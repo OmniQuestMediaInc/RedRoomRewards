@@ -110,9 +110,10 @@ export function assertValidEnvironment(rules: EnvValidationRule[]): void {
   const result = validateEnvironment(rules);
   
   // Log warnings (non-blocking)
+  // Note: We use process.stderr.write here as this is a startup check
+  // before the logging system is initialized
   for (const warning of result.warnings) {
-    // Use console.warn here as this is a startup check before logger is initialized
-    console.warn(warning);
+    process.stderr.write(`WARNING: ${warning}\n`);
   }
   
   // Throw error for validation failures (blocking)
@@ -169,9 +170,19 @@ export const COMMON_ENV_RULES: EnvValidationRule[] = [
 ];
 
 /**
- * Validate environment on module load (fail-fast for security)
- * Only in production - allow flexibility in development/test
+ * Initialize environment validation for production
+ * Call this function explicitly during application startup
+ * 
+ * @example
+ * import { initEnvironmentValidation } from './config/env-validator';
+ * 
+ * // In main application entry point (e.g., index.ts)
+ * if (process.env.NODE_ENV === 'production') {
+ *   initEnvironmentValidation();
+ * }
  */
-if (process.env.NODE_ENV === 'production') {
-  assertValidEnvironment(COMMON_ENV_RULES);
+export function initEnvironmentValidation(): void {
+  if (process.env.NODE_ENV === 'production') {
+    assertValidEnvironment(COMMON_ENV_RULES);
+  }
 }

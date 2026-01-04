@@ -42,9 +42,29 @@ if (!secret || secret.length < 32) {
   throw new Error('SECRET must be at least 32 characters');
 }
 
-// CORRECT: Use environment validator
-import { assertValidEnvironment, COMMON_ENV_RULES } from './config/env-validator';
-assertValidEnvironment(COMMON_ENV_RULES);
+// CORRECT: Use environment validator (recommended)
+// In your main application entry point (e.g., index.ts or server.ts):
+import { initEnvironmentValidation } from './config/env-validator';
+
+// Validate environment at startup (fail-fast if misconfigured)
+if (process.env.NODE_ENV === 'production') {
+  initEnvironmentValidation();
+}
+
+// Or create custom validation rules
+import { assertValidEnvironment, EnvValidationRule } from './config/env-validator';
+
+const customRules: EnvValidationRule[] = [
+  {
+    name: 'API_KEY',
+    required: true,
+    minLength: 32,
+    description: 'External API key for service integration',
+    isSecret: true,
+  },
+];
+
+assertValidEnvironment(customRules);
 ```
 
 ### Secret Requirements
