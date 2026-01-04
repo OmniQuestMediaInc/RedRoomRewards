@@ -494,4 +494,5 @@ The wallet and escrow architecture demonstrates strong security practices:
 
 ---
 
-**This security summary certifies that the wallet and escrow architecture meets security requirements for the specification phase.**
+**This security summary certifies that the wallet and escrow architecture meets security requirements for
+the specification phase.**

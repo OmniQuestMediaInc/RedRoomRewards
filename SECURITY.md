@@ -2,7 +2,8 @@
 
 ### Last Updated: January 2, 2026
 
-At OmniQuestMedia, the security of our platform and user data is of the utmost priority. Below, we outline the standards and practices used to ensure a secure environment for RedRoomRewards.
+At OmniQuestMedia, the security of our platform and user data is of the utmost priority. Below, we outline
+the standards and practices used to ensure a secure environment for RedRoomRewards.
 
 ---
 
@@ -18,7 +19,8 @@ We have enhanced safety measures when processing promotion payloads. Our system:
 
 ### Secure Defaults for Expiration Dates
 
-- All promotions automatically use secure default expiration dates aligned with standard retention guidelines unless explicitly defined.
+- All promotions automatically use secure default expiration dates aligned with standard retention guidelines
+  unless explicitly defined.
 - Expirations are capped to ensure no unintended prolonged activity.
 - Default settings are reviewed monthly to keep up-to-date with new security insights.
 
@@ -26,7 +28,8 @@ We have enhanced safety measures when processing promotion payloads. Our system:
 
 ### Idempotency for Payload Submissions
 
-- To ensure that no promotion payload is processed multiple times, all payload submissions are idempotent. Any reprocessing attempts of the same payload will be intercepted and logged.
+- To ensure that no promotion payload is processed multiple times, all payload submissions are idempotent.
+  Any reprocessing attempts of the same payload will be intercepted and logged.
 - Properly configured idempotency keys are a mandatory field, validated at the API level.
 
 ---

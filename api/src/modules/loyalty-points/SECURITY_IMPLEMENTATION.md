@@ -323,4 +323,5 @@ This implementation demonstrates **defense in depth**:
 - Signature verification prevents unauthorized access
 - Comprehensive tests verify security properties
 
-The code is **CodeQL-compliant by design**, not by patching. It follows security best practices from the ground up and provides a template for future webhook handlers in the RedRoomRewards platform.
+The code is **CodeQL-compliant by design**, not by patching. It follows security best practices from the ground up
+and provides a template for future webhook handlers in the RedRoomRewards platform.
