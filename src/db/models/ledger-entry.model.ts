@@ -183,4 +183,22 @@ LedgerEntrySchema.index({ correlationId: 1 }, { sparse: true });
 // Index for time-based queries and retention
 LedgerEntrySchema.index({ timestamp: 1 });
 
+/**
+ * Immutability Protection
+ * Prevent any updates to ledger entries after creation
+ */
+LedgerEntrySchema.pre(['updateOne', 'updateMany', 'findOneAndUpdate', 'findByIdAndUpdate'], function(next) {
+  const error = new Error('Ledger entries are immutable and cannot be updated. Create a new offsetting entry instead.');
+  next(error);
+});
+
+LedgerEntrySchema.pre('save', function(next) {
+  // Allow save only if document is new
+  if (!this.isNew) {
+    const error = new Error('Ledger entries are immutable and cannot be modified. Create a new offsetting entry instead.');
+    return next(error);
+  }
+  next();
+});
+
 export const LedgerEntryModel = mongoose.model<ILedgerEntry>('LedgerEntry', LedgerEntrySchema);

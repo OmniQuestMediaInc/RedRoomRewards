@@ -74,6 +74,12 @@ export interface PointAccrualConfig {
   
   /** Default expiration days (if not specified) */
   defaultExpirationDays: number;
+  
+  /** Maximum retry attempts for optimistic lock conflicts */
+  maxRetryAttempts: number;
+  
+  /** Retry backoff base in milliseconds */
+  retryBackoffMs: number;
 }
 
 const DEFAULT_CONFIG: PointAccrualConfig = {
@@ -82,6 +88,8 @@ const DEFAULT_CONFIG: PointAccrualConfig = {
   minAwardAmount: 1,
   enableExpiration: true,
   defaultExpirationDays: 365,
+  maxRetryAttempts: 3,
+  retryBackoffMs: 100,
 };
 
 /**
@@ -112,25 +120,34 @@ export class PointAccrualService {
    * - Admin credits
    * 
    * @param request Award request details
+   * @param retryCount Internal retry counter for optimistic locking
    * @returns Award response with new balance
    * @throws ValidationError if amount is invalid
    * @throws IdempotencyConflictError if key already used
+   * @throws OptimisticLockError if max retries exceeded
    */
-  async awardPoints(request: AwardPointsRequest): Promise<AwardPointsResponse> {
+  async awardPoints(request: AwardPointsRequest, retryCount: number = 0): Promise<AwardPointsResponse> {
+    // Check retry limit
+    if (retryCount >= this.config.maxRetryAttempts) {
+      throw new Error(`Optimistic lock conflict after ${this.config.maxRetryAttempts} attempts for user ${request.userId}`);
+    }
+    
     // Validate amount
     this.validateAmount(request.amount);
     
     // Validate reason is an earning reason
     this.validateEarningReason(request.reason);
     
-    // Check idempotency
-    const exists = await this.ledgerService.checkIdempotency(
-      request.idempotencyKey,
-      'award_points'
-    );
-    
-    if (exists) {
-      throw new Error('Idempotency key already used');
+    // Check idempotency (only on first attempt)
+    if (retryCount === 0) {
+      const exists = await this.ledgerService.checkIdempotency(
+        request.idempotencyKey,
+        'award_points'
+      );
+      
+      if (exists) {
+        throw new Error('Idempotency key already used');
+      }
     }
     
     // Get or create wallet
@@ -165,8 +182,9 @@ export class PointAccrualService {
     );
     
     if (!updated) {
-      // Retry once on conflict
-      return this.awardPoints(request);
+      // Retry with exponential backoff
+      await this.sleep(this.config.retryBackoffMs * Math.pow(2, retryCount));
+      return this.awardPoints(request, retryCount + 1);
     }
     
     // Create ledger entry
@@ -350,6 +368,13 @@ export class PointAccrualService {
     if (!earningReasons.includes(reason)) {
       throw new Error(`Invalid earning reason: ${reason}`);
     }
+  }
+  
+  /**
+   * Sleep utility for retry backoff
+   */
+  private sleep(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 }
 

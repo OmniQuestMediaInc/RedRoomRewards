@@ -4,6 +4,13 @@
  * REST API controller for wallet operations based on OpenAPI specification.
  * Provides endpoints for wallet queries and balance modifications (credit/deduct).
  * 
+ * NOTE: This is a placeholder implementation. For production use:
+ * 1. Integrate with PointAccrualService for credit operations
+ * 2. Integrate with PointRedemptionService for deduct operations
+ * 3. Implement proper idempotency checking via ILedgerService
+ * 4. Add proper error handling and HTTP status codes
+ * 5. Add authorization and authentication middleware
+ * 
  * @see /api/openapi.yaml for API contract
  */
 
@@ -104,6 +111,13 @@ export class WalletController {
    * POST /wallets/:userId/deduct
    * Deduct points for a specified user
    * 
+   * IMPORTANT: This is a placeholder implementation without proper service integration.
+   * For production:
+   * - Use PointRedemptionService for actual deductions
+   * - Check idempotency before processing
+   * - Validate authorization tokens
+   * - Return cached results for duplicate requests
+   * 
    * @param userId - User identifier
    * @param request - Deduct request parameters
    * @returns Promise<TransactionResponse>
@@ -113,6 +127,14 @@ export class WalletController {
     if (request.amount <= 0) {
       throw new Error('Amount must be positive');
     }
+    
+    // TODO: Check idempotency
+    // const ledgerService = ... // Need to inject ILedgerService
+    // const exists = await ledgerService.checkIdempotency(request.idempotencyKey, 'wallet_deduct');
+    // if (exists) {
+    //   // Return cached result
+    //   return cachedResult;
+    // }
 
     // In a full implementation, this would call a ledger service to create a debit transaction
     // For now, we'll return a structured response
@@ -144,6 +166,13 @@ export class WalletController {
    * POST /wallets/:userId/credit
    * Credit points to a specified user
    * 
+   * IMPORTANT: This is a placeholder implementation without proper service integration.
+   * For production:
+   * - Use PointAccrualService for actual credits
+   * - Check idempotency before processing
+   * - Validate authorization tokens
+   * - Return cached results for duplicate requests
+   * 
    * @param userId - User identifier
    * @param request - Credit request parameters
    * @returns Promise<TransactionResponse>
@@ -153,6 +182,14 @@ export class WalletController {
     if (request.amount <= 0) {
       throw new Error('Amount must be positive');
     }
+    
+    // TODO: Check idempotency
+    // const ledgerService = ... // Need to inject ILedgerService
+    // const exists = await ledgerService.checkIdempotency(request.idempotencyKey, 'wallet_credit');
+    // if (exists) {
+    //   // Return cached result
+    //   return cachedResult;
+    // }
 
     // In a full implementation, this would call a ledger service to create a credit transaction
     // For now, we'll return a structured response
