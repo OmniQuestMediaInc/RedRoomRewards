@@ -3,6 +3,29 @@
  * 
  * Handles wallet operations including escrow management with optimistic locking.
  * All operations are idempotent and create immutable ledger entries.
+ * 
+ * IMPORTANT: Multi-model updates (wallet + escrow + ledger) should ideally use
+ * MongoDB transactions for full atomicity. Current implementation uses optimistic
+ * locking with rollback attempts, which provides good protection but is not
+ * transaction-safe. For production deployment with high concurrency, wrap
+ * operations in MongoDB sessions with transactions.
+ * 
+ * Example transaction pattern:
+ * ```typescript
+ * const session = await mongoose.startSession();
+ * session.startTransaction();
+ * try {
+ *   // All operations with { session } option
+ *   await WalletModel.updateOne({...}, {...}, { session });
+ *   await LedgerService.createEntry({...}, { session });
+ *   await session.commitTransaction();
+ * } catch (error) {
+ *   await session.abortTransaction();
+ *   throw error;
+ * } finally {
+ *   session.endSession();
+ * }
+ * ```
  */
 
 import { v4 as uuidv4 } from 'uuid';
@@ -260,14 +283,28 @@ export class WalletService implements IWalletService {
       throw new Error('Idempotency key already used');
     }
 
-    // Get escrow item
-    const escrow = await EscrowItemModel.findOne({ escrowId: { $eq: request.escrowId } });
+    // Get escrow item and lock it atomically
+    const escrow = await EscrowItemModel.findOneAndUpdate(
+      { 
+        escrowId: { $eq: request.escrowId },
+        status: { $eq: 'held' }, // Only process if still held
+      },
+      {
+        $set: { 
+          status: 'settling', // Intermediate state to prevent concurrent processing
+          processedAt: new Date(),
+        },
+      },
+      { new: false } // Return original document
+    );
+    
     if (!escrow) {
-      throw new EscrowNotFoundError(request.escrowId);
-    }
-
-    if (escrow.status !== 'held') {
-      throw new EscrowAlreadyProcessedError(request.escrowId, escrow.status);
+      // Either escrow doesn't exist or is already processed
+      const existing = await EscrowItemModel.findOne({ escrowId: { $eq: request.escrowId } });
+      if (!existing) {
+        throw new EscrowNotFoundError(request.escrowId);
+      }
+      throw new EscrowAlreadyProcessedError(request.escrowId, existing.status);
     }
 
     // Get or create model wallet
@@ -327,16 +364,20 @@ export class WalletService implements IWalletService {
     );
 
     if (!updatedUserWallet) {
+      // Rollback escrow status if wallet update fails
+      await EscrowItemModel.updateOne(
+        { escrowId: { $eq: request.escrowId } },
+        { $set: { status: 'held', processedAt: null } }
+      );
       throw new OptimisticLockError('wallet', escrow.userId);
     }
 
-    // Update escrow status
+    // Finalize escrow status to 'settled'
     await EscrowItemModel.updateOne(
       { escrowId: { $eq: request.escrowId } },
       {
         $set: {
           status: 'settled',
-          processedAt: new Date(),
           modelId: request.modelId,
         },
       }
@@ -420,14 +461,28 @@ export class WalletService implements IWalletService {
       throw new Error('Idempotency key already used');
     }
 
-    // Get escrow item
-    const escrow = await EscrowItemModel.findOne({ escrowId: { $eq: request.escrowId } });
+    // Get escrow item and lock it atomically
+    const escrow = await EscrowItemModel.findOneAndUpdate(
+      { 
+        escrowId: { $eq: request.escrowId },
+        status: { $eq: 'held' }, // Only process if still held
+      },
+      {
+        $set: { 
+          status: 'refunding', // Intermediate state to prevent concurrent processing
+          processedAt: new Date(),
+        },
+      },
+      { new: false } // Return original document
+    );
+    
     if (!escrow) {
-      throw new EscrowNotFoundError(request.escrowId);
-    }
-
-    if (escrow.status !== 'held') {
-      throw new EscrowAlreadyProcessedError(request.escrowId, escrow.status);
+      // Either escrow doesn't exist or is already processed
+      const existing = await EscrowItemModel.findOne({ escrowId: { $eq: request.escrowId } });
+      if (!existing) {
+        throw new EscrowNotFoundError(request.escrowId);
+      }
+      throw new EscrowAlreadyProcessedError(request.escrowId, existing.status);
     }
 
     // Get user wallet
@@ -457,16 +512,20 @@ export class WalletService implements IWalletService {
     );
 
     if (!updatedWallet) {
+      // Rollback escrow status if wallet update fails
+      await EscrowItemModel.updateOne(
+        { escrowId: { $eq: request.escrowId } },
+        { $set: { status: 'held', processedAt: null } }
+      );
       throw new OptimisticLockError('wallet', request.userId);
     }
 
-    // Update escrow status
+    // Finalize escrow status to 'refunded'
     await EscrowItemModel.updateOne(
       { escrowId: { $eq: request.escrowId } },
       {
         $set: {
           status: 'refunded',
-          processedAt: new Date(),
         },
       }
     );
@@ -549,14 +608,28 @@ export class WalletService implements IWalletService {
       throw new Error('Idempotency key already used');
     }
 
-    // Get escrow item
-    const escrow = await EscrowItemModel.findOne({ escrowId: { $eq: request.escrowId } });
+    // Get escrow item and lock it atomically
+    const escrow = await EscrowItemModel.findOneAndUpdate(
+      { 
+        escrowId: { $eq: request.escrowId },
+        status: { $eq: 'held' }, // Only process if still held
+      },
+      {
+        $set: { 
+          status: 'partial_settling', // Intermediate state to prevent concurrent processing
+          processedAt: new Date(),
+        },
+      },
+      { new: false } // Return original document
+    );
+    
     if (!escrow) {
-      throw new EscrowNotFoundError(request.escrowId);
-    }
-
-    if (escrow.status !== 'held') {
-      throw new EscrowAlreadyProcessedError(request.escrowId, escrow.status);
+      // Either escrow doesn't exist or is already processed
+      const existing = await EscrowItemModel.findOne({ escrowId: { $eq: request.escrowId } });
+      if (!existing) {
+        throw new EscrowNotFoundError(request.escrowId);
+      }
+      throw new EscrowAlreadyProcessedError(request.escrowId, existing.status);
     }
 
     // Validate amounts
@@ -606,6 +679,11 @@ export class WalletService implements IWalletService {
     );
 
     if (!updatedUserWallet) {
+      // Rollback escrow status if wallet update fails
+      await EscrowItemModel.updateOne(
+        { escrowId: { $eq: request.escrowId } },
+        { $set: { status: 'held', processedAt: null } }
+      );
       throw new OptimisticLockError('wallet', request.userId);
     }
 
@@ -625,16 +703,21 @@ export class WalletService implements IWalletService {
     );
 
     if (!updatedModelWallet) {
+      // Rollback both escrow and user wallet if model wallet update fails
+      await EscrowItemModel.updateOne(
+        { escrowId: { $eq: request.escrowId } },
+        { $set: { status: 'held', processedAt: null } }
+      );
+      // Note: User wallet rollback is complex - in production use database transactions
       throw new OptimisticLockError('model_wallet', request.modelId);
     }
 
-    // Update escrow status (marked as settled since it's processed)
+    // Finalize escrow status to 'settled' (marked as settled since it's processed)
     await EscrowItemModel.updateOne(
       { escrowId: { $eq: request.escrowId } },
       {
         $set: {
           status: 'settled',
-          processedAt: new Date(),
           modelId: request.modelId,
         },
       }

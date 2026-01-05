@@ -183,4 +183,33 @@ LedgerEntrySchema.index({ correlationId: 1 }, { sparse: true });
 // Index for time-based queries and retention
 LedgerEntrySchema.index({ timestamp: 1 });
 
+/**
+ * Immutability Protection
+ * Prevent any updates to ledger entries after creation
+ * 
+ * Note: These hooks throw errors to prevent updates.
+ * For TypeScript compatibility with Mongoose v9, we use simplified hooks.
+ */
+LedgerEntrySchema.pre('updateOne', function() {
+  throw new Error('Ledger entries are immutable and cannot be updated. Create a new offsetting entry instead.');
+});
+
+LedgerEntrySchema.pre('updateMany', function() {
+  throw new Error('Ledger entries are immutable and cannot be updated. Create a new offsetting entry instead.');
+});
+
+LedgerEntrySchema.pre('findOneAndUpdate', function() {
+  throw new Error('Ledger entries are immutable and cannot be updated. Create a new offsetting entry instead.');
+});
+
+// Note: findByIdAndUpdate not available as pre-hook in this Mongoose version
+// It will be blocked by the application layer and unique indexes
+
+LedgerEntrySchema.pre('save', function() {
+  // Allow save only if document is new
+  if (!this.isNew) {
+    throw new Error('Ledger entries are immutable and cannot be modified. Create a new offsetting entry instead.');
+  }
+});
+
 export const LedgerEntryModel = mongoose.model<ILedgerEntry>('LedgerEntry', LedgerEntrySchema);

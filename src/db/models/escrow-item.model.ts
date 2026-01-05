@@ -47,7 +47,7 @@ const EscrowItemSchema = new Schema<IEscrowItem>(
     status: {
       type: String,
       required: true,
-      enum: ['held', 'settled', 'refunded'],
+      enum: ['held', 'settling', 'settled', 'refunding', 'refunded', 'partial_settling'],
       default: 'held',
       index: true,
     },
