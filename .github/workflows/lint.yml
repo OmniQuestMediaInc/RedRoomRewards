@@ -42,8 +42,9 @@ jobs:
           IGNORE_GITIGNORED_FILES: true
 
           # Restrict linting to root files, .github, and docs/ only
-          # Excludes application code directories like src/, api/, infra/, archive/
-          FILTER_REGEX_INCLUDE: ^(\.github/|docs/|README\.md$|LICENSE$|CONTRIBUTING\.md$|SECURITY\.md$|\.editorconfig$|\.gitignore$|\.gitattributes$|[^/]+\.md$|[^/]+\.yml$|[^/]+\.yaml$|[^/]+\.json$)
+          # Matches: .github/**, docs/**, and root-level *.md, *.yml, *.yaml, *.json files
+          # Excludes: src/, api/, infra/, archive/, and all their subdirectories
+          FILTER_REGEX_INCLUDE: ^(\.github/|docs/|[^/]+\.(md|yml|yaml|json)$)
 
           # Config directory for super-linter template discovery
           LINTER_RULES_PATH: .github/linters
