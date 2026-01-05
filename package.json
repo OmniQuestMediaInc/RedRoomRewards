@@ -12,7 +12,8 @@
     "test:ci": "jest --ci --coverage --maxWorkers=2",
     "lint": "eslint . --ext .ts",
     "format": "prettier --write \"src/**/*.ts\"",
-    "dev": "ts-node src/index.ts"
+    "dev": "ts-node src/index.ts",
+    "validate:schema": "node validate-schema.js"
   },
   "keywords": [
     "loyalty",
@@ -34,6 +35,8 @@
     "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^8.19.1",
     "@typescript-eslint/parser": "^8.19.1",
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
     "eslint": "^9.18.0",
     "jest": "^30.2.0",
     "prettier": "^3.4.2",
