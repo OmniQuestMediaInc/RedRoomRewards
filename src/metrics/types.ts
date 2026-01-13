@@ -14,6 +14,9 @@ export enum MetricEventType {
   INGEST_EVENT_FAILED = 'ingest.event.failed',
   INGEST_EVENT_DLQ = 'ingest.event.dlq',
   INGEST_IDEMPOTENCY_HIT = 'ingest.idempotency.hit',
+  INGEST_RECEIVED = 'ingest.received',
+  INGEST_ACCEPTED = 'ingest.accepted',
+  INGEST_REJECTED = 'ingest.rejected',
   
   // DLQ and replay metrics
   DLQ_EVENT_MOVED = 'dlq.event.moved',

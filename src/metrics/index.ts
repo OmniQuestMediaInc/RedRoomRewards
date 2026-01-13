@@ -9,3 +9,4 @@ export {
   MetricData,
   AlertData,
 } from './types';
+export { logIngestEvent, IngestLogEntry } from './ingest-logger';

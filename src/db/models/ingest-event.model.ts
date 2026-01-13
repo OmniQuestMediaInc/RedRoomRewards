@@ -27,6 +27,13 @@ export interface IIngestEvent extends Document {
   payloadSnapshot?: Record<string, any>;
   replayable: boolean;
   nextAttemptAt?: Date;
+  correlationId?: string;
+  merchantId?: string;
+  idempotencyKey?: string;
+  processedAt?: Date;
+  accepted?: boolean;
+  replayed?: boolean;
+  postedTransactions?: number;
 }
 
 const IngestEventSchema = new Schema<IIngestEvent>(
@@ -79,6 +86,36 @@ const IngestEventSchema = new Schema<IIngestEvent>(
     nextAttemptAt: {
       type: Date,
     },
+    correlationId: {
+      type: String,
+      trim: true,
+      maxlength: 256,
+    },
+    merchantId: {
+      type: String,
+      trim: true,
+      maxlength: 256,
+    },
+    idempotencyKey: {
+      type: String,
+      trim: true,
+      maxlength: 256,
+    },
+    processedAt: {
+      type: Date,
+    },
+    accepted: {
+      type: Boolean,
+    },
+    replayed: {
+      type: Boolean,
+      default: false,
+    },
+    postedTransactions: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
   },
   {
     timestamps: true,
@@ -92,5 +129,7 @@ IngestEventSchema.index({ status: 1, receivedAt: 1 });
 IngestEventSchema.index({ receivedAt: 1 });
 IngestEventSchema.index({ eventType: 1, receivedAt: 1 });
 IngestEventSchema.index({ status: 1, nextAttemptAt: 1 });
+IngestEventSchema.index({ merchantId: 1, idempotencyKey: 1 });
+IngestEventSchema.index({ correlationId: 1 });
 
 export const IngestEventModel = mongoose.model<IIngestEvent>('IngestEvent', IngestEventSchema);

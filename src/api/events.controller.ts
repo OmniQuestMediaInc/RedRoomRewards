@@ -10,6 +10,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { IngestEventModel, IngestEventStatus, IdempotencyRecordModel } from '../db/models';
 import { MetricsLogger, MetricEventType } from '../metrics';
+import { logIngestEvent } from '../metrics/ingest-logger';
 
 /**
  * Request interface for POST /events
@@ -21,6 +22,7 @@ export interface PostEventRequest {
   idempotencyKey: string;
   requestId?: string;
   replayable?: boolean;
+  correlationId?: string;
 }
 
 /**
@@ -32,6 +34,24 @@ export interface EventResponse {
   message: string;
   queuePosition?: number;
   requestId?: string;
+  correlationId: string;
+}
+
+/**
+ * Receipt response for support endpoint
+ * Only includes approved fields for support operations
+ */
+export interface EventReceiptResponse {
+  correlationId?: string;
+  merchantId?: string;
+  eventId: string;
+  idempotencyKey?: string;
+  processedAt?: Date;
+  status: string;
+  accepted?: boolean;
+  replayed?: boolean;
+  postedTransactions?: number;
+  errorCode?: string;
 }
 
 /**
@@ -60,8 +80,19 @@ export class EventsController {
    * @throws Error if validation fails
    */
   async postEvent(request: PostEventRequest): Promise<EventResponse> {
+    // Generate or accept correlationId from upstream (existing repo convention)
+    const correlationId = request.correlationId || request.requestId || this.generateCorrelationId();
+    
+    // Extract merchantId from payload if present
+    const merchantId = request.payload?.merchantId as string | undefined;
+    
     // Validate required fields
     this.validateRequest(request);
+
+    // Log ingest received
+    MetricsLogger.incrementCounter(MetricEventType.INGEST_RECEIVED, {
+      eventType: request.eventType,
+    });
 
     // Generate or use provided event ID
     const eventId = request.eventId || this.generateEventId();
@@ -77,40 +108,139 @@ export class EventsController {
         eventType: request.eventType,
       });
 
+      // Structured logging with redaction
+      logIngestEvent({
+        correlationId,
+        merchantId,
+        eventType: request.eventType,
+        eventId,
+        idempotencyKey: request.idempotencyKey,
+        outcome: 'duplicate',
+        httpStatus: 200,
+      });
+
       return {
         eventId,
         status: 'duplicate',
         message: 'Event already processed or queued',
         requestId,
+        correlationId,
       };
     }
 
-    // Store idempotency record
-    await this.storeIdempotency(request.idempotencyKey, eventId);
+    try {
+      // Store idempotency record
+      await this.storeIdempotency(request.idempotencyKey, eventId);
 
-    // Create ingest event record
-    const ingestEvent = await IngestEventModel.create({
-      eventId,
-      eventType: request.eventType,
-      receivedAt: new Date(),
-      status: IngestEventStatus.QUEUED,
-      attempts: 0,
-      payloadSnapshot: request.payload,
-      replayable: request.replayable !== false, // Default to true
+      // Create ingest event record with correlationId and receipt fields
+      const ingestEvent = await IngestEventModel.create({
+        eventId,
+        eventType: request.eventType,
+        receivedAt: new Date(),
+        status: IngestEventStatus.QUEUED,
+        attempts: 0,
+        payloadSnapshot: request.payload,
+        replayable: request.replayable !== false, // Default to true
+        correlationId,
+        merchantId,
+        idempotencyKey: request.idempotencyKey,
+        accepted: true,
+        replayed: false,
+        postedTransactions: 0,
+      });
+
+      // Get approximate queue position (count of queued events before this one)
+      const queuePosition = await IngestEventModel.countDocuments({
+        status: IngestEventStatus.QUEUED,
+        receivedAt: { $lt: ingestEvent.receivedAt },
+      });
+
+      // Log acceptance
+      MetricsLogger.incrementCounter(MetricEventType.INGEST_ACCEPTED, {
+        eventType: request.eventType,
+      });
+
+      // Structured logging with redaction
+      logIngestEvent({
+        correlationId,
+        merchantId,
+        eventType: request.eventType,
+        eventId,
+        idempotencyKey: request.idempotencyKey,
+        outcome: 'accepted',
+        httpStatus: 201,
+      });
+
+      return {
+        eventId,
+        status: 'queued',
+        message: 'Event queued for processing',
+        queuePosition: queuePosition + 1,
+        requestId,
+        correlationId,
+      };
+    } catch (error) {
+      // Log rejection
+      const errorCode = error instanceof Error ? error.name : 'UNKNOWN_ERROR';
+      
+      MetricsLogger.incrementCounter(MetricEventType.INGEST_REJECTED, {
+        eventType: request.eventType,
+        errorCode,
+      });
+
+      // Structured logging with redaction
+      logIngestEvent({
+        correlationId,
+        merchantId,
+        eventType: request.eventType,
+        eventId,
+        idempotencyKey: request.idempotencyKey,
+        outcome: 'rejected',
+        httpStatus: 500,
+        errorCode,
+      });
+
+      throw error;
+    }
+  }
+
+  /**
+   * GET /v1/events/receipt
+   * Lookup event receipt by merchantId and idempotencyKey (support endpoint)
+   * 
+   * Returns only approved fields for support operations.
+   * Must be protected by admin/support auth guard.
+   * 
+   * @param merchantId - Merchant identifier
+   * @param idempotencyKey - Idempotency key
+   * @returns Promise<EventReceiptResponse | null>
+   */
+  async getEventReceipt(
+    merchantId: string,
+    idempotencyKey: string
+  ): Promise<EventReceiptResponse | null> {
+    // Query for the event by merchantId and idempotencyKey
+    const event = await IngestEventModel.findOne({
+      merchantId: { $eq: merchantId },
+      idempotencyKey: { $eq: idempotencyKey },
     });
 
-    // Get approximate queue position (count of queued events before this one)
-    const queuePosition = await IngestEventModel.countDocuments({
-      status: IngestEventStatus.QUEUED,
-      receivedAt: { $lt: ingestEvent.receivedAt },
-    });
+    if (!event) {
+      return null;
+    }
 
+    // Return only approved fields (no sensitive data, no PII, no payloads)
     return {
-      eventId,
-      status: 'queued',
-      message: 'Event queued for processing',
-      queuePosition: queuePosition + 1,
-      requestId,
+      correlationId: event.correlationId,
+      merchantId: event.merchantId,
+      eventId: event.eventId,
+      idempotencyKey: event.idempotencyKey,
+      processedAt: event.processedAt,
+      status: event.status,
+      accepted: event.accepted,
+      replayed: event.replayed,
+      postedTransactions: event.postedTransactions,
+      errorCode: event.lastErrorCode,
     };
   }
 
@@ -262,6 +392,14 @@ export class EventsController {
    */
   private generateRequestId(): string {
     return `req_${uuidv4()}`;
+  }
+
+  /**
+   * Generate correlation ID (follows X-Request-ID convention)
+   * @private
+   */
+  private generateCorrelationId(): string {
+    return uuidv4();
   }
 }
 
