@@ -95,8 +95,11 @@ export class SupportService {
     const errorCode = storedResult.errorCode as string | undefined;
     const postedTransactions = storedResult.postedTransactions as string[] | undefined;
 
-    // Determine if this was a replayed request (record exists = replayed on subsequent calls)
-    const replayed = record.createdAt ? true : false;
+    // Determine if this was a replayed request
+    // Note: The replayed flag here indicates the record exists, meaning
+    // subsequent calls with this idempotencyKey will be treated as replays.
+    // The actual replay detection happens in the events controller.
+    const replayed = false; // This service returns stored receipt, not replay detection
 
     return {
       correlationId,
@@ -119,7 +122,7 @@ export class SupportService {
    * @throws Error if user doesn't have required permissions
    */
   validateSupportAccess(userRole: UserRole): void {
-    if (!this.config.allowedRoles.includes(userRole) && userRole !== UserRole.ADMIN) {
+    if (!this.config.allowedRoles.includes(userRole)) {
       throw new Error('Insufficient permissions for support operations');
     }
   }
