@@ -252,7 +252,7 @@ describe('EventsController', () => {
       try {
         await controller.postEvent(invalidRequest);
         fail('Should have thrown validation error');
-      } catch (error: any) {
+      } catch (error: unknown) {
         expect(error.validationErrors).toBeDefined();
         expect(Array.isArray(error.validationErrors)).toBe(true);
         expect(error.validationErrors.length).toBeGreaterThan(0);

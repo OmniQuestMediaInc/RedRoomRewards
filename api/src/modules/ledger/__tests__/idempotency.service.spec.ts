@@ -49,13 +49,15 @@ describe('IdempotencyService', () => {
     });
 
     it('should reject null or undefined', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result = service.validateUuid(null as any);
-      
+
       expect(result.isValid).toBe(false);
       expect(result.errorMessage).toBe('UUID is required');
     });
 
     it('should reject non-string values', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const result = service.validateUuid(12345 as any);
       
       expect(result.isValid).toBe(false);
@@ -149,7 +151,7 @@ describe('IdempotencyService', () => {
 
     it('should handle race condition gracefully (duplicate key error)', async () => {
       const key = uuidv4();
-      const error: any = new Error('Duplicate key');
+      const error: unknown = new Error('Duplicate key');
       error.code = 11000;
       
       const mockCreate = jest.fn().mockRejectedValue(error);

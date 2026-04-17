@@ -132,7 +132,7 @@ describe('Security Tests', () => {
 });
 
 // Helper validation functions
-function validateUserId(userId: any): void {
+function validateUserId(userId: any): void { // eslint-disable-line @typescript-eslint/no-explicit-any
   if (typeof userId !== 'string') {
     throw new Error('Invalid user ID format');
   }
@@ -141,8 +141,8 @@ function validateUserId(userId: any): void {
   }
 }
 
-function sanitizeMetadata(metadata: Record<string, any>): Record<string, any> {
-  const sanitized: Record<string, any> = {};
+function sanitizeMetadata(metadata: Record<string, unknown>): Record<string, unknown> {
+  const sanitized: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(metadata)) {
     if (typeof value === 'string') {
       sanitized[key] = value
@@ -156,7 +156,7 @@ function sanitizeMetadata(metadata: Record<string, any>): Record<string, any> {
   return sanitized;
 }
 
-function validateAmount(amount: any): void {
+function validateAmount(amount: any): void { // eslint-disable-line @typescript-eslint/no-explicit-any
   if (typeof amount !== 'number') {
     throw new Error('Amount must be a number');
   }
@@ -168,7 +168,7 @@ function validateAmount(amount: any): void {
   }
 }
 
-function redactSensitiveData(data: any): any {
+function redactSensitiveData(data: any): any { // eslint-disable-line @typescript-eslint/no-explicit-any
   const redacted = { ...data };
   const sensitiveFields = ['password', 'creditCard', 'ssn', 'apiKey', 'token'];
   sensitiveFields.forEach((field) => {

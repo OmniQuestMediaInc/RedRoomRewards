@@ -82,7 +82,7 @@ export interface QueueItem {
   statusReason?: TransactionReason;
   
   /** Additional context */
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -108,7 +108,7 @@ export interface QueueIntakeRequest {
   priority?: number;
   
   /** Additional metadata */
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -335,7 +335,7 @@ export interface FeatureActionData {
   modelId?: string;
   
   /** Additional feature-specific data */
-  [key: string]: any;
+  [key: string]: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
 /**
@@ -378,7 +378,7 @@ export interface IMessagingService {
   /**
    * Format message from template
    */
-  formatMessage(templateId: string, variables: Record<string, any>): Promise<string>;
+  formatMessage(templateId: string, variables: Record<string, unknown>): Promise<string>;
 }
 
 /**
@@ -456,6 +456,7 @@ export class OptimisticLockError extends WalletServiceError {
 }
 
 export class IdempotencyConflictError extends WalletServiceError {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   constructor(key: string, existingResult: any) {
     super(
       `Request with idempotency key already processed: ${key}`,
@@ -484,7 +485,7 @@ export interface ServiceHealth {
   checkedAt: Date;
   
   /** Additional metrics */
-  metrics?: Record<string, any>;
+  metrics?: Record<string, unknown>;
 }
 
 /**

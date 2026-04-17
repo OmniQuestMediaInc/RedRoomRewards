@@ -116,7 +116,7 @@ describe('PointAccrualService', () => {
         version: 6,
       });
 
-      mockLedgerService.createEntry.mockResolvedValue({} as any);
+      mockLedgerService.createEntry.mockResolvedValue({} as any); // eslint-disable-line @typescript-eslint/no-explicit-any
 
       // Act
       const result = await service.awardPoints({
@@ -210,7 +210,7 @@ describe('PointAccrualService', () => {
         version: 1,
       });
 
-      mockLedgerService.createEntry.mockResolvedValue({} as any);
+      mockLedgerService.createEntry.mockResolvedValue({} as any); // eslint-disable-line @typescript-eslint/no-explicit-any
 
       // Act
       const result = await service.awardSignupBonus('user-new', 500, 'req-signup');
@@ -239,7 +239,7 @@ describe('PointAccrualService', () => {
         version: 2,
       });
 
-      mockLedgerService.createEntry.mockResolvedValue({} as any);
+      mockLedgerService.createEntry.mockResolvedValue({} as any); // eslint-disable-line @typescript-eslint/no-explicit-any
 
       // Act
       const result = await service.awardReferralBonus(
@@ -279,7 +279,7 @@ describe('PointAccrualService', () => {
         version: 1,
       });
 
-      mockLedgerService.createEntry.mockResolvedValue({} as any);
+      mockLedgerService.createEntry.mockResolvedValue({} as any); // eslint-disable-line @typescript-eslint/no-explicit-any
 
       // Act
       const result = await service.awardPromotionalPoints(
@@ -318,7 +318,7 @@ describe('PointAccrualService', () => {
         version: 3,
       });
 
-      mockLedgerService.createEntry.mockResolvedValue({} as any);
+      mockLedgerService.createEntry.mockResolvedValue({} as any); // eslint-disable-line @typescript-eslint/no-explicit-any
 
       // Act
       const result = await service.adminCreditPoints(

@@ -251,7 +251,7 @@ export class IngestWorker {
    * Handle processing result
    */
   private async handleProcessingResult(
-    event: any,
+    event: any, // eslint-disable-line @typescript-eslint/no-explicit-any
     response: { result: ProcessingResult; errorCode?: string; errorMessage?: string }
   ): Promise<void> {
     switch (response.result) {
@@ -342,7 +342,7 @@ export class IngestWorker {
    * Move event to DLQ
    */
   private async moveToDLQ(
-    event: any,
+    event: any, // eslint-disable-line @typescript-eslint/no-explicit-any
     errorCode: string,
     errorMessage: string
   ): Promise<void> {

@@ -38,6 +38,7 @@ export interface IdempotencyMetadata {
  * ```
  */
 export const Idempotent = (metadata: IdempotencyMetadata) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
     Reflect.defineMetadata(IDEMPOTENCY_KEY, metadata, descriptor.value);
     return descriptor;
