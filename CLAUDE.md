@@ -91,74 +91,26 @@ Never modify another agent's completed work without human authorization.
 
 ---
 
-## Autonomous Directive Protocol (DROID MODE)
+## Directive Execution Protocol
 
-When operating autonomously, Claude Code follows this protocol exactly.
-DROID MODE applies — execute directives as written, no synthesis, no deviation.
+Directives may arrive via TWO channels — both are valid:
 
-### Step 1 — Sync
-Run: `git fetch origin && git reset --hard origin/main`
+Channel A — Direct session prompt (current operating mode)
+  Execute instructions given directly in the agent session.
+  No file in QUEUE required. Proceed immediately.
 
-### Step 2 — Find next task
-Read docs/REQUIREMENTS_MASTER.md.
-Find the first row where:
-  - Status = QUEUED
-  - A directive file exists at PROGRAM_CONTROL/DIRECTIVES/QUEUE/[ID].md
-  - **Agent:** field = CLAUDE_CODE
-  - No file in PROGRAM_CONTROL/DIRECTIVES/IN_PROGRESS/ for this ID
-  - No open PR references this directive ID
-If none: stop. Do not invent work.
+Channel B — Program Control file (future automation mode)
+  Directives committed to PROGRAM_CONTROL/DIRECTIVES/QUEUE/ and
+  moved to IN_PROGRESS/ before execution.
 
-### Step 3 — Conflict check
-Read **Touches:** field from selected directive.
-Check QUEUE and IN_PROGRESS for overlapping file paths.
-If overlap: HARD_STOP — output CONFLICT DETECTED, await human resolution.
+Either channel is authoritative. Do not require Channel B
+before acting on Channel A instructions.
 
-### Step 4 — Pre-flight reads (MANDATORY)
-Before writing any code, read:
-  1. Full directive file
-  2. docs/DOMAIN_GLOSSARY.md
-  3. docs/REQUIREMENTS_MASTER.md
-  4. Any models or services the directive references (confirm they exist)
-  5. Files listed in "Files to Confirm Unchanged"
+Report-backs to PROGRAM_CONTROL/REPORT_BACK/ are encouraged
+but not required for Channel A sessions.
 
-### Step 5 — Move to IN_PROGRESS
-Move QUEUE/[ID].md → IN_PROGRESS/[ID].md
-Commit: `CHORE: [ID] QUEUE → IN_PROGRESS`
-Branch: `claude/[id-lowercase]-[random-suffix]`
-
-### Step 6 — Execute
-Execute directive exactly as written. DROID MODE.
-Follow all invariants listed in the directive checklist.
-
-### Step 7 — Build and test check
-Run: `npm run build`
-Run: `npm test` (if applicable)
-Zero NEW errors required. Pre-existing failures acceptable if confirmed on baseline.
-If new failures: fix before proceeding. If unfixable within scope: HARD_STOP.
-
-### Step 8 — File report-back
-Create: PROGRAM_CONTROL/REPORT_BACK/[ID]-REPORT-BACK.md
-Include: branch, HEAD, files created/modified/unchanged,
-npm run build result, all invariants confirmed or flagged,
-any deviations from directive, git diff --stat, result: SUCCESS or HARD_STOP.
-
-### Step 9 — Update REQUIREMENTS_MASTER
-Open docs/REQUIREMENTS_MASTER.md.
-Update Status for this directive's requirement rows: QUEUED → DONE.
-
-### Step 10 — Move to DONE and commit
-Move IN_PROGRESS/[ID].md → DONE/[ID].md
-One commit: report-back + REQUIREMENTS_MASTER + directive move + source changes.
-Non-FIZ: `CHORE: [ID] complete — report-back filed, directive moved to DONE`
-FIZ: `FIZ: [ID] — [description]` / REASON: / IMPACT: / CORRELATION_ID: / GATE:
-
-### Step 11 — Open PR
-PR targeting main.
-Title: `[PREFIX]: [ID] — [short description]`
-Body: full report-back
-Labels: claude-code-task, ready-for-review
-FIZ: also add fiz-review-required
+The QUEUE/IN_PROGRESS/DONE directory structure remains in place
+for future use but is NOT a prerequisite for execution.
 
 ---
 
