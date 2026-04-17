@@ -44,23 +44,23 @@ Append-Only. Deterministic. Idempotent.
 
 All commits must begin with one of these prefixes:
 
-| Prefix | Use |
-|--------|-----|
-| FIZ    | Financial Integrity Zone — ledger, wallet, balance, escrow |
-| DB     | Database models, schema, indexes |
-| API    | Controllers, routes, OpenAPI contract |
-| SVC    | Service layer (non-financial) |
-| INFRA  | Workflows, CI, config, infrastructure |
-| UI     | Frontend or dashboard (future) |
-| GOV    | Governance, policy, agent instruction docs |
-| TEST   | Test files only |
-| CHORE  | Maintenance, cleanup, non-code tasks |
+| Prefix | Use                                                                 |
+|--------|---------------------------------------------------------------------|
+| FIZ    | Financial Integrity Zone — ledger, wallet, balance, escrow          |
+| DB     | Database models, schema, indexes                                    |
+| API    | Controllers, routes, OpenAPI contract                               |
+| SVC    | Service layer (non-financial)                                       |
+| INFRA  | Workflows, CI, config, infrastructure                               |
+| UI     | Frontend or dashboard (future)                                      |
+| GOV    | Governance, policy, agent instruction docs                          |
+| TEST   | Test files only                                                     |
+| CHORE  | Maintenance, cleanup, non-code tasks                                |
 
 ---
 
 ## FIZ Commit Format (required when prefix = FIZ)
 
-```
+```text
 FIZ: <description>
 REASON: <why this change was needed>
 IMPACT: <what financial flows are affected>
@@ -137,7 +137,7 @@ for future use but is NOT a prerequisite for execution.
 
 ## Key File Paths
 
-```
+```text
 Directive queue:    PROGRAM_CONTROL/DIRECTIVES/QUEUE/
 In progress:        PROGRAM_CONTROL/DIRECTIVES/IN_PROGRESS/
 Done:               PROGRAM_CONTROL/DIRECTIVES/DONE/
