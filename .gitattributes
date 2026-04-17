@@ -30,8 +30,6 @@ package-lock.json merge=ours
 *.sh text eol=lf
 
 # Shell scripts need LF and executable bit
-*.sh text eol=lf
-
 # ──────────────────────────────────────────────
 # Binary files — never diff or merge as text
 # ──────────────────────────────────────────────
