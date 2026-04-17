@@ -371,7 +371,7 @@ export class LedgerService implements ILedgerService {
       pointsIdempotencyKey: key,
       eventScope: operationType,
       resultHash: JSON.stringify(result),
-      storedResult: result,
+      storedResult: result as Record<string, unknown>,
       expiresAt,
       retentionUntil,
     });

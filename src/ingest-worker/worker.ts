@@ -193,17 +193,16 @@ export class IngestWorker {
         metricType: MetricEventType.WORKER_ERROR,
         timestamp: new Date(),
         metadata: {
-          eventId: event?.eventId,
-          eventType: event?.eventType,
+          eventMongoId,
           errorType: error instanceof Error ? error.name : 'Unknown',
           errorMessage: error instanceof Error ? error.message : String(error),
         },
       });
       
       // Fetch event again to handle error
-      const event = await IngestEventModel.findById(eventMongoId);
-      if (event) {
-        await this.handleProcessingResult(event, {
+      const errorEvent = await IngestEventModel.findById(eventMongoId);
+      if (errorEvent) {
+        await this.handleProcessingResult(errorEvent, {
           result: ProcessingResult.RETRYABLE_FAILURE,
           errorCode: 'PROCESSING_ERROR',
           errorMessage: error instanceof Error ? error.message : 'Unknown error',

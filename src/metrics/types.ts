@@ -52,6 +52,17 @@ export enum MetricEventType {
   // Wallet event metrics
   WALLET_EVENT_PUBLISHED = 'wallet.event.published',
   WALLET_EVENT_PUBLISH_ERROR = 'wallet.event.publish.error',
+
+  // Worker lifecycle metrics
+  WORKER_STARTED = 'worker.started',
+  WORKER_STOPPED = 'worker.stopped',
+  WORKER_ERROR = 'worker.error',
+  EVENT_PROCESSED = 'event.processed',
+
+  // Database connection metrics
+  DATABASE_CONNECTION = 'database_connection',
+  DATABASE_CONNECTION_ERROR = 'database_connection_error',
+  DATABASE_DISCONNECTION = 'database_disconnection',
 }
 
 /**

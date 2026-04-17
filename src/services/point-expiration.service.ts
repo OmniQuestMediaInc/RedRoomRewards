@@ -137,7 +137,7 @@ export class PointExpirationService {
     
     for (const entry of ledgerResult.entries) {
       const expiresAt = entry.metadata?.expiresAt 
-        ? new Date(entry.metadata.expiresAt) 
+        ? new Date(entry.metadata.expiresAt as string | number) 
         : null;
       
       if (expiresAt && expiresAt <= gracePeriodDate) {
@@ -310,7 +310,7 @@ export class PointExpirationService {
     
     for (const entry of ledgerResult.entries) {
       const expiresAt = entry.metadata?.expiresAt
-        ? new Date(entry.metadata.expiresAt)
+        ? new Date(entry.metadata.expiresAt as string | number)
         : null;
       
       if (expiresAt && expiresAt >= now && expiresAt <= warningDate) {
