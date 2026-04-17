@@ -459,24 +459,26 @@ Implements point earning endpoint per `/api/openapi.yaml`.
 
 **Format**: `<type>(<scope>): <description>`
 
-**Types**:
-- `feat`: New feature
-- `fix`: Bug fix
-- `docs`: Documentation only
-- `test`: Adding or updating tests
-- `refactor`: Code restructuring (no behavior change)
-- `chore`: Maintenance tasks
-- `security`: Security fixes
+**Types** (RRR authoritative enum):
+- `FIZ`: Financial Integrity Zone — ledger, wallet, balance, escrow
+- `DB`: Database models, Mongoose schemas, indexes
+- `API`: Controllers, routes, OpenAPI contract
+- `SVC`: Service layer (non-financial)
+- `INFRA`: Workflows, CI, config, infrastructure
+- `UI`: Frontend, dashboard (future)
+- `GOV`: Governance, policy, agent instruction documents
+- `TEST`: Test files only
+- `CHORE`: Maintenance, cleanup, non-code tasks
+
+Do NOT use: feat / fix / docs / refactor — not valid RRR prefixes.
 
 **Examples**:
 
 **Good**:
 ```
-feat(wallets): implement GET /wallets/{userId} endpoint
-fix(ledger): prevent race condition in balance updates
-docs(api): update OpenAPI spec with redeem endpoint
-test(earn): add edge case tests for negative amounts
-security(auth): add rate limiting to all endpoints
+API(wallets): implement GET /wallets/{userId} endpoint
+FIZ(ledger): prevent race condition in balance updates
+TEST(earn): add edge case tests for negative amounts
 ```
 
 **Bad**:
