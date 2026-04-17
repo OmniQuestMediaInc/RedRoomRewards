@@ -1,0 +1,226 @@
+name: Directive Dispatch — Auto-Route, Lifecycle, Conflict Detection
+
+on:
+  issues:
+    types: [opened]
+  pull_request:
+    types: [opened, closed]
+    branches: [main]
+  push:
+    branches: [main]
+    paths:
+      - 'PROGRAM_CONTROL/DIRECTIVES/QUEUE/**.md'
+
+permissions:
+  contents: write
+  issues: write
+  pull-requests: write
+
+jobs:
+
+  assign-to-agent:
+    name: Assign directive issue to correct agent
+    if: github.event_name == 'issues' && github.event.action == 'opened'
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - name: Parse agent from issue body
+        id: parse
+        env:
+          ISSUE_BODY: ${{ github.event.issue.body }}
+        run: |
+          AGENT=$(echo "$ISSUE_BODY" | grep -oP '(?<=\*\*Agent:\*\* ).*' | head -1 | tr -d '[:space:]')
+          echo "CHECK: Detected agent = ${AGENT}"
+          echo "agent=${AGENT}" >> "$GITHUB_OUTPUT"
+
+      - name: Route to Copilot
+        if: steps.parse.outputs.agent == 'COPILOT'
+        run: |
+          echo "CHECK: Assigning issue ${{ github.event.issue.number }} to app/copilot"
+          gh issue edit ${{ github.event.issue.number }} \
+            --repo ${{ github.repository }} \
+            --add-assignee "app/copilot" \
+          && echo "CHECK: Assigned to app/copilot" \
+          || echo "WARNING: Could not assign to app/copilot"
+
+      - name: Route to Claude Code
+        if: steps.parse.outputs.agent == 'CLAUDE_CODE'
+        run: |
+          gh issue edit ${{ github.event.issue.number }} \
+            --repo ${{ github.repository }} \
+            --add-label "claude-code-task"
+          gh issue comment ${{ github.event.issue.number }} \
+            --repo ${{ github.repository }} \
+            --body "This directive is scoped for Claude Code (DROID MODE). Paste the directive content to Claude Code to execute."
+
+      - name: Add dispatched label
+        run: |
+          gh issue edit ${{ github.event.issue.number }} \
+            --repo ${{ github.repository }} \
+            --add-label "dispatched" \
+          || echo "WARNING: Could not add dispatched label"
+
+  conflict-detection:
+    name: Detect file-path conflicts between queued directives
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Scan for conflicts
+        run: |
+          python3 - <<'PYEOF'
+          import os, re, subprocess
+
+          QUEUE_DIR = "PROGRAM_CONTROL/DIRECTIVES/QUEUE"
+          IN_PROGRESS_DIR = "PROGRAM_CONTROL/DIRECTIVES/IN_PROGRESS"
+
+          def parse_touches(filepath):
+              try:
+                  with open(filepath) as f:
+                      for line in f:
+                          m = re.search(r'\*\*Touches:\*\*\s*(.+)', line)
+                          if m:
+                              raw = m.group(1).strip()
+                              return [p.strip() for p in raw.split(',') if p.strip()]
+              except Exception:
+                  pass
+              return []
+
+          def directive_id(filepath):
+              return os.path.splitext(os.path.basename(filepath))[0]
+
+          directives = {}
+          for d in [QUEUE_DIR, IN_PROGRESS_DIR]:
+              if not os.path.isdir(d):
+                  continue
+              for fname in os.listdir(d):
+                  if not fname.endswith('.md') or fname == '.gitkeep':
+                      continue
+                  fpath = os.path.join(d, fname)
+                  did = directive_id(fpath)
+                  touches = parse_touches(fpath)
+                  if touches:
+                      directives[did] = {'path': fpath, 'touches': touches}
+
+          print(f"CHECK: Scanned {len(directives)} directives")
+          path_map = {}
+          for did, info in directives.items():
+              for t in info['touches']:
+                  path_map.setdefault(t, []).append(did)
+
+          conflicts = {p: ids for p, ids in path_map.items() if len(ids) >= 2}
+          if not conflicts:
+              print("CHECK: No file-path conflicts detected")
+          else:
+              repo = os.environ.get('GITHUB_REPOSITORY', '')
+              for fpath, ids in conflicts.items():
+                  for i in range(len(ids)):
+                      for j in range(i + 1, len(ids)):
+                          id_a, id_b = ids[i], ids[j]
+                          title = f"CONFLICT: {id_a} x {id_b} — {fpath}"
+                          body = (f"Directives **{id_a}** and **{id_b}** both touch `{fpath}`.\n\n"
+                                  f"Resolve sequencing before either executes.\n\n"
+                                  f"- {id_a}: `PROGRAM_CONTROL/DIRECTIVES/QUEUE/{id_a}.md`\n"
+                                  f"- {id_b}: `PROGRAM_CONTROL/DIRECTIVES/QUEUE/{id_b}.md`")
+                          subprocess.run(['gh', 'issue', 'create', '--repo', repo,
+                                         '--title', title, '--body', body,
+                                         '--label', 'conflict,needs-conflict-review'],
+                                        capture_output=True, text=True)
+                          print(f"WARNING: Conflict issue opened: {title}")
+          PYEOF
+
+  lifecycle-pr-opened:
+    name: Move directive QUEUE to IN_PROGRESS on PR open
+    if: github.event_name == 'pull_request' && github.event.action == 'opened'
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract directive ID and move file
+        run: |
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+          DIRECTIVE_ID=$(echo "$PR_TITLE" | sed 's/^[^:]*: *//' | awk -F' ' '{print $1}' | tr -d '—')
+          echo "CHECK: Directive ID = ${DIRECTIVE_ID}"
+          if [ -z "$DIRECTIVE_ID" ]; then exit 0; fi
+          QUEUE_FILE="PROGRAM_CONTROL/DIRECTIVES/QUEUE/${DIRECTIVE_ID}.md"
+          IN_PROGRESS_FILE="PROGRAM_CONTROL/DIRECTIVES/IN_PROGRESS/${DIRECTIVE_ID}.md"
+          if [ ! -f "$QUEUE_FILE" ]; then
+            echo "CHECK: ${QUEUE_FILE} not found — skipping"
+            exit 0
+          fi
+          mkdir -p "PROGRAM_CONTROL/DIRECTIVES/IN_PROGRESS"
+          mv "$QUEUE_FILE" "$IN_PROGRESS_FILE"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add "$QUEUE_FILE" "$IN_PROGRESS_FILE"
+          git commit -m "CHORE: ${DIRECTIVE_ID} QUEUE → IN_PROGRESS (PR #${PR_NUMBER} opened)"
+          git push origin HEAD:"${{ github.event.pull_request.head.ref }}"
+
+  lifecycle-pr-merged:
+    name: Move directive IN_PROGRESS to DONE on PR merge
+    if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract directive ID and move file
+        run: |
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+          DIRECTIVE_ID=$(echo "$PR_TITLE" | sed 's/^[^:]*: *//' | awk -F' ' '{print $1}' | tr -d '—')
+          if [ -z "$DIRECTIVE_ID" ]; then exit 0; fi
+          IN_PROGRESS_FILE="PROGRAM_CONTROL/DIRECTIVES/IN_PROGRESS/${DIRECTIVE_ID}.md"
+          DONE_FILE="PROGRAM_CONTROL/DIRECTIVES/DONE/${DIRECTIVE_ID}.md"
+          if [ ! -f "$IN_PROGRESS_FILE" ]; then
+            echo "CHECK: ${IN_PROGRESS_FILE} not found — skipping"
+            exit 0
+          fi
+          mkdir -p "PROGRAM_CONTROL/DIRECTIVES/DONE"
+          mv "$IN_PROGRESS_FILE" "$DONE_FILE"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add "$IN_PROGRESS_FILE" "$DONE_FILE"
+          git commit -m "CHORE: ${DIRECTIVE_ID} IN_PROGRESS → DONE (PR #${PR_NUMBER} merged)"
+          git push origin main
+
+      - name: Close corresponding GitHub Issue
+        run: |
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          PR_NUMBER="${{ github.event.pull_request.number }}"
+          DIRECTIVE_ID=$(echo "$PR_TITLE" | sed 's/^[^:]*: *//' | awk -F' ' '{print $1}' | tr -d '—')
+          if [ -z "$DIRECTIVE_ID" ]; then exit 0; fi
+          ISSUE_TITLE="DIRECTIVE: ${DIRECTIVE_ID}"
+          ISSUE_NUMBER=$(gh issue list \
+            --repo ${{ github.repository }} \
+            --search "\"${ISSUE_TITLE}\" in:title" \
+            --state open \
+            --json number,title \
+            --jq ".[] | select(.title == \"${ISSUE_TITLE}\") | .number" \
+            | head -1)
+          if [ -z "$ISSUE_NUMBER" ]; then exit 0; fi
+          gh issue close "$ISSUE_NUMBER" \
+            --repo ${{ github.repository }} \
+            --comment "Directive complete. PR #${PR_NUMBER} merged." \
+          || echo "WARNING: Could not close issue"
