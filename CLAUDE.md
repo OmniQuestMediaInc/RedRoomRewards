@@ -1,152 +1,115 @@
-# CLAUDE.md — RedRoomRewards
-**Authority:** Kevin B. Hartley, CEO — OmniQuest Media Inc.
-**Repo:** OmniQuestMediaInc/RedRoomRewards
-**Date:** 2026-04-17
+---
+
+## Financial Integrity Rules (non-negotiable)
+
+- All point movements through LedgerService only — no direct Wallet mutations
+- All financial operations require idempotency_key
+- Ledger entries are append-only — no UPDATE or DELETE on ledger_entries
+- correlation_id and reason_code required on all ledger entries
+- No hardcoded balances anywhere in production code paths
+- No backdoors, master passwords, or unauthorized settlement behaviour
 
 ---
 
-## Role
+## Execution Protocol
 
-Claude Code is a senior execution agent for RedRoomRewards. It receives
-directives from PROGRAM_CONTROL/DIRECTIVES/IN_PROGRESS/, executes exactly
-what is specified, and files a report-back to PROGRAM_CONTROL/REPORT_BACK/.
-
----
-
-## Source of Truth
-
-- **Coding Doctrine:** COPILOT_INSTRUCTIONS.md (root) — always read before executing
-- **Agent Instructions:** .github/copilot-instructions.md — Program Control rules
-- **Domain Glossary:** docs/DOMAIN_GLOSSARY.md (naming authority — check before naming anything)
-- **Requirements:** docs/REQUIREMENTS_MASTER.md (live build state — check before selecting next task)
-- **CEO Decisions:** docs/RRR_CEO_DECISIONS_FINAL_2026-04-17.md
+1. Read all instructions before writing any code
+2. Execute exactly what is specified — do not invent scope
+3. Run npm run build and npm test before committing
+4. One PR per discrete work unit
+5. Report-back encouraged: PROGRAM_CONTROL/REPORT_BACK/<ID>-report.md
+6. Report-back format: STATUS / FILES_CHANGED / TEST_RESULTS / NOTES
 
 ---
 
-## Stack
+## Hard Stops — halt and report BLOCKED
 
-- Runtime: Node.js + TypeScript (strict)
-- Database: MongoDB + Mongoose (no Prisma)
-- Package manager: npm (not Yarn)
-- Test runner: Jest
-- Build: npm run build (npx tsc --noEmit for type check)
-- Lint: npm run lint
+Stop immediately if any of these occur:
 
----
+- FIZ file has a merge conflict
+- Instructions ask for direct wallet balance mutations
+- Instructions ask for UPDATE or DELETE on ledger_entries
+- Build or tests fail after implementation attempt and fix is not obvious
+- Any ambiguity that cannot be resolved from available context
 
-## Core Principles
-
-Append-Only. Deterministic. Idempotent.
-
----
-
-## Commit Prefix Enum (RRR)
-
-All commits must begin with one of these prefixes:
-
-| Prefix | Use                                                                 |
-|--------|---------------------------------------------------------------------|
-| FIZ    | Financial Integrity Zone — ledger, wallet, balance, escrow          |
-| DB     | Database models, schema, indexes                                    |
-| API    | Controllers, routes, OpenAPI contract                               |
-| SVC    | Service layer (non-financial)                                       |
-| INFRA  | Workflows, CI, config, infrastructure                               |
-| UI     | Frontend or dashboard (future)                                      |
-| GOV    | Governance, policy, agent instruction docs                          |
-| TEST   | Test files only                                                     |
-| CHORE  | Maintenance, cleanup, non-code tasks                                |
-
----
-
-## FIZ Commit Format (required when prefix = FIZ)
-
-```text
-FIZ: <description>
-REASON: <why this change was needed>
-IMPACT: <what financial flows are affected>
-CORRELATION_ID: <unique tracing identifier>
-```
-
-FIZ-scoped commits require REASON:, IMPACT:, CORRELATION_ID: in the commit body.
-
----
-
-## Financial Integrity Rules
-
-- Append-only ledger — no UPDATE or DELETE on ledger_entries.
-- All point movements through LedgerService. No direct balance updates.
-- All financial operations require idempotency_key.
-- correlation_id and reason_code on all ledger entries.
-- Wallet mutations must use MongoDB sessions (startSession + transactions)
-  once RRR-P1-004 is resolved. Until then: follow existing optimistic lock
-  pattern in wallet.service.ts.
-
----
-
-## Agent Handoff
-
-Leave a `## HANDOFF` block stating what was built, what was left incomplete,
-and the next agent's first task.
-Never modify another agent's completed work without human authorization.
-
----
-
-## Directive Execution Protocol
-
-Directives may arrive via TWO channels — both are valid:
-
-Channel A — Direct session prompt (current operating mode)
-  Execute instructions given directly in the agent session.
-  No file in QUEUE required. Proceed immediately.
-
-Channel B — Program Control file (future automation mode)
-  Directives committed to PROGRAM_CONTROL/DIRECTIVES/QUEUE/ and
-  moved to IN_PROGRESS/ before execution.
-
-Either channel is authoritative. Do not require Channel B
-before acting on Channel A instructions.
-
-Report-backs to PROGRAM_CONTROL/REPORT_BACK/ are encouraged
-but not required for Channel A sessions.
-
-The QUEUE/IN_PROGRESS/DONE directory structure remains in place
-for future use but is NOT a prerequisite for execution.
-
----
-
-## HARD_STOP Conditions
-
-- Directive missing Agent/Parallel-safe/Touches fields
-- Referenced model/service absent and directive does not say to create it
-- npm run build produces NEW failures
-- FIZ change missing REASON/IMPACT/CORRELATION_ID
-- CLARIFY tag present — CEO decision required
-- Directive asks to modify another agent's completed work without explicit instruction
-
----
-
-## What Claude Code Must NEVER Do
-
-- Direct balance updates (always through LedgerService)
-- Skip idempotency on financial operations
-- Create directives (Claude Chat's role)
-- Clear clearances (CEO only)
-- Merge its own PR
+Do not guess past a Hard Stop. Report the blocker clearly.
 
 ---
 
 ## Key File Paths
 
-```text
-Directive queue:    PROGRAM_CONTROL/DIRECTIVES/QUEUE/
-In progress:        PROGRAM_CONTROL/DIRECTIVES/IN_PROGRESS/
-Done:               PROGRAM_CONTROL/DIRECTIVES/DONE/
-Report-backs:       PROGRAM_CONTROL/REPORT_BACK/
-Requirements:       docs/REQUIREMENTS_MASTER.md
-Glossary:           docs/DOMAIN_GLOSSARY.md
-CEO Decisions:      docs/RRR_CEO_DECISIONS_FINAL_2026-04-17.md
-Ledger service:     src/ledger/ledger.service.ts
-Wallet service:     src/wallets/wallet.service.ts
-DB models:          src/db/models/
-API controllers:    src/api/
-```
+| Purpose              | Path |
+|----------------------|------|
+| Ledger service       | src/ledger/ledger.service.ts |
+| Wallet service       | src/wallets/wallet.service.ts |
+| Wallet controller    | src/api/wallet.controller.ts |
+| DB models            | src/db/models/ |
+| Service layer        | src/services/ |
+| API controllers      | src/api/ |
+| Requirements master  | docs/REQUIREMENTS_MASTER.md |
+| Domain glossary      | docs/DOMAIN_GLOSSARY.md |
+| CEO decisions        | docs/RRR_CEO_DECISIONS_FINAL_2026-04-17.md |
+| RRR spec             | docs/RRR_LOYALTY_ENGINE_SPEC_v1.1.md |
+| Queue (optional)     | PROGRAM_CONTROL/DIRECTIVES/QUEUE/ |
+| In progress          | PROGRAM_CONTROL/DIRECTIVES/IN_PROGRESS/ |
+| Done                 | PROGRAM_CONTROL/DIRECTIVES/DONE/ |
+| Report-backs         | PROGRAM_CONTROL/REPORT_BACK/ |
+
+---
+
+## Domain Glossary Authority
+
+docs/DOMAIN_GLOSSARY.md is the naming authority for all identifiers.
+Do not invent names not present in the glossary.
+If a required term is missing: flag it in the report-back.
+
+---
+
+## Current Build State (as of 2026-04-17)
+
+### P0 Bug — Fix Before Anything Else
+
+src/api/wallet.controller.ts lines 131 and 186:
+  const previousBalance = 1000; // Placeholder
+
+This returns hardcoded fake balances in production.
+This is a financial correctness bug. Directive RRR-P0-001 addresses it.
+
+### Built
+- src/ledger/ledger.service.ts — LedgerService (append-only)
+- src/wallets/wallet.service.ts — WalletService (partial, optimistic lock)
+- src/wallets/ — EscrowService
+- src/services/point-accrual.service.ts — partial
+- src/services/point-redemption.service.ts — partial
+- src/services/point-expiration.service.ts — partial
+- src/db/models/ledger-entry.model.ts
+- src/db/models/wallet.model.ts
+- src/db/models/model-wallet.model.ts
+- src/db/models/escrow-item.model.ts
+
+### Missing (required for full spec)
+- src/db/models/point-lot.model.ts
+- LoyaltyAccount model
+- IdentityLink model
+- Config tables: ValuationConfig, EarnRateConfig, TierCapConfig,
+                 MicroTopupConfig, SpendOrderConfig
+
+---
+
+## CEO Decisions — All Locked 2026-04-17
+
+Full detail in docs/RRR_CEO_DECISIONS_FINAL_2026-04-17.md.
+Summary:
+
+D1 — Slot machine: RETIRED. Remove all slot machine code.
+D2 — Platform name: ChatNow.Zone (not XXXChatNow.com).
+D3 — Diamond Concierge: 0 earn points. Burn eligible.
+D4 — Inferno Bonus: configurable via inferno_multiplier on EarnRateConfig.
+D5 — GGS Integration: deferred. Webhook endpoints only.
+
+B1 — inferno_multiplier required field on EarnRateConfig, no default.
+B2 — merchant_tier (launch) + rrr_member_tier (future, nullable).
+B3 — Phase 1: RedRoomPleasures + Cyrano. Phase 2: ChatNow.Zone.
+B4 — Cross-merchant 1:1 default via MerchantPairConfig.
+B5 — Redemption caps via TierCapConfig.
+     Placeholders: PLATINUM 50% GOLD 35% SILVER 20% MEMBER 10% GUEST 5%
