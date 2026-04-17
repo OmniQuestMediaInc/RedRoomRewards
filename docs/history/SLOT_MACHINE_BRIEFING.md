@@ -35,7 +35,7 @@ Provide a Vegas-style slot machine experience for viewers during live broadcasts
 - ✅ Audit trail of all transactions
 - ✅ Balance reconciliation
 
-**External System Responsibilities** (XXXChatNow or Game Service):
+**External System Responsibilities** (ChatNow.Zone or Game Service):
 - ✅ Slot machine UI/UX
 - ✅ RNG (Random Number Generator)
 - ✅ Win determination logic

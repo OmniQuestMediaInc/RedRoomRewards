@@ -34,7 +34,7 @@ This document defines the architectural boundaries, domain responsibilities, and
 - Does NOT process payments or handle tipping
 - Server-side authority for all financial operations
 
-### 1.2 External System Domain (XXXChatNow and Others)
+### 1.2 External System Domain (ChatNow.Zone and Others)
 
 **Core Responsibility**: User experience, content delivery, and business logic.
 
@@ -135,7 +135,7 @@ This document defines the architectural boundaries, domain responsibilities, and
          │ Facts              │ Confirmations
          │                    ▼
 ┌─────────────────────────────────────────┐
-│      External Systems (XXXChatNow)      │
+│      External Systems (ChatNow.Zone)      │
 │                                         │
 │  Business Logic │ UI/UX │ Auth │ Games │
 └─────────────────────────────────────────┘

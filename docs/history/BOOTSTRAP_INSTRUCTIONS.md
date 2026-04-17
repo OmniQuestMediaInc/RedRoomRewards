@@ -804,8 +804,7 @@ HOW TO USE:
 | RedRoomRewards | OQMInc SaaS loyalty and rewards engine | RedRoomRewards, RRR |
 | RRR | RedRoomRewards abbreviation | RRR |
 | OmniQuest Media Inc. | Parent company | OmniQuestMediaInc, OQMI |
-| ChatNow.Zone | Primary merchant tenant (formerly XXXChatNow.com) | ChatNow.Zone, chatnow_zone |
-| RETIRED: XXXChatNow.com | Prior platform name — retired | Do not use |
+| ChatNow.Zone | Primary merchant tenant | ChatNow.Zone, chatnow_zone |
 | RedRoomPleasures | Merchant tenant (Phase 1) | RedRoomPleasures |
 | Cyrano | Merchant tenant (Phase 1) | Cyrano |
 
@@ -953,7 +952,7 @@ Create docs/REQUIREMENTS_MASTER.md with the following content exactly.
 | RRR-P1-003 | Effective-dated config models: ValuationConfig, EarnRateConfig, TierCapConfig (merchant-configurable), MicroTopupConfig, SpendOrderConfig | NEEDS_DIRECTIVE | — | All configurable per merchant |
 | RRR-P1-004 | Wrap wallet mutations in MongoDB sessions (startSession + transactions) | NEEDS_DIRECTIVE | — | Production concurrency safety |
 | RRR-P1-005 | Implement spend ordering (EARLIEST_EXPIRY_THEN_FIFO) | NEEDS_DIRECTIVE | — | Spec requirement |
-| RRR-P1-006 | Repo-wide rename: XXXChatNow.com to ChatNow.Zone in all docs, comments, configs, model defaults | NEEDS_DIRECTIVE | — | CEO Decision 2 |
+| RRR-P1-006 | Repo-wide rename: ChatNow.Zone to ChatNow.Zone in all docs, comments, configs, model defaults | NEEDS_DIRECTIVE | — | CEO Decision 2 |
 | RRR-P1-007 | Remove/archive slot machine code and spec documents | NEEDS_DIRECTIVE | — | CEO Decision 1 — retired |
 
 ---
@@ -1058,8 +1057,7 @@ Slot machine and chance-based game logic is retired. Archive or remove from repo
 - archive/xxxchatnow-seed/: remove
 
 ## D2 — Primary Tenant: ChatNow.Zone
-XXXChatNow.com was the prior platform name. All references must be updated to ChatNow.Zone.
-ChatNow.Zone is merchant tenant 1. RedRoomPleasures and Cyrano onboard first (Phase 1).
+ChatNow.Zone is the canonical platform name. ChatNow.Zone is merchant tenant 1. RedRoomPleasures and Cyrano onboard first (Phase 1).
 ChatNow.Zone is Phase 2 with full CNZ integration.
 
 ## D3 — Diamond Concierge Earn: Zero Points

@@ -364,7 +364,7 @@ All core functionality is complete and working. Tests pass except for the Jest/U
 ### Future (Phase 3+)
 
 1. **External Integrations**:
-   - XXXChatNow integration adapter
+   - ChatNow.Zone integration adapter
    - Webhook handlers
    - Event publishing
 

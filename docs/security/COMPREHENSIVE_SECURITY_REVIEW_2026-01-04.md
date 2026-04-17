@@ -615,7 +615,7 @@ grep -rn "eval\(|new Function\(|innerHTML" src/ --include="*.ts"
 grep -rn "process\.env" src/ --include="*.ts"
 
 # Check archive isolation
-grep -r "archive/\|xxxchatnow" src/ --include="*.ts"
+grep -r "archive/\|chatnow.zone" src/ --include="*.ts"
 
 # CodeQL analysis
 codeql database analyze --format=sarif-latest --output=results.sarif
