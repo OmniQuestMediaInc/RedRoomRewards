@@ -144,6 +144,6 @@ WalletService.refundEscrow() ← Queue authorized
 
 ## Related Documentation
 
-- `/COPILOT_GOVERNANCE.md` - Section 2.1-2.2 for wallet-specific rules
+- `/docs/governance/COPILOT_GOVERNANCE.md` - Section 2.1-2.2 for wallet-specific rules
 - `/docs/WALLET_ESCROW_ARCHITECTURE.md` - Detailed escrow design
 - `/docs/TESTING_STRATEGY.md` - Testing requirements

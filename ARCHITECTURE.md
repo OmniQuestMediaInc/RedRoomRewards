@@ -354,12 +354,12 @@ RedRoomRewards (Monorepo)
 
 **Required Reading**:
 - `/docs/UNIVERSAL_ARCHITECTURE.md` - Detailed architectural guidance
-- `/COPILOT_GOVERNANCE.md` - AI development rules
-- `/SECURITY_AUDIT_AND_NO_BACKDOOR_POLICY.md` - Security principles
+- `/docs/governance/COPILOT_GOVERNANCE.md` - AI development rules
+- `/docs/security/SECURITY_AUDIT_AND_NO_BACKDOOR_POLICY.md` - Security principles
 - `/api/openapi.yaml` - API contract specification
 
 **Decision Records**:
-- All architectural decisions documented in `/DECISIONS.md`
+- All architectural decisions documented in `/docs/DECISIONS.md`
 - Changes require review and approval
 - Rationale captured for future reference
 

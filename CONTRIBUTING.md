@@ -88,7 +88,7 @@ Before contributing, please read:
 
 - **[COPILOT_INSTRUCTIONS.md](COPILOT_INSTRUCTIONS.md)** - Core development rules
 - **[docs/UNIVERSAL_ARCHITECTURE.md](docs/UNIVERSAL_ARCHITECTURE.md)** - Architectural principles
-- **[COPILOT_GOVERNANCE.md](COPILOT_GOVERNANCE.md)** - Repository-specific rules
+- **[COPILOT_GOVERNANCE.md](docs/governance/COPILOT_GOVERNANCE.md)** - Repository-specific rules
 - **[SECURITY.md](SECURITY.md)** - Security policy
 - **[api/openapi.yaml](api/openapi.yaml)** - API contract
 
@@ -553,7 +553,7 @@ None / [Description of breaking changes and migration path]
 - **Architecture**: [docs/UNIVERSAL_ARCHITECTURE.md](docs/UNIVERSAL_ARCHITECTURE.md)
 - **API Contract**: [api/openapi.yaml](api/openapi.yaml)
 - **Development Rules**: [COPILOT_INSTRUCTIONS.md](COPILOT_INSTRUCTIONS.md)
-- **Governance**: [COPILOT_GOVERNANCE.md](COPILOT_GOVERNANCE.md)
+- **Governance**: [COPILOT_GOVERNANCE.md](docs/governance/COPILOT_GOVERNANCE.md)
 
 ---
 

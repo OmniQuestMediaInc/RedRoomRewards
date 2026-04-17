@@ -218,13 +218,13 @@ Idempotency records are stored in the `idempotency_records` collection:
 
 This implementation fully conforms to:
 - ✅ **OmniQuestMedia architectural codebase checks**
-- ✅ **COPILOT_GOVERNANCE.md** requirements for financial operations
+- ✅ **COPILOT_GOVERNANCE.md** requirements for financial operations (see `/docs/governance/COPILOT_GOVERNANCE.md`)
 - ✅ **ARCHITECTURE.md** separation of concerns
 - ✅ **WALLET_ESCROW_ARCHITECTURE.md** idempotency requirements
 
 ### Governance Alignment
 
-From COPILOT_GOVERNANCE.md Section 2.2:
+From `/docs/governance/COPILOT_GOVERNANCE.md` Section 2.2:
 > "Idempotency Keys: All award and redemption endpoints MUST accept and enforce idempotency keys"
 > "Duplicate Detection: The system MUST detect and prevent processing of duplicate requests"
 
@@ -284,7 +284,7 @@ Potential improvements for future iterations:
 For questions or issues related to the idempotency framework:
 1. Review this documentation
 2. Check test suite for usage examples
-3. Consult COPILOT_GOVERNANCE.md for architectural guidance
+3. Consult `/docs/governance/COPILOT_GOVERNANCE.md` for architectural guidance
 4. Contact the platform team
 
 ---

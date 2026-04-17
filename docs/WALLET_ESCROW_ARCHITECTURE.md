@@ -675,7 +675,7 @@ Before production deployment, features must demonstrate:
 
 **Related Documents**:
 - `/docs/UNIVERSAL_ARCHITECTURE.md` - Overall architecture
-- `/COPILOT_GOVERNANCE.md` - Development rules
+- `/docs/governance/COPILOT_GOVERNANCE.md` - Development rules
 - `/api/openapi.yaml` - API contract
 - `/SECURITY.md` - Security requirements
 

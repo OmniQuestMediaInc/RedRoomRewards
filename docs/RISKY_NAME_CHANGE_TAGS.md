@@ -47,4 +47,4 @@ Any instance of a legacy name MUST be flagged as risky if found in the following
 ## See Also
 
 - [ARCHITECTURE.md](./ARCHITECTURE.md)
-- [SECURITY_AUDIT_AND_NO_BACKDOOR_POLICY.md](./SECURITY_AUDIT_AND_NO_BACKDOOR_POLICY.md)
+- [SECURITY_AUDIT_AND_NO_BACKDOOR_POLICY.md](./security/SECURITY_AUDIT_AND_NO_BACKDOOR_POLICY.md)

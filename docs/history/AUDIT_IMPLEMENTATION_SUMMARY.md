@@ -300,7 +300,7 @@ No security vulnerabilities detected in the implemented changes.
 ## References
 
 - **Main Audit Report:** `/FINANCIAL_AUDIT_REPORT.md`
-- **Governance Rules:** `/COPILOT_GOVERNANCE.md` Section 2.1-2.2
+- **Governance Rules:** `/docs/governance/COPILOT_GOVERNANCE.md` Section 2.1-2.2
 - **Architecture Docs:** `/docs/WALLET_ESCROW_ARCHITECTURE.md`
 - **Module READMEs:**
   - `/src/ledger/README.md`

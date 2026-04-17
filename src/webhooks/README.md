@@ -26,4 +26,4 @@ When implementing this module:
 - Include retry logic with exponential backoff
 - Add webhook event logging
 
-See `/COPILOT_GOVERNANCE.md` for security and idempotency requirements.
+See `/docs/governance/COPILOT_GOVERNANCE.md` for security and idempotency requirements.

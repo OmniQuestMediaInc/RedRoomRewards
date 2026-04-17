@@ -10,7 +10,7 @@ At OmniQuestMedia, the security of our platform and user data is of the utmost p
 
 **Latest Security Audit**: January 4, 2026  
 **Status**: ✅ APPROVED (A+ Rating: 95/100)  
-**Review Report**: [COMPREHENSIVE_SECURITY_REVIEW_2026-01-04.md](./COMPREHENSIVE_SECURITY_REVIEW_2026-01-04.md)
+**Review Report**: [COMPREHENSIVE_SECURITY_REVIEW_2026-01-04.md](./docs/security/COMPREHENSIVE_SECURITY_REVIEW_2026-01-04.md)
 
 **Key Findings:**
 - 0 critical vulnerabilities found
@@ -19,8 +19,8 @@ At OmniQuestMedia, the security of our platform and user data is of the utmost p
 - Comprehensive security policies in place
 
 **For Developers:**
-- [Security Best Practices Guide](./SECURITY_BEST_PRACTICES.md) - Practical security guidelines with examples
-- [Security Audit and No Backdoor Policy](./SECURITY_AUDIT_AND_NO_BACKDOOR_POLICY.md) - Complete security policy
+- [Security Best Practices Guide](./docs/security/SECURITY_BEST_PRACTICES.md) - Practical security guidelines with examples
+- [Security Audit and No Backdoor Policy](./docs/security/SECURITY_AUDIT_AND_NO_BACKDOOR_POLICY.md) - Complete security policy
 
 ---
 
@@ -59,9 +59,9 @@ For any further security concerns or reports, please reach out via [security@omn
 ### Security Resources
 
 **For Developers:**
-- [Security Best Practices Guide](./SECURITY_BEST_PRACTICES.md) - Mandatory reading for all developers
-- [Security Audit Policy](./SECURITY_AUDIT_AND_NO_BACKDOOR_POLICY.md) - Complete security framework
-- [Latest Security Review](./COMPREHENSIVE_SECURITY_REVIEW_2026-01-04.md) - Most recent audit results
+- [Security Best Practices Guide](./docs/security/SECURITY_BEST_PRACTICES.md) - Mandatory reading for all developers
+- [Security Audit Policy](./docs/security/SECURITY_AUDIT_AND_NO_BACKDOOR_POLICY.md) - Complete security framework
+- [Latest Security Review](./docs/security/COMPREHENSIVE_SECURITY_REVIEW_2026-01-04.md) - Most recent audit results
 
 **Security Principles:**
 1. **Zero Trust**: Never trust, always verify
