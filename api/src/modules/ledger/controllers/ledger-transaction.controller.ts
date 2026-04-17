@@ -41,7 +41,7 @@ export interface CreateTransactionRequest {
   requestId?: string;
   
   /** Additional metadata */
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -105,7 +105,7 @@ export class LedgerTransactionController {
   @Idempotent({ operationType: 'ledger_transaction', required: true })
   async createTransaction(
     @Body() body: CreateTransactionRequest,
-    @Headers('idempotency-key') idempotencyKey?: string
+    @Headers('idempotency-key') _idempotencyKey?: string
   ): Promise<TransactionResponse> {
     // Note: Idempotency validation is handled by guard/middleware
     // This handler only executes for new (non-duplicate) requests

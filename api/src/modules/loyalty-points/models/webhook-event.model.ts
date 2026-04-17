@@ -63,7 +63,7 @@ WebhookEventSchema.index({ processed_at: 1 }, { expireAfterSeconds: 7776000 }); 
 export interface IWebhookEvent {
   event_id: string;
   event_type: string;
-  data?: any;
+  data?: any; // eslint-disable-line @typescript-eslint/no-explicit-any
   processed_at: Date;
   createdAt?: Date;
   updatedAt?: Date;

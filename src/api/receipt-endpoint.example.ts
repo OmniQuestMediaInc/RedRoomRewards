@@ -28,7 +28,7 @@ interface HTTPRequest {
  */
 interface HTTPResponse {
   status(code: number): HTTPResponse;
-  json(data: any): void;
+  json(data: any): void; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
 
 /**

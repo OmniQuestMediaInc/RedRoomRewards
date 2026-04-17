@@ -142,9 +142,9 @@ export class IdempotencyService implements IIdempotencyService {
       if (this.config.enableLogging) {
         console.log(`[Idempotency] Stored result for key=${idempotencyKey}, type=${operationType}`);
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Ignore duplicate key errors (race condition - another request stored first)
-      if (error.code === 11000) {
+      if (error && typeof error === 'object' && 'code' in error && error.code === 11000) {
         if (this.config.enableLogging) {
           console.log(`[Idempotency] Race condition detected for key=${idempotencyKey}, ignoring duplicate store`);
         }
@@ -200,19 +200,19 @@ export class IdempotencyService implements IIdempotencyService {
    * @param body - Request body object (optional)
    * @returns Idempotency key or null if not found
    */
-  extractIdempotencyKey(headers: any, body?: any): string | null {
+  extractIdempotencyKey(headers: Record<string, unknown>, body?: Record<string, unknown>): string | null {
     // Check standard header
-    if (headers['idempotency-key']) {
+    if (headers['idempotency-key'] && typeof headers['idempotency-key'] === 'string') {
       return headers['idempotency-key'];
     }
 
     // Check alternative header
-    if (headers['x-idempotency-key']) {
+    if (headers['x-idempotency-key'] && typeof headers['x-idempotency-key'] === 'string') {
       return headers['x-idempotency-key'];
     }
 
     // Check body
-    if (body && body.idempotencyKey) {
+    if (body && body.idempotencyKey && typeof body.idempotencyKey === 'string') {
       return body.idempotencyKey;
     }
 

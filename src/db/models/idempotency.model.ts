@@ -12,7 +12,7 @@ export interface IIdempotencyRecord extends Document {
   eventScope: string;
   createdAt: Date;
   resultHash: string;
-  storedResult?: Record<string, any>;
+  storedResult?: Record<string, unknown>;
   retentionUntil?: Date;
   expiresAt?: Date;
 }

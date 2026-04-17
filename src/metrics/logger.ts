@@ -58,7 +58,7 @@ export class MetricsLogger {
   /**
    * Helper to log a simple counter metric
    */
-  static incrementCounter(type: MetricEventType, metadata?: Record<string, any>): void {
+  static incrementCounter(type: MetricEventType, metadata?: Record<string, unknown>): void {
     MetricsLogger.logMetric({
       type,
       value: 1,
@@ -70,7 +70,7 @@ export class MetricsLogger {
   /**
    * Helper to log a duration metric (in milliseconds)
    */
-  static recordDuration(type: MetricEventType, durationMs: number, metadata?: Record<string, any>): void {
+  static recordDuration(type: MetricEventType, durationMs: number, metadata?: Record<string, unknown>): void {
     MetricsLogger.logMetric({
       type,
       value: durationMs,

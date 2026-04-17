@@ -60,7 +60,7 @@ export interface LedgerEntry {
   currency: string;
   
   /** Additional context (no PII) */
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   
   /** Related escrow ID if applicable */
   escrowId?: string;
@@ -119,7 +119,7 @@ export interface CreateLedgerEntryRequest {
   currency?: string;
   
   /** Metadata */
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   
   /** Escrow ID if applicable */
   escrowId?: string;
@@ -247,7 +247,7 @@ export interface AuditTrailEntry {
   initiatedBy?: string;
   
   /** Additional audit context (no PII) */
-  auditContext?: Record<string, any>;
+  auditContext?: Record<string, unknown>;
   
   /** Audit entry created timestamp */
   auditedAt: Date;
@@ -343,7 +343,7 @@ export interface ILedgerService {
   storeIdempotencyResult(
     key: string,
     operationType: string,
-    result: any,
+    result: any, // eslint-disable-line @typescript-eslint/no-explicit-any
     statusCode: number,
     ttlSeconds: number
   ): Promise<void>;

@@ -13,7 +13,6 @@
  */
 
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
 import { LedgerTransactionController } from './controllers/ledger-transaction.controller';
 import { IdempotencyService } from './services/idempotency.service';
 import { IdempotencyGuard } from './guards/idempotency.guard';

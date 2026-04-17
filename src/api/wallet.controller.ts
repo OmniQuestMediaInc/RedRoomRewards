@@ -36,7 +36,7 @@ export interface WalletResponse {
 export interface DeductPointsRequest {
   amount: number;
   reason: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   idempotencyKey: string;
   requestId: string;
 }
@@ -47,7 +47,7 @@ export interface DeductPointsRequest {
 export interface CreditPointsRequest {
   amount: number;
   reason: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   idempotencyKey: string;
   requestId: string;
 }

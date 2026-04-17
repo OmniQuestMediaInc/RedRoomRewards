@@ -6,11 +6,9 @@
  */
 
 import { WalletService } from '../wallet.service';
-import { TransactionType, TransactionReason, EscrowStatus } from '../types';
+import { TransactionType, TransactionReason } from '../types';
 import {
   InsufficientBalanceError,
-  EscrowNotFoundError,
-  EscrowAlreadyProcessedError,
 } from '../../services/types';
 
 // Mock implementations
@@ -58,7 +56,7 @@ describe('WalletService - Comprehensive Tests', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    walletService = new WalletService(mockLedgerService as any);
+    walletService = new WalletService(mockLedgerService as any); // eslint-disable-line @typescript-eslint/no-explicit-any
   });
 
   describe('holdInEscrow', () => {
