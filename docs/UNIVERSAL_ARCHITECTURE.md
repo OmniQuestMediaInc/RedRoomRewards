@@ -43,9 +43,7 @@ This document defines the mandatory architectural principles and prohibitions fo
 
 **ABSOLUTE PROHIBITION**: No code, patterns, or logic from archived legacy systems may be referenced, copied, adapted, or used in RedRoomRewards.
 
-- **Archive Location**: `/archive/xxxchatnow-seed/`
-- **Purpose**: Historical reference and audit only
-- **Access**: View-only for understanding prior architecture mistakes
+- **Archive**: Removed per CEO Decision D1 (2026-04-17). Previously at `/archive/xxxchatnow-seed/`.
 - **Usage**: ZERO reuse permitted
 
 **Rationale**: Legacy archived code contains:
