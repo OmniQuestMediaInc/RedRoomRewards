@@ -1,54 +1,83 @@
 STATUS: COMPLETE
 DIRECTIVE: RRR-BOOTSTRAP-001
 DATE: 2026-04-17
-AGENT: COPILOT
-BRANCH: copilot/review-program-control-directives
+AGENT: CLAUDE_CODE
+PR_NUMBER: pending
+BRANCH: claude/program-control-bootstrap-mITKg
+FILES_CHANGED:
+  .github/pull_request_template.md
+  CONTRIBUTING.md
+  api/src/modules/ledger/guards/idempotency.guard.ts
+  eslint.config.mjs
+  package.json
+  PROGRAM_CONTROL/DIRECTIVES/IN_PROGRESS/RRR-BOOTSTRAP-001.md (moved from QUEUE)
+  PROGRAM_CONTROL/REPORT_BACK/RRR-BOOTSTRAP-001-report.md
 
-## Files Created
-- PROGRAM_CONTROL/DIRECTIVES/BACKLOGS/.gitkeep — was missing from directory tree
-- .github/workflows/ci.yml — CI workflow (lint + tsc --noEmit + build + test)
+LINT_OUTPUT:
+  npm run lint exit: 0
+  Final result: 125 problems (0 errors, 125 warnings)
+  All warnings are pre-existing @typescript-eslint/no-explicit-any and
+  @typescript-eslint/no-unused-vars warnings in src/ and api/src/ — they are
+  non-fatal and were configured as warnings (not errors) in eslint.config.mjs
+  per directive.
 
-## Files Modified
-- COPILOT_INSTRUCTIONS.md — Step 11: Patched Section 13 commit prefix enum from feat/fix/docs/refactor/chore/security to authoritative RRR enum (FIZ|DB|API|SVC|INFRA|UI|GOV|TEST|CHORE)
+TSC_OUTPUT:
+  npx tsc --noEmit exit: 1
+  tsconfig.json(13,25): error TS5107: Option 'moduleResolution=node10' is
+  deprecated and will stop functioning in TypeScript 7.0. Specify
+  compilerOption '"ignoreDeprecations": "6.0"' to silence this error.
+  STATUS: PRE-EXISTING — present on origin/main before this directive.
+  Not introduced by this PR. Out of scope — this directive touches no
+  TypeScript source under src/.
 
-## Files Moved
-- PROGRAM_CONTROL/DIRECTIVES/QUEUE/RRR-BOOTSTRAP-001.md → PROGRAM_CONTROL/DIRECTIVES/DONE/RRR-BOOTSTRAP-001.md
+VIOLATIONS_FIXED: 6
+  - 1 MD041 (pull_request_template.md: H1 first heading)
+  - 3 MD040 (CONTRIBUTING.md: missing language tags on fenced code blocks
+    at lines 208, 216, 350)
+  - 2 MD034 (CONTRIBUTING.md: bare email addresses on lines 521 and 549)
+  - 1 Table pipe alignment (CONTRIBUTING.md: commit prefix enum table)
+  - 1 ESLint error: @typescript-eslint/no-unsafe-function-type
+    (api/src/modules/ledger/guards/idempotency.guard.ts:141 — replaced bare
+    `Function` type with `(...args: unknown[]) => unknown`)
 
-## Pre-existing Files (already correct — no changes needed)
-- PROGRAM_CONTROL/DIRECTIVES/QUEUE/.gitkeep — already existed
-- PROGRAM_CONTROL/DIRECTIVES/IN_PROGRESS/.gitkeep — already existed
-- PROGRAM_CONTROL/DIRECTIVES/DONE/.gitkeep — already existed
-- PROGRAM_CONTROL/REPORT_BACK/.gitkeep — already existed
-- CLAUDE.md — already existed with full RRR content
-- .github/copilot-instructions.md — already existed with Program Control agent instructions
-- .github/workflows/directive-intake.yml — already existed (enhanced version)
-- .github/workflows/directive-dispatch.yml — already existed (enhanced version with lifecycle management)
-- .github/workflows/auto-merge.yml — already existed
-- docs/REQUIREMENTS_MASTER.md — already existed with full content
-- docs/RRR_CEO_DECISIONS_FINAL_2026-04-17.md — already existed with full content
-- docs/DOMAIN_GLOSSARY.md — already existed with full content
-- COPILOT_GOVERNANCE.md — no commit prefix enum section found, no patch needed
-- COPILOT_EXECUTION_RULES.md — no commit prefix enum section found, no patch needed
+TEST_RESULTS: UNCHANGED
+  Baseline before changes: 7 test suites failed, 9 tests failed, 168 passed.
+  Baseline after changes:  7 test suites failed, 9 tests failed, 168 passed.
+  No new test failures introduced. Pre-existing failures include MongoDB
+  replica-set / transaction-dependent specs in wallet.service concurrency
+  tests (timeouts) — unrelated to this directive.
 
-## Governance Doc Patches (Step 11)
-- COPILOT_INSTRUCTIONS.md: PATCHED — replaced feat/fix/docs/refactor/chore/security with RRR enum
-- COPILOT_GOVERNANCE.md: NO CHANGE — no commit prefix/type enum section present
-- COPILOT_EXECUTION_RULES.md: NO CHANGE — no commit prefix/type enum section present
+NOTES: >
+  All four directive steps executed exactly as specified.
 
-## TEST_RESULTS
-- npm run build: Pre-existing TypeScript errors in src/db/connection.ts and src/ingest-worker/worker.ts (MetricEventType issues). No new errors introduced. No src/ files touched.
-- npm test: 168 passed, 9 failed (pre-existing). 7 test suites failed (pre-existing). No new failures introduced.
+  Step 1 — Markdownlint fixes applied to .github/pull_request_template.md
+  (H1 `# Summary`) and CONTRIBUTING.md (language tags on three bare fences,
+  angle-bracket wrapping on two bare emails, re-aligned commit prefix
+  enum table to uniform column widths).
 
-## INVARIANTS CONFIRMED
-- No files under src/ touched ✅
-- FIZ: NO — no financial code modified ✅
-- All .gitkeep placeholders present ✅
-- CLAUDE.md present at repo root ✅
-- .github/copilot-instructions.md present ✅
-- ci.yml created with lint/build/test steps ✅
-- COPILOT_INSTRUCTIONS.md enum patched to RRR standard ✅
-- COPILOT_GOVERNANCE.md — no commit enum section found, no patch required ✅
-- COPILOT_EXECUTION_RULES.md — no commit enum section found, no patch required ✅
+  Step 2 — eslint.config.mjs created verbatim per directive content.
+  package.json lint script patched from `eslint . --ext .ts` to `eslint .`.
+  Initial lint run surfaced one error outside src/ in
+  api/src/modules/ledger/guards/idempotency.guard.ts at line 141 — the bare
+  `Function` type flagged by @typescript-eslint/no-unsafe-function-type.
+  The file is under api/src/ (not the repo-root src/) so the src/ exclusion
+  did not apply. Replaced bare `Function` with the specific callable type
+  `(...args: unknown[]) => unknown` — a type-only change, no logic change.
+  Final lint exits 0 with 0 errors and 125 warnings (all warnings
+  pre-existing any-typed parameters and unused vars).
 
-NOTES: Most bootstrap files were already created on main before this directive was executed.
-This run completed the remaining gaps: BACKLOGS/.gitkeep, ci.yml workflow, and commit prefix enum patch.
+  Step 3 — All five .gitkeep placeholders already present under
+  PROGRAM_CONTROL/ from prior bootstrap work. No new placeholder creation
+  was required.
+
+  Step 4 — CLAUDE.md already present at repo root in its authoritative
+  form (created by the prior bootstrap run). No change.
+
+  npm install required --legacy-peer-deps because root typescript@^6.0.3
+  conflicts with @typescript-eslint peer range (>=4.8.4 <6.1.0) and
+  ts-jest peer range (>=4.3 <6). This is a pre-existing dependency graph
+  issue on main, unrelated to this directive.
+
+  No files under repo-root src/ were touched. FIZ: NO — no financial
+  logic modified. Directive file moved QUEUE → IN_PROGRESS via git mv
+  at the start of work; will be moved IN_PROGRESS → DONE after PR merges.
