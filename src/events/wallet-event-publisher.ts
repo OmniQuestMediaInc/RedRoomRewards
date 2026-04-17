@@ -34,7 +34,7 @@ export class WalletEventPublisher {
     userAvailableBalance: number;
     userEscrowBalance: number;
     idempotencyKey: string;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
     correlationId?: string;
   }): Promise<void> {
     const event: EscrowHeldEvent = {
@@ -83,7 +83,7 @@ export class WalletEventPublisher {
     transactionId: string;
     modelEarnedBalance: number;
     idempotencyKey: string;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
     correlationId?: string;
   }): Promise<void> {
     const event: EscrowSettledEvent = {
@@ -132,7 +132,7 @@ export class WalletEventPublisher {
     userAvailableBalance: number;
     userEscrowBalance: number;
     idempotencyKey: string;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
     correlationId?: string;
   }): Promise<void> {
     const event: EscrowRefundedEvent = {
@@ -183,7 +183,7 @@ export class WalletEventPublisher {
     userEscrowBalance: number;
     modelEarnedBalance: number;
     idempotencyKey: string;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
     correlationId?: string;
   }): Promise<void> {
     const event: EscrowPartialSettledEvent = {
@@ -236,7 +236,7 @@ export class WalletEventPublisher {
     transactionId: string;
     ledgerEntryId: string;
     idempotencyKey: string;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
     correlationId?: string;
   }): Promise<void> {
     const event: BalanceUpdatedEvent = {

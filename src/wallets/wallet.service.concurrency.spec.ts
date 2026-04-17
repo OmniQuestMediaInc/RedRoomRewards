@@ -66,6 +66,7 @@ describe('Wallet Service - Concurrency and Race Conditions', () => {
       
       // Total escrow should equal sum of successful operations
       const successfulAmounts = results
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .filter((r): r is PromiseFulfilledResult<any> => r.status === 'fulfilled')
         .map(r => r.value.escrowBalance);
       

@@ -59,7 +59,7 @@ export interface ManualAdjustmentRequest {
   requestId: string;
   
   /** Additional metadata */
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**

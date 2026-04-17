@@ -33,7 +33,7 @@ export interface AwardPointsRequest {
   requestId: string;
   
   /** Additional metadata (no PII) */
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   
   /** Optional expiration date for points */
   expiresAt?: Date;

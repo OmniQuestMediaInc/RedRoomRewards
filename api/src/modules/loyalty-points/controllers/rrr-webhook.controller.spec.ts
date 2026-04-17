@@ -15,7 +15,7 @@ import * as crypto from 'crypto';
  */
 describe('RRRWebhookController', () => {
   let controller: RRRWebhookController;
-  let mockWebhookEventModel: any;
+  let mockWebhookEventModel: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 
   // Mock webhook secret for testing (must be 32+ characters for validation)
   const WEBHOOK_SECRET = 'test-secret-key-with-minimum-32-characters-for-security';
@@ -56,6 +56,7 @@ describe('RRRWebhookController', () => {
   /**
    * Helper: Generate valid HMAC signature
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   function generateSignature(payload: any): string {
     const bodyString = JSON.stringify(payload);
     return crypto

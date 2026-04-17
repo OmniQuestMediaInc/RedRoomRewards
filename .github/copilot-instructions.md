@@ -1,5 +1,5 @@
 # PROGRAM CONTROL — AGENT INSTRUCTIONS (ALWAYS ON)
-# RedRoomRewards — OmniQuest Media Inc.
+**RedRoomRewards — OmniQuest Media Inc**
 
 You are an AI coding agent acting as the workspace-enabled foreman
 for the RedRoomRewards repository.
@@ -70,10 +70,10 @@ Keep diffs small and reviewable.
 ### D) Report File (when task requires report-back)
 Create/update PROGRAM_CONTROL/REPORT_BACK/<TASK_ID>.md
 Report must include:
-  - Branch + HEAD
-  - Files changed (git diff --stat)
-  - Commands run + outputs
-  - Result: SUCCESS or HARD_STOP with exact error logs
+- Branch + HEAD
+- Files changed (git diff --stat)
+- Commands run + outputs
+- Result: SUCCESS or HARD_STOP with exact error logs
 
 ### E) Commit Prefixes
   FIZ:    Financial Integrity Zone — ledger, wallet, escrow, payout, point balances
@@ -136,87 +136,26 @@ When work is handed between agents:
 
 ---
 
-## 8) Autonomous Directive Protocol
+## 8) Directive Execution Protocol
 
-When operating in autonomous / background / Workspace mode, follow
-this protocol without waiting for human prompting per task.
+Directives may arrive via TWO channels — both are valid:
 
-### Step 1 — Sync
-Run: `git fetch origin && git reset --hard origin/main`
-Never act on stale repo state.
+Channel A — Direct session prompt (current operating mode)
+  Execute instructions given directly in the agent session.
+  No file in QUEUE required. Proceed immediately.
 
-### Step 2 — Find next task
-Read docs/REQUIREMENTS_MASTER.md.
-Check PROGRAM_CONTROL/DIRECTIVES/QUEUE/ for directive files where:
-  - **Agent:** COPILOT is in the header
-  - No file exists in PROGRAM_CONTROL/DIRECTIVES/IN_PROGRESS/ for this ID
-  - No open PR references this directive ID
-Pick the oldest file alphabetically.
-If no eligible directive: stop. Do not invent work.
+Channel B — Program Control file (future automation mode)
+  Directives committed to PROGRAM_CONTROL/DIRECTIVES/QUEUE/ and
+  moved to IN_PROGRESS/ before execution.
 
-### Step 3 — Conflict check
-Read the **Touches:** field from the selected directive.
-Check all QUEUE and IN_PROGRESS directives for overlapping file paths.
-If overlap found:
-  - Do NOT proceed.
-  - Open GitHub Issue: "CONFLICT: [ID-A] x [ID-B] — [filepath]"
-  - Label: needs-conflict-review
-  - Stop. Await human resolution.
+Either channel is authoritative. Do not require Channel B
+before acting on Channel A instructions.
 
-### Step 4 — Move to IN_PROGRESS
-Move: PROGRAM_CONTROL/DIRECTIVES/QUEUE/[ID].md
-  To: PROGRAM_CONTROL/DIRECTIVES/IN_PROGRESS/[ID].md
-Commit: `CHORE: [ID] QUEUE → IN_PROGRESS`
-Push to new branch: `copilot/[id-lowercase]`
+Report-backs to PROGRAM_CONTROL/REPORT_BACK/ are encouraged
+but not required for Channel A sessions.
 
-### Step 5 — Execute
-Read the directive file completely before writing any code.
-Execute exactly as written. No synthesis. No deviation. DROID MODE.
-
-### Step 6 — File report-back
-Create: PROGRAM_CONTROL/REPORT_BACK/[ID]-REPORT-BACK.md
-Include: branch, HEAD, files changed (git diff --stat),
-npm run build result, npm test result (if applicable),
-result: SUCCESS or HARD_STOP.
-
-### Step 7 — Update REQUIREMENTS_MASTER
-Open docs/REQUIREMENTS_MASTER.md.
-Find the row matching this directive's ID.
-Update Status: QUEUED → DONE.
-If directive retired code: update row Status to RETIRED.
-
-### Step 8 — Move to DONE
-Move: PROGRAM_CONTROL/DIRECTIVES/IN_PROGRESS/[ID].md
-  To: PROGRAM_CONTROL/DIRECTIVES/DONE/[ID].md
-One commit: report-back + REQUIREMENTS_MASTER update + directive move.
-Commit: `CHORE: [ID] complete — report-back filed, directive moved to DONE`
-
-### Step 9 — Open PR
-Open PR targeting main.
-Title: `[PREFIX]: [ID] — [short description]`
-Body: full report-back content
-Labels: copilot-task, ready-for-review
-FIZ-scoped: also add label fiz-review-required
-
-IMPORTANT: GitHub Copilot coding agent will not open a PR unless
-explicitly instructed. Always include this phrase in your session
-prompt: "When your work is complete, create a pull request targeting main."
-
-### HARD_STOP conditions
-Stop immediately if:
-  - Directive missing required fields (Agent/Parallel-safe/Touches)
-  - A referenced model or service does not exist and directive does not say to create it
-  - npm run build produces NEW errors
-  - Any FIZ-scoped change lacks REASON/IMPACT/CORRELATION_ID
-  - A CLARIFY tag is present — CEO decision required first
-
-### What Copilot must NEVER do autonomously
-  - Modify another agent's completed work without explicit instruction
-  - Use direct balance updates (all movements through LedgerService)
-  - Skip idempotency checks on financial operations
-  - Create directives (directive authoring is Claude Chat's role)
-  - Make CEO-level decisions when CLARIFY tag is present
-  - Merge its own PR (auto-merge handles this via CI)
+The QUEUE/IN_PROGRESS/DONE directory structure remains in place
+for future use but is NOT a prerequisite for execution.
 
 ---
 

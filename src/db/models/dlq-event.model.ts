@@ -17,7 +17,7 @@ export interface IDLQEvent extends Document {
   lastErrorCode?: string;
   lastErrorMessage?: string;
   lastErrorAt?: Date;
-  payloadSnapshot?: Record<string, any>;
+  payloadSnapshot?: Record<string, unknown>;
   replayable: boolean;
 }
 

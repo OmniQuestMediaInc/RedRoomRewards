@@ -68,7 +68,7 @@ export interface MetricData {
   timestamp: Date;
   
   /** Additional context */
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -98,5 +98,5 @@ export interface AlertData {
   timestamp: Date;
   
   /** Additional context */
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
