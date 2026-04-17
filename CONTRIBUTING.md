@@ -190,22 +190,22 @@ git commit -m "API: implement GET /wallets/{userId} endpoint"
 
 **RRR Prefix Enum** (these are the ONLY valid prefixes):
 
-| Prefix | Scope |
-|--------|-------|
+| Prefix | Scope                                                      |
+|--------|------------------------------------------------------------|
 | FIZ    | Financial Integrity Zone — ledger, wallet, balance, escrow |
-| DB     | Database models, Mongoose schemas, indexes |
-| API    | Controllers, routes, OpenAPI contract |
-| SVC    | Service layer (non-financial) |
-| INFRA  | Workflows, CI, config, infrastructure |
-| UI     | Frontend, dashboard (future) |
-| GOV    | Governance, policy, agent instruction documents |
-| TEST   | Test files only |
-| CHORE  | Maintenance, cleanup, non-code tasks |
+| DB     | Database models, Mongoose schemas, indexes                 |
+| API    | Controllers, routes, OpenAPI contract                      |
+| SVC    | Service layer (non-financial)                              |
+| INFRA  | Workflows, CI, config, infrastructure                      |
+| UI     | Frontend, dashboard (future)                               |
+| GOV    | Governance, policy, agent instruction documents            |
+| TEST   | Test files only                                            |
+| CHORE  | Maintenance, cleanup, non-code tasks                       |
 
 > **Do NOT use** `feat`, `fix`, `docs`, `refactor`, or other Conventional Commits prefixes — they are not valid in RRR.
 
 **FIZ-scoped commits** require additional fields in the commit body:
-```
+```text
 FIZ: prevent race condition in ledger balance updates
 REASON: concurrent earn requests could double-credit
 IMPACT: ledger transaction creation, wallet balance updates
@@ -213,7 +213,7 @@ CORRELATION_ID: rrr-fiz-20260417-001
 ```
 
 **Good Examples**:
-```
+```text
 API: add POST /earn endpoint with idempotency
 FIZ: prevent race condition in transaction creation
 CHORE: update OpenAPI spec with webhook endpoints
@@ -347,7 +347,7 @@ const transaction = await createTransaction(data); // Duplicate risk
 
 ### File Organization
 
-```
+```text
 src/
 ├── ledger/
 │   ├── ledger.service.ts      # Business logic
@@ -518,7 +518,7 @@ None / [Description of breaking changes and migration path]
 **Do NOT** open public issues for security vulnerabilities.
 
 **Instead**:
-- Email: security@omniquestmedia.com (or appropriate contact)
+- Email: <security@omniquestmedia.com> (or appropriate contact)
 - Include: Detailed description, steps to reproduce, impact assessment
 - See: [SECURITY.md](SECURITY.md) for full process
 
@@ -546,7 +546,7 @@ None / [Description of breaking changes and migration path]
 
 - **General Questions**: [GitHub Discussions](https://github.com/OmniQuestMedia/RedRoomRewards/discussions)
 - **Bug Reports**: [GitHub Issues](https://github.com/OmniQuestMedia/RedRoomRewards/issues)
-- **Security Issues**: security@omniquestmedia.com
+- **Security Issues**: <security@omniquestmedia.com>
 
 ### Documentation
 

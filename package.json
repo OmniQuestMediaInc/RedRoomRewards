@@ -10,7 +10,7 @@
     "test:coverage": "jest --coverage",
     "test:verbose": "jest --verbose",
     "test:ci": "jest --ci --coverage --maxWorkers=2",
-    "lint": "eslint . --ext .ts",
+    "lint": "eslint .",
     "format": "prettier --write \"src/**/*.ts\"",
     "dev": "ts-node src/index.ts",
     "validate:schema": "node validate-schema.js"

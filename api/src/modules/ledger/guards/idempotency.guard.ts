@@ -138,7 +138,7 @@ export class IdempotencyGuard implements CanActivate {
  */
 export function getIdempotencyMetadata(
   reflector: Reflector,
-  handler: Function
+  handler: (...args: unknown[]) => unknown
 ): IdempotencyMetadata | undefined {
   return reflector.get<IdempotencyMetadata>(IDEMPOTENCY_KEY, handler);
 }
