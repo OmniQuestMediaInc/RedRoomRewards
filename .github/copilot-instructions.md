@@ -136,7 +136,30 @@ When work is handed between agents:
 
 ---
 
-## 8) Autonomous Directive Protocol
+## 8) Directive Execution Protocol
+
+Directives may arrive via TWO channels — both are valid:
+
+Channel A — Direct session prompt (current operating mode)
+  Execute instructions given directly in the agent session.
+  No file in QUEUE required. Proceed immediately.
+
+Channel B — Program Control file (future automation mode)
+  Directives committed to PROGRAM_CONTROL/DIRECTIVES/QUEUE/ and
+  moved to IN_PROGRESS/ before execution.
+
+Either channel is authoritative. Do not require Channel B
+before acting on Channel A instructions.
+
+Report-backs to PROGRAM_CONTROL/REPORT_BACK/ are encouraged
+but not required for Channel A sessions.
+
+The QUEUE/IN_PROGRESS/DONE directory structure remains in place
+for future use but is NOT a prerequisite for execution.
+
+---
+
+## 9) Autonomous Directive Protocol
 
 When operating in autonomous / background / Workspace mode, follow
 this protocol without waiting for human prompting per task.
