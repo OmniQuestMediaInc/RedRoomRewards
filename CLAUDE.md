@@ -1,3 +1,5 @@
+# CLAUDE.md
+
 ---
 
 ## Financial Integrity Rules (non-negotiable)
@@ -38,22 +40,22 @@ Do not guess past a Hard Stop. Report the blocker clearly.
 
 ## Key File Paths
 
-| Purpose              | Path |
-|----------------------|------|
-| Ledger service       | src/ledger/ledger.service.ts |
-| Wallet service       | src/wallets/wallet.service.ts |
-| Wallet controller    | src/api/wallet.controller.ts |
-| DB models            | src/db/models/ |
-| Service layer        | src/services/ |
-| API controllers      | src/api/ |
-| Requirements master  | docs/REQUIREMENTS_MASTER.md |
-| Domain glossary      | docs/DOMAIN_GLOSSARY.md |
-| CEO decisions        | docs/RRR_CEO_DECISIONS_FINAL_2026-04-17.md |
-| RRR spec             | docs/RRR_LOYALTY_ENGINE_SPEC_v1.1.md |
-| Queue (optional)     | PROGRAM_CONTROL/DIRECTIVES/QUEUE/ |
-| In progress          | PROGRAM_CONTROL/DIRECTIVES/IN_PROGRESS/ |
-| Done                 | PROGRAM_CONTROL/DIRECTIVES/DONE/ |
-| Report-backs         | PROGRAM_CONTROL/REPORT_BACK/ |
+| Purpose             | Path                                         |
+|---------------------|----------------------------------------------|
+| Ledger service      | src/ledger/ledger.service.ts                 |
+| Wallet service      | src/wallets/wallet.service.ts                |
+| Wallet controller   | src/api/wallet.controller.ts                 |
+| DB models           | src/db/models/                               |
+| Service layer       | src/services/                                |
+| API controllers     | src/api/                                     |
+| Requirements master | docs/REQUIREMENTS_MASTER.md                  |
+| Domain glossary     | docs/DOMAIN_GLOSSARY.md                      |
+| CEO decisions       | docs/RRR_CEO_DECISIONS_FINAL_2026-04-17.md   |
+| RRR spec            | docs/RRR_LOYALTY_ENGINE_SPEC_v1.1.md         |
+| Queue (optional)    | PROGRAM_CONTROL/DIRECTIVES/QUEUE/            |
+| In progress         | PROGRAM_CONTROL/DIRECTIVES/IN_PROGRESS/      |
+| Done                | PROGRAM_CONTROL/DIRECTIVES/DONE/             |
+| Report-backs        | PROGRAM_CONTROL/REPORT_BACK/                 |
 
 ---
 
