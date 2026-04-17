@@ -2,12 +2,14 @@
  * Wallet Controller Tests
  */
 
-import { WalletController, DeductPointsRequest, CreditPointsRequest } from './wallet.controller';
+import { WalletController, DeductPointsRequest, CreditPointsRequest, BadRequestError } from './wallet.controller';
 import { IWalletService } from '../services/types';
+import { IIdempotencyService } from '../services/idempotency.service';
 
 describe('WalletController', () => {
   let controller: WalletController;
   let mockWalletService: jest.Mocked<IWalletService>;
+  let mockIdempotencyService: jest.Mocked<IIdempotencyService>;
 
   beforeEach(() => {
     // Create mock wallet service
@@ -20,7 +22,13 @@ describe('WalletController', () => {
       partialSettleEscrow: jest.fn(),
     } as unknown as jest.Mocked<IWalletService>;
 
-    controller = new WalletController(mockWalletService);
+    // Create mock idempotency service (cache miss by default)
+    mockIdempotencyService = {
+      checkKey: jest.fn().mockResolvedValue(null),
+      recordKey: jest.fn().mockResolvedValue(undefined),
+    } as jest.Mocked<IIdempotencyService>;
+
+    controller = new WalletController(mockWalletService, mockIdempotencyService);
   });
 
   describe('getWallet', () => {
@@ -132,6 +140,100 @@ describe('WalletController', () => {
 
       expect(response.transaction.reason).toBe('chip_menu_purchase');
     });
+
+    it('should reject request when idempotencyKey is missing', async () => {
+      const request = {
+        amount: 100,
+        reason: 'admin_debit',
+        idempotencyKey: '',
+        requestId: 'req-missing',
+      } as DeductPointsRequest;
+
+      await expect(
+        controller.deductPoints('user-123', request)
+      ).rejects.toThrow(BadRequestError);
+    });
+
+    it('should reject request when idempotencyKey is whitespace only', async () => {
+      const request = {
+        amount: 100,
+        reason: 'admin_debit',
+        idempotencyKey: '   ',
+        requestId: 'req-whitespace',
+      } as DeductPointsRequest;
+
+      await expect(
+        controller.deductPoints('user-123', request)
+      ).rejects.toThrow(BadRequestError);
+    });
+
+    it('should return cached result on idempotency key hit', async () => {
+      const cachedResponse = {
+        transaction: {
+          id: 'txn_cached',
+          userId: 'user-123',
+          amount: -100,
+          type: 'debit',
+          reason: 'admin_debit',
+          timestamp: '2026-01-01T00:00:00.000Z',
+          idempotencyKey: 'idem-dup',
+          previousBalance: 900,
+          newBalance: 800,
+          requestId: 'req-original',
+        },
+        wallet: {
+          userId: 'user-123',
+          availableBalance: 800,
+          escrowBalance: 0,
+          totalBalance: 800,
+          currency: 'points',
+          version: 0,
+          createdAt: '2026-01-01T00:00:00.000Z',
+          lastUpdated: '2026-01-01T00:00:00.000Z',
+        },
+      };
+      mockIdempotencyService.checkKey.mockResolvedValue(
+        cachedResponse as unknown as Record<string, unknown>
+      );
+
+      const request: DeductPointsRequest = {
+        amount: 100,
+        reason: 'admin_debit',
+        idempotencyKey: 'idem-dup',
+        requestId: 'req-duplicate',
+      };
+
+      const response = await controller.deductPoints('user-123', request);
+
+      // Should return cached result — wallet service must NOT be called
+      expect(mockWalletService.getUserBalance).not.toHaveBeenCalled();
+      expect(response.transaction.id).toBe('txn_cached');
+      expect(mockIdempotencyService.recordKey).not.toHaveBeenCalled();
+    });
+
+    it('should record key after successful deduct', async () => {
+      mockWalletService.getUserBalance.mockResolvedValue({
+        available: 900,
+        escrow: 0,
+        total: 900,
+      });
+
+      const request: DeductPointsRequest = {
+        amount: 100,
+        reason: 'admin_debit',
+        idempotencyKey: 'idem-record',
+        requestId: 'req-record',
+      };
+
+      await controller.deductPoints('user-123', request);
+
+      expect(mockIdempotencyService.recordKey).toHaveBeenCalledWith(
+        'idem-record',
+        'user-123',
+        'wallet_deduct',
+        expect.any(Object)
+      );
+    });
   });
 
   describe('creditPoints', () => {
@@ -205,5 +307,100 @@ describe('WalletController', () => {
       expect(response.transaction.reason).toBe('referral_bonus');
       expect(response.transaction.amount).toBe(250);
     });
+
+    it('should reject request when idempotencyKey is missing', async () => {
+      const request = {
+        amount: 100,
+        reason: 'admin_credit',
+        idempotencyKey: '',
+        requestId: 'req-missing',
+      } as CreditPointsRequest;
+
+      await expect(
+        controller.creditPoints('user-456', request)
+      ).rejects.toThrow(BadRequestError);
+    });
+
+    it('should reject request when idempotencyKey is whitespace only', async () => {
+      const request = {
+        amount: 100,
+        reason: 'admin_credit',
+        idempotencyKey: '   ',
+        requestId: 'req-whitespace',
+      } as CreditPointsRequest;
+
+      await expect(
+        controller.creditPoints('user-456', request)
+      ).rejects.toThrow(BadRequestError);
+    });
+
+    it('should return cached result on idempotency key hit', async () => {
+      const cachedResponse = {
+        transaction: {
+          id: 'txn_cached_credit',
+          userId: 'user-123',
+          amount: 100,
+          type: 'credit',
+          reason: 'user_signup_bonus',
+          timestamp: '2026-01-01T00:00:00.000Z',
+          idempotencyKey: 'idem-credit-dup',
+          previousBalance: 1000,
+          newBalance: 1100,
+          requestId: 'req-original',
+        },
+        wallet: {
+          userId: 'user-123',
+          availableBalance: 1100,
+          escrowBalance: 0,
+          totalBalance: 1100,
+          currency: 'points',
+          version: 0,
+          createdAt: '2026-01-01T00:00:00.000Z',
+          lastUpdated: '2026-01-01T00:00:00.000Z',
+        },
+      };
+      mockIdempotencyService.checkKey.mockResolvedValue(
+        cachedResponse as unknown as Record<string, unknown>
+      );
+
+      const request: CreditPointsRequest = {
+        amount: 100,
+        reason: 'user_signup_bonus',
+        idempotencyKey: 'idem-credit-dup',
+        requestId: 'req-duplicate',
+      };
+
+      const response = await controller.creditPoints('user-123', request);
+
+      // Should return cached result — wallet service must NOT be called
+      expect(mockWalletService.getUserBalance).not.toHaveBeenCalled();
+      expect(response.transaction.id).toBe('txn_cached_credit');
+      expect(mockIdempotencyService.recordKey).not.toHaveBeenCalled();
+    });
+
+    it('should record key after successful credit', async () => {
+      mockWalletService.getUserBalance.mockResolvedValue({
+        available: 1000,
+        escrow: 0,
+        total: 1000,
+      });
+
+      const request: CreditPointsRequest = {
+        amount: 100,
+        reason: 'user_signup_bonus',
+        idempotencyKey: 'idem-credit-record',
+        requestId: 'req-credit-record',
+      };
+
+      await controller.creditPoints('user-123', request);
+
+      expect(mockIdempotencyService.recordKey).toHaveBeenCalledWith(
+        'idem-credit-record',
+        'user-123',
+        'wallet_credit',
+        expect.any(Object)
+      );
+    });
   });
 });
+

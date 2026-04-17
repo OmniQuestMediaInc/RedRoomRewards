@@ -15,6 +15,19 @@
  */
 
 import { IWalletService } from '../services/types';
+import { IIdempotencyService } from '../services/idempotency.service';
+
+/**
+ * Error thrown when a required field is missing or invalid in the request.
+ * Maps to HTTP 400 Bad Request.
+ */
+export class BadRequestError extends Error {
+  public statusCode = 400;
+  constructor(message: string) {
+    super(message);
+    this.name = 'BadRequestError';
+  }
+}
 
 /**
  * Response interface for GET /wallets/:userId
@@ -77,9 +90,11 @@ export interface TransactionResponse {
  */
 export class WalletController {
   private walletService: IWalletService;
+  private idempotencyService: IIdempotencyService;
 
-  constructor(walletService: IWalletService) {
+  constructor(walletService: IWalletService, idempotencyService: IIdempotencyService) {
     this.walletService = walletService;
+    this.idempotencyService = idempotencyService;
   }
 
   /**
@@ -123,18 +138,25 @@ export class WalletController {
    * @returns Promise<TransactionResponse>
    */
   async deductPoints(userId: string, request: DeductPointsRequest): Promise<TransactionResponse> {
+    // Validate idempotency key is present before any mutation
+    if (!request.idempotencyKey?.trim()) {
+      throw new BadRequestError('idempotencyKey is required');
+    }
+
     // Validate amount
     if (request.amount <= 0) {
       throw new Error('Amount must be positive');
     }
-    
-    // TODO: Check idempotency
-    // const ledgerService = ... // Need to inject ILedgerService
-    // const exists = await ledgerService.checkIdempotency(request.idempotencyKey, 'wallet_deduct');
-    // if (exists) {
-    //   // Return cached result
-    //   return cachedResult;
-    // }
+
+    // Check idempotency BEFORE any wallet or ledger mutation
+    const cached = await this.idempotencyService.checkKey(
+      request.idempotencyKey,
+      userId,
+      'wallet_deduct'
+    );
+    if (cached !== null) {
+      return cached as unknown as TransactionResponse;
+    }
 
     // Get current balance from wallet service
     const balance = await this.walletService.getUserBalance(userId);
@@ -156,10 +178,20 @@ export class WalletController {
 
     const wallet = await this.getWallet(userId);
 
-    return {
+    const result: TransactionResponse = {
       transaction,
       wallet,
     };
+
+    // Record result so duplicate requests return the cached response
+    await this.idempotencyService.recordKey(
+      request.idempotencyKey,
+      userId,
+      'wallet_deduct',
+      result as unknown as Record<string, unknown>
+    );
+
+    return result;
   }
 
   /**
@@ -178,18 +210,25 @@ export class WalletController {
    * @returns Promise<TransactionResponse>
    */
   async creditPoints(userId: string, request: CreditPointsRequest): Promise<TransactionResponse> {
+    // Validate idempotency key is present before any mutation
+    if (!request.idempotencyKey?.trim()) {
+      throw new BadRequestError('idempotencyKey is required');
+    }
+
     // Validate amount
     if (request.amount <= 0) {
       throw new Error('Amount must be positive');
     }
-    
-    // TODO: Check idempotency
-    // const ledgerService = ... // Need to inject ILedgerService
-    // const exists = await ledgerService.checkIdempotency(request.idempotencyKey, 'wallet_credit');
-    // if (exists) {
-    //   // Return cached result
-    //   return cachedResult;
-    // }
+
+    // Check idempotency BEFORE any wallet or ledger mutation
+    const cached = await this.idempotencyService.checkKey(
+      request.idempotencyKey,
+      userId,
+      'wallet_credit'
+    );
+    if (cached !== null) {
+      return cached as unknown as TransactionResponse;
+    }
 
     // Get current balance from wallet service
     const balance = await this.walletService.getUserBalance(userId);
@@ -211,10 +250,20 @@ export class WalletController {
 
     const wallet = await this.getWallet(userId);
 
-    return {
+    const result: TransactionResponse = {
       transaction,
       wallet,
     };
+
+    // Record result so duplicate requests return the cached response
+    await this.idempotencyService.recordKey(
+      request.idempotencyKey,
+      userId,
+      'wallet_credit',
+      result as unknown as Record<string, unknown>
+    );
+
+    return result;
   }
 
   /**
@@ -229,6 +278,9 @@ export class WalletController {
 /**
  * Factory function to create controller instance
  */
-export function createWalletController(walletService: IWalletService): WalletController {
-  return new WalletController(walletService);
+export function createWalletController(
+  walletService: IWalletService,
+  idempotencyService: IIdempotencyService
+): WalletController {
+  return new WalletController(walletService, idempotencyService);
 }
