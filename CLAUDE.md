@@ -69,13 +69,11 @@ If a required term is missing: flag it in the report-back.
 
 ## Current Build State (as of 2026-04-17)
 
-### P0 Bug — Fix Before Anything Else
+### P0 Bug — FIXED (RRR-P0-001)
 
-src/api/wallet.controller.ts lines 131 and 186:
-  const previousBalance = 1000; // Placeholder
-
-This returns hardcoded fake balances in production.
-This is a financial correctness bug. Directive RRR-P0-001 addresses it.
+src/api/wallet.controller.ts previously had hardcoded `previousBalance = 1000`
+at two sites. Fixed in PR #212 — both `deductPoints` and `creditPoints` now
+call `walletService.getUserBalance(userId)` and return real balances.
 
 ### Built
 - src/ledger/ledger.service.ts — LedgerService (append-only)
