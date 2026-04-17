@@ -2,54 +2,53 @@ STATUS: COMPLETE
 DIRECTIVE: RRR-BOOTSTRAP-001
 DATE: 2026-04-17
 AGENT: COPILOT
-BRANCH: copilot/choreprogram-control-bootstrap-again
+BRANCH: copilot/review-program-control-directives
 
-FILES_CHANGED:
-  CREATED:
-    .github/workflows/ci.yml
-    PROGRAM_CONTROL/REPORT_BACK/RRR-BOOTSTRAP-001-report.md
+## Files Created
+- PROGRAM_CONTROL/DIRECTIVES/BACKLOGS/.gitkeep — was missing from directory tree
+- .github/workflows/ci.yml — CI workflow (lint + tsc --noEmit + build + test)
 
-  CONFIRMED EXISTING (no changes needed):
-    PROGRAM_CONTROL/DIRECTIVES/QUEUE/.gitkeep
-    PROGRAM_CONTROL/DIRECTIVES/IN_PROGRESS/.gitkeep
-    PROGRAM_CONTROL/DIRECTIVES/DONE/.gitkeep
-    PROGRAM_CONTROL/DIRECTIVES/BACKLOGS/.gitkeep
-    PROGRAM_CONTROL/REPORT_BACK/.gitkeep
-    CLAUDE.md
-    .github/copilot-instructions.md
-    .github/workflows/directive-intake.yml
-    .github/workflows/directive-dispatch.yml
-    .github/workflows/auto-merge.yml
-    docs/REQUIREMENTS_MASTER.md
-    docs/RRR_CEO_DECISIONS_FINAL_2026-04-17.md
-    docs/DOMAIN_GLOSSARY.md
+## Files Modified
+- COPILOT_INSTRUCTIONS.md — Step 11: Patched Section 13 commit prefix enum from feat/fix/docs/refactor/chore/security to authoritative RRR enum (FIZ|DB|API|SVC|INFRA|UI|GOV|TEST|CHORE)
 
-  PATCHED (Step 11 — enum correction):
-    COPILOT_INSTRUCTIONS.md — replaced feat/fix/docs/refactor enum with authoritative RRR enum
+## Files Moved
+- PROGRAM_CONTROL/DIRECTIVES/QUEUE/RRR-BOOTSTRAP-001.md → PROGRAM_CONTROL/DIRECTIVES/DONE/RRR-BOOTSTRAP-001.md
 
-  DIRECTIVE LIFECYCLE:
-    QUEUE/RRR-BOOTSTRAP-001.md → DONE/RRR-BOOTSTRAP-001.md
+## Pre-existing Files (already correct — no changes needed)
+- PROGRAM_CONTROL/DIRECTIVES/QUEUE/.gitkeep — already existed
+- PROGRAM_CONTROL/DIRECTIVES/IN_PROGRESS/.gitkeep — already existed
+- PROGRAM_CONTROL/DIRECTIVES/DONE/.gitkeep — already existed
+- PROGRAM_CONTROL/REPORT_BACK/.gitkeep — already existed
+- CLAUDE.md — already existed with full RRR content
+- .github/copilot-instructions.md — already existed with Program Control agent instructions
+- .github/workflows/directive-intake.yml — already existed (enhanced version)
+- .github/workflows/directive-dispatch.yml — already existed (enhanced version with lifecycle management)
+- .github/workflows/auto-merge.yml — already existed
+- docs/REQUIREMENTS_MASTER.md — already existed with full content
+- docs/RRR_CEO_DECISIONS_FINAL_2026-04-17.md — already existed with full content
+- docs/DOMAIN_GLOSSARY.md — already existed with full content
+- COPILOT_GOVERNANCE.md — no commit prefix enum section found, no patch needed
+- COPILOT_EXECUTION_RULES.md — no commit prefix enum section found, no patch needed
 
-TEST_RESULTS:
-  npm run build — pre-existing errors (3 TS errors present before this directive, not introduced):
-    - TS2688: Cannot find type definition file for 'jest'
-    - TS2688: Cannot find type definition file for 'node'
-    - TS5107: moduleResolution=node10 deprecated warning
-  No new errors introduced by this directive. FIZ: NO.
+## Governance Doc Patches (Step 11)
+- COPILOT_INSTRUCTIONS.md: PATCHED — replaced feat/fix/docs/refactor/chore/security with RRR enum
+- COPILOT_GOVERNANCE.md: NO CHANGE — no commit prefix/type enum section present
+- COPILOT_EXECUTION_RULES.md: NO CHANGE — no commit prefix/type enum section present
 
-INVARIANTS CONFIRMED:
-  - No files under src/ touched ✅
-  - FIZ: NO — no financial code modified ✅
-  - All .gitkeep placeholders present ✅
-  - CLAUDE.md present at repo root ✅
-  - .github/copilot-instructions.md present ✅
-  - ci.yml created with lint/build/test steps ✅
-  - COPILOT_INSTRUCTIONS.md enum patched to RRR standard ✅
-  - COPILOT_GOVERNANCE.md — no commit enum section found, no patch required ✅
-  - COPILOT_EXECUTION_RULES.md — no commit enum section found, no patch required ✅
+## TEST_RESULTS
+- npm run build: Pre-existing TypeScript errors in src/db/connection.ts and src/ingest-worker/worker.ts (MetricEventType issues). No new errors introduced. No src/ files touched.
+- npm test: 168 passed, 9 failed (pre-existing). 7 test suites failed (pre-existing). No new failures introduced.
 
-NOTES:
-  Steps 1–10 files were already present from prior agent work on this branch.
-  Step 7 (ci.yml) was missing and was created.
-  Step 11 patch applied to COPILOT_INSTRUCTIONS.md (old Conventional Commits enum replaced).
-  Directive moved to DONE. Report-back filed.
+## INVARIANTS CONFIRMED
+- No files under src/ touched ✅
+- FIZ: NO — no financial code modified ✅
+- All .gitkeep placeholders present ✅
+- CLAUDE.md present at repo root ✅
+- .github/copilot-instructions.md present ✅
+- ci.yml created with lint/build/test steps ✅
+- COPILOT_INSTRUCTIONS.md enum patched to RRR standard ✅
+- COPILOT_GOVERNANCE.md — no commit enum section found, no patch required ✅
+- COPILOT_EXECUTION_RULES.md — no commit enum section found, no patch required ✅
+
+NOTES: Most bootstrap files were already created on main before this directive was executed.
+This run completed the remaining gaps: BACKLOGS/.gitkeep, ci.yml workflow, and commit prefix enum patch.

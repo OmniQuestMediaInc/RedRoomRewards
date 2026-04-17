@@ -455,30 +455,35 @@ Implements point earning endpoint per `/api/openapi.yaml`.
 
 ### 13. Commit Message Standards
 
-**Rule**: Use semantic commit messages with clear descriptions.
+**Rule**: Use the RRR commit prefix enum. Do NOT use feat / fix / docs / refactor — not valid RRR prefixes.
 
-**Format**: `<type>(<scope>): <description>`
+**Format**: `<PREFIX>: <description>`
 
-**Types** (RRR authoritative enum):
-- `FIZ`: Financial Integrity Zone — ledger, wallet, balance, escrow
-- `DB`: Database models, Mongoose schemas, indexes
-- `API`: Controllers, routes, OpenAPI contract
-- `SVC`: Service layer (non-financial)
-- `INFRA`: Workflows, CI, config, infrastructure
-- `UI`: Frontend, dashboard (future)
-- `GOV`: Governance, policy, agent instruction documents
-- `TEST`: Test files only
-- `CHORE`: Maintenance, cleanup, non-code tasks
+**Authoritative RRR Commit Prefix Enum**:
 
-Do NOT use: feat / fix / docs / refactor — not valid RRR prefixes.
+| Prefix | Scope |
+|--------|-------|
+| FIZ    | Financial Integrity Zone: ledger, wallet, balance, escrow |
+| DB     | Database models, Mongoose schemas, indexes |
+| API    | Controllers, routes, OpenAPI contract |
+| SVC    | Service layer (non-financial) |
+| INFRA  | Workflows, CI, config, infrastructure |
+| UI     | Frontend, dashboard (future) |
+| GOV    | Governance, policy, agent instruction documents |
+| TEST   | Test files only |
+| CHORE  | Maintenance, cleanup, non-code tasks |
+
+FIZ-scoped commits require REASON:, IMPACT:, CORRELATION_ID: in the commit body.
 
 **Examples**:
 
 **Good**:
 ```
-API(wallets): implement GET /wallets/{userId} endpoint
-FIZ(ledger): prevent race condition in balance updates
-TEST(earn): add edge case tests for negative amounts
+API: implement GET /wallets/{userId} endpoint
+FIZ: prevent race condition in ledger balance updates
+CHORE: update OpenAPI spec with redeem endpoint
+TEST: add edge case tests for negative amounts
+INFRA: add rate limiting to all endpoints
 ```
 
 **Bad**:
@@ -486,7 +491,7 @@ TEST(earn): add edge case tests for negative amounts
 updated files          ❌ Not descriptive
 fix stuff              ❌ Too vague
 WIP                    ❌ Should not be committed
-asdf                   ❌ Meaningless
+feat(wallets): ...     ❌ Not a valid RRR prefix
 ```
 
 ---

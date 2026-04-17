@@ -109,15 +109,17 @@
 
 | ID | Requirement | Status | Directive |
 |----|-------------|--------|-----------|
-| PIPE-001 | PROGRAM_CONTROL directory structure | DONE | Bootstrap |
-| PIPE-002 | .github/copilot-instructions.md | DONE | Bootstrap |
-| PIPE-003 | CLAUDE.md | DONE | Bootstrap |
-| PIPE-004 | directive-intake.yml | DONE | Bootstrap |
-| PIPE-005 | directive-dispatch.yml | DONE | Bootstrap |
-| PIPE-006 | auto-merge.yml | DONE | Bootstrap |
-| PIPE-007 | docs/DOMAIN_GLOSSARY.md | DONE | Bootstrap |
-| PIPE-008 | docs/REQUIREMENTS_MASTER.md (this file) | DONE | Bootstrap |
-| PIPE-009 | docs/RRR_CEO_DECISIONS_FINAL_2026-04-17.md | DONE | Bootstrap |
+| PIPE-001 | PROGRAM_CONTROL directory structure | DONE | RRR-BOOTSTRAP-001 |
+| PIPE-002 | .github/copilot-instructions.md | DONE | RRR-BOOTSTRAP-001 |
+| PIPE-003 | CLAUDE.md | DONE | RRR-BOOTSTRAP-001 |
+| PIPE-004 | directive-intake.yml | DONE | RRR-BOOTSTRAP-001 |
+| PIPE-005 | directive-dispatch.yml | DONE | RRR-BOOTSTRAP-001 |
+| PIPE-006 | auto-merge.yml | DONE | RRR-BOOTSTRAP-001 |
+| PIPE-007 | docs/DOMAIN_GLOSSARY.md | DONE | RRR-BOOTSTRAP-001 |
+| PIPE-008 | docs/REQUIREMENTS_MASTER.md (this file) | DONE | RRR-BOOTSTRAP-001 |
+| PIPE-009 | docs/RRR_CEO_DECISIONS_FINAL_2026-04-17.md | DONE | RRR-BOOTSTRAP-001 |
+| PIPE-010 | .github/workflows/ci.yml | DONE | RRR-BOOTSTRAP-001 |
+| PIPE-011 | Governance doc commit prefix enum patch | DONE | RRR-BOOTSTRAP-001 |
 
 ---
 
