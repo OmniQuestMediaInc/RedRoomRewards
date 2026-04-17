@@ -19,17 +19,20 @@ COPILOT
 OmniQuestMediaInc/RedRoomRewards
 
 ## Branch
-copilot/fizrrr-p0-001
+copilot/rrr-p0-001-fiz-wire-wallet-controller
 
-## Files Changed
+## FILES_CHANGED
 ```
-src/api/wallet.controller.ts        | 12 ++++++------
-src/metrics/types.ts                 |  8 ++++++++
-src/db/connection.ts                 |  5 +++--
-src/ingest-worker/worker.ts          |  8 ++++----
-src/ledger/ledger.service.ts         |  2 +-
-src/services/point-expiration.service.ts | 4 ++--
-tsconfig.json                        |  1 +
+src/api/wallet.controller.ts                    | 12 ++++++------  (P0 fix — PR #212)
+src/metrics/types.ts                             |  8 ++++++++  (build fix — PR #214)
+src/db/connection.ts                             |  5 +++--  (build fix — PR #214)
+src/ingest-worker/worker.ts                      |  8 ++++----  (build fix — PR #214)
+src/ledger/ledger.service.ts                     |  2 +-   (build fix — PR #214)
+src/services/point-expiration.service.ts         |  4 ++--  (build fix — PR #214)
+tsconfig.json                                    |  1 +    (build fix — PR #214)
+docs/REQUIREMENTS_MASTER.md                      |  1 +- (mark RRR-P0-001 DONE)
+CLAUDE.md                                        |  5 +- (update P0 bug section to FIXED)
+PROGRAM_CONTROL/REPORT_BACK/RRR-P0-001-report.md | updated (this file)
 ```
 
 ## Changes Made
@@ -73,15 +76,12 @@ const newBalance = previousBalance + request.amount;
 - **src/ledger/ledger.service.ts**: Cast `result` to `Record<string, unknown>` in storeIdempotencyResult
 - **src/services/point-expiration.service.ts**: Cast `metadata.expiresAt` to `string | number` for `new Date()`
 
-## Verification
-
-### npm run build
+## BUILD_RESULT
 ```
-> tsc
-(exit 0)
+npm run build → exit 0
 ```
 
-### npm test
+## TEST_RESULT
 ```
 Test Suites: 8 failed, 10 passed, 18 total
 Tests:       9 failed, 136 passed, 145 total
@@ -90,19 +90,21 @@ wallet.controller.spec.ts: PASS
 All 9 failures are pre-existing in unrelated suites.
 ```
 
-### npm run lint
+## LINT_RESULT
 ```
 ✖ 17 problems (0 errors, 17 warnings)
-(exit 0)
+npm run lint → exit 0
 ```
 
 ## Result
 COMPLETE
 
-## Notes
+## NOTES
 - The P0 financial integrity bug is fixed — no hardcoded balances remain
 - Both previousBalance placeholders replaced with real WalletService.getUserBalance() calls
-- All balance reads go through WalletService — no direct MongoDB queries
+- All balance reads go through WalletService — no direct MongoDB queries in controller
 - No financial logic changes beyond balance retrieval
 - Pre-existing build errors fixed to satisfy build gate (non-financial type fixes)
 - wallet.controller.spec.ts passes with no new failures
+- docs/REQUIREMENTS_MASTER.md updated: RRR-P0-001 → DONE
+- CLAUDE.md updated: P0 bug section marked FIXED

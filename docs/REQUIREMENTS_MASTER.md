@@ -29,7 +29,7 @@
 
 | ID | Requirement | Status | Directive | Notes |
 |----|-------------|--------|-----------|-------|
-| RRR-P0-001 | Wire wallet controller credit/deduct to real services. Remove const previousBalance = 1000 placeholders at wallet.controller.ts:131 and :186. | NEEDS_DIRECTIVE | — | Live financial correctness bug |
+| RRR-P0-001 | Wire wallet controller credit/deduct to real services. Remove const previousBalance = 1000 placeholders at wallet.controller.ts:131 and :186. | DONE | RRR-P0-001 | Fixed in PR #212 — both sites now use WalletService.getUserBalance() |
 | RRR-P0-002 | Enforce idempotency on credit/deduct paths in wallet.controller.ts | NEEDS_DIRECTIVE | — | Double-spend risk on retry |
 | RRR-P0-003 | Add CI workflow: npm run lint + tsc --noEmit + npm test on PR | NEEDS_DIRECTIVE | — | TypeScript errors entering main undetected |
 
