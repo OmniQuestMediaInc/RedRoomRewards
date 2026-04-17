@@ -77,7 +77,7 @@ RedRoomRewards follows this **mandatory** structure:
 ```
 /
 ├── archive/              # Legacy code (view-only, no reuse)
-│   └── chatnow.zone-seed/
+│   └── xxxchatnow-seed/
 ├── api/                  # API contracts and specifications
 │   └── openapi.yaml
 ├── src/                  # Application source code

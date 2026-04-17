@@ -79,11 +79,17 @@ Exit code: 0 — PASS
 Final `git grep -n -i "xxxchatnow" -- ':!archive/xxxchatnow-seed'` filtered for non-archive hits:
 
 ```
-(empty — zero remaining occurrences outside archive/xxxchatnow-seed/)
+PROGRAM_CONTROL/REPORT_BACK/RRR-P1-006-report.md  (lines 4,93-96,104)
+  — this report-back file itself, documenting the replacement rules.
+  Uses old names only in "before→after" notation; intentional meta-documentation.
+
+docs/UNIVERSAL_ARCHITECTURE.md:80:│   └── xxxchatnow-seed/
+  — directory tree diagram referencing the archive folder path.
+  Correctly preserved: archive/xxxchatnow-seed/ is excluded per directive
+  (handled by RRR-P1-007). The diagram path name is not content usage.
 ```
 
-All remaining `xxxchatnow` hits in the repo are exclusively `archive/xxxchatnow-seed/`
-path references, correctly excluded per directive.
+All non-report-back, non-archive-path occurrences: **zero**.
 
 ---
 
@@ -107,6 +113,7 @@ path references, correctly excluded per directive.
 - `docs/RRR_CEO_DECISIONS_FINAL_2026-04-17.md` D2 text: "ChatNow.Zone was the prior platform name" reworded to "ChatNow.Zone is the canonical platform name"
 - `docs/REQUIREMENTS_MASTER.md` RRR-P1-006 row: description rephrased as "legacy platform name → ChatNow.Zone" to avoid self-referential redundancy
 
-**docs/REQUIREMENTS_MASTER.md:** RRR-P1-006 status updated from `NEEDS_DIRECTIVE` → `IN_PROGRESS`.
+- `docs/UNIVERSAL_ARCHITECTURE.md` line 80: `chatnow.zone-seed/` directory name reverted to `xxxchatnow-seed/` — archive folder path is excluded per directive; the rename script had incorrectly renamed the folder name in the tree diagram
+- `docs/history/BOOTSTRAP_INSTRUCTIONS.md` line 955: RRR-P1-006 table row description rephrased from self-referential "ChatNow.Zone to ChatNow.Zone" to "legacy platform name → ChatNow.Zone"
 
 Human review required before merge. Do NOT auto-merge.
