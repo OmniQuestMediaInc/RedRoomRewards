@@ -60,7 +60,7 @@ All commits must begin with one of these prefixes:
 
 ## FIZ Commit Format (required when prefix = FIZ)
 
-```
+```text
 FIZ: <description>
 REASON: <why this change was needed>
 IMPACT: <what financial flows are affected>
@@ -137,7 +137,7 @@ for future use but is NOT a prerequisite for execution.
 
 ## Key File Paths
 
-```
+```text
 Directive queue:    PROGRAM_CONTROL/DIRECTIVES/QUEUE/
 In progress:        PROGRAM_CONTROL/DIRECTIVES/IN_PROGRESS/
 Done:               PROGRAM_CONTROL/DIRECTIVES/DONE/

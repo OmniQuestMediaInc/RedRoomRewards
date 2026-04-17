@@ -18,3 +18,21 @@ MD041: false
 # MD024: Multiple headings with same content - allow if nesting differs
 MD024:
   allow_different_nesting: true
+
+# MD022: Allow headings without surrounding blank lines (governance docs use compact style)
+MD022: false
+
+# MD025: Allow multiple top-level headings (governance/agent instruction docs use them)
+MD025: false
+
+# MD026: Allow trailing punctuation in headings (e.g. "OmniQuest Media Inc.")
+MD026: false
+
+# MD032: Allow lists without surrounding blank lines (governance docs use compact style)
+MD032: false
+
+# MD036: Allow emphasis as heading (governance docs use *END ...* pattern)
+MD036: false
+
+# MD060: Disable table column alignment enforcement
+MD060: false
