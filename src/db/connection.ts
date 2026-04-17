@@ -6,7 +6,7 @@
 
 import mongoose from 'mongoose';
 import { MetricsLogger } from '../metrics/logger';
-import { AlertSeverity } from '../metrics/types';
+import { AlertSeverity, MetricEventType } from '../metrics/types';
 
 export interface DatabaseConfig {
   uri: string;
@@ -28,7 +28,7 @@ export async function connectDatabase(config: DatabaseConfig): Promise<typeof mo
     MetricsLogger.logAlert({
       severity: AlertSeverity.INFO,
       message: 'MongoDB connected successfully',
-      metricType: 'database_connection',
+      metricType: MetricEventType.DATABASE_CONNECTION,
       timestamp: new Date(),
       metadata: {
         readyState: mongoose.connection.readyState,
@@ -41,7 +41,7 @@ export async function connectDatabase(config: DatabaseConfig): Promise<typeof mo
     MetricsLogger.logAlert({
       severity: AlertSeverity.CRITICAL,
       message: 'MongoDB connection error',
-      metricType: 'database_connection_error',
+      metricType: MetricEventType.DATABASE_CONNECTION_ERROR,
       timestamp: new Date(),
       metadata: {
         errorType: error instanceof Error ? error.name : 'Unknown',
@@ -61,7 +61,7 @@ export async function disconnectDatabase(): Promise<void> {
   MetricsLogger.logAlert({
     severity: AlertSeverity.INFO,
     message: 'MongoDB disconnected',
-    metricType: 'database_disconnection',
+    metricType: MetricEventType.DATABASE_DISCONNECTION,
     timestamp: new Date(),
   });
 }

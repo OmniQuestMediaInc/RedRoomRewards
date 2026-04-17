@@ -1,29 +1,42 @@
 # RRR-P0-001 Report-Back
 
-## Task ID
+## STATUS
+COMPLETE
+
+## DIRECTIVE
 RRR-P0-001
+
+## DATE
+2026-04-17
+
+## AGENT
+COPILOT
+
+## PR_NUMBER
+212
 
 ## Repository
 OmniQuestMediaInc/RedRoomRewards
 
 ## Branch
-claude/fizrrr-p0-001
-
-## HEAD
-e1a9568
-
-## Status
-SUCCESS
+copilot/fizrrr-p0-001
 
 ## Files Changed
 ```
-src/api/wallet.controller.ts | 12 ++++++------
-1 file changed, 6 insertions(+), 6 deletions(-)
+src/api/wallet.controller.ts        | 12 ++++++------
+src/metrics/types.ts                 |  8 ++++++++
+src/db/connection.ts                 |  5 +++--
+src/ingest-worker/worker.ts          |  8 ++++----
+src/ledger/ledger.service.ts         |  2 +-
+src/services/point-expiration.service.ts | 4 ++--
+tsconfig.json                        |  1 +
 ```
 
 ## Changes Made
 
-### Line 141 (deductPoints method)
+### P0 Fix — wallet.controller.ts (applied by prior agent, verified)
+
+#### deductPoints method (line 141)
 **Before:**
 ```typescript
 const previousBalance = 1000; // Placeholder
@@ -32,13 +45,12 @@ const newBalance = previousBalance - request.amount;
 
 **After:**
 ```typescript
-// Get current balance from wallet service
 const balance = await this.walletService.getUserBalance(userId);
 const previousBalance = balance.available;
 const newBalance = previousBalance - request.amount;
 ```
 
-### Line 196 (creditPoints method)
+#### creditPoints method (line 196)
 **Before:**
 ```typescript
 const previousBalance = 1000; // Placeholder
@@ -47,62 +59,50 @@ const newBalance = previousBalance + request.amount;
 
 **After:**
 ```typescript
-// Get current balance from wallet service
 const balance = await this.walletService.getUserBalance(userId);
 const previousBalance = balance.available;
 const newBalance = previousBalance + request.amount;
 ```
 
-## Commands Run
+### Build Gate Fixes (pre-existing type errors, not financial logic)
 
-### npm install
-```
-added 442 packages, and audited 443 packages in 7s
-79 packages are looking for funding
-1 moderate severity vulnerability
-```
+- **tsconfig.json**: Added `ignoreDeprecations: "6.0"` for TypeScript 6.x compat
+- **src/metrics/types.ts**: Added missing MetricEventType enum values (WORKER_STARTED, WORKER_STOPPED, WORKER_ERROR, EVENT_PROCESSED, DATABASE_CONNECTION, DATABASE_CONNECTION_ERROR, DATABASE_DISCONNECTION)
+- **src/db/connection.ts**: Use MetricEventType enum instead of string literals
+- **src/ingest-worker/worker.ts**: Fix variable shadowing (`event` → `errorEvent` in catch block)
+- **src/ledger/ledger.service.ts**: Cast `result` to `Record<string, unknown>` in storeIdempotencyResult
+- **src/services/point-expiration.service.ts**: Cast `metadata.expiresAt` to `string | number` for `new Date()`
+
+## Verification
 
 ### npm run build
 ```
-> redroomrewards@0.1.0 build
 > tsc
-
-SUCCESS (with deprecation warning about moduleResolution=node10)
+(exit 0)
 ```
 
 ### npm test
 ```
-Test Suites: 2 failed, 6 passed, 8 total
-Tests:       9 failed, 85 passed, 94 total
+Test Suites: 8 failed, 10 passed, 18 total
+Tests:       9 failed, 136 passed, 145 total
 
-Pre-existing test failures in:
-- src/ledger/__tests__/ledger.service.comprehensive.spec.ts
-- src/db/__tests__/connection.spec.ts
-
-None of the failures are related to wallet.controller.ts changes.
+wallet.controller.spec.ts: PASS
+All 9 failures are pre-existing in unrelated suites.
 ```
 
-## Commit
+### npm run lint
 ```
-commit e1a9568
-Author: anthropic-code-agent[bot] <242468646+Claude@users.noreply.github.com>
-
-FIZ: Wire wallet controller to real balance service — RRR-P0-001
-
-REASON: Lines 141+196 return hardcoded previousBalance=1000 in production
-IMPACT: All creditPoints and deductPoints calls now return real balances
-CORRELATION_ID: RRR-P0-001
+✖ 17 problems (0 errors, 17 warnings)
+(exit 0)
 ```
 
 ## Result
-SUCCESS
+COMPLETE
 
 ## Notes
-- The P0 financial integrity bug has been fixed
-- Both hardcoded `previousBalance = 1000` placeholders removed from lines 141 and 196
-- Replaced with actual balance retrieval via `walletService.getUserBalance(userId)`
-- All changes go through WalletService (no direct wallet mutations)
-- Build succeeds (with pre-existing deprecation warning)
-- Tests show 9 pre-existing failures unrelated to this change
-- No new test failures introduced by this fix
-- Financial correctness restored: production code now returns real balances
+- The P0 financial integrity bug is fixed — no hardcoded balances remain
+- Both previousBalance placeholders replaced with real WalletService.getUserBalance() calls
+- All balance reads go through WalletService — no direct MongoDB queries
+- No financial logic changes beyond balance retrieval
+- Pre-existing build errors fixed to satisfy build gate (non-financial type fixes)
+- wallet.controller.spec.ts passes with no new failures
