@@ -1,7 +1,7 @@
 /**
  * Account Link Model
  * 
- * Manages account linking between RRR and external systems (e.g., XXXChatNow)
+ * Manages account linking between RRR and external systems (e.g., ChatNow.Zone)
  * Collection: account_links
  */
 

@@ -2,7 +2,7 @@
  * Wallet and Escrow Type Definitions
  * 
  * These types define the core wallet and escrow structures for RedRoomRewards.
- * Based on established patterns from XXXChatNow integration requirements.
+ * Based on established patterns from ChatNow.Zone integration requirements.
  * 
  * @see /docs/WALLET_ESCROW_ARCHITECTURE.md for detailed specifications
  */

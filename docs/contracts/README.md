@@ -2,7 +2,7 @@
 
 ## Overview
 
-This directory contains canonical data contracts for integrations between RedRoomRewards and its merchant clients (e.g., XXXChatNow).
+This directory contains canonical data contracts for integrations between RedRoomRewards and its merchant clients (e.g., ChatNow.Zone).
 
 ## Contents
 
@@ -57,8 +57,8 @@ const event = {
   transaction_id: "txn_2024_001",
   event_type: "token_purchase",
   occurred_at: "2024-01-15T14:30:00.000Z",
-  source_system: "xxxchatnow",
-  merchant_id: "xxxchatnow-prod",
+  source_system: "chatnow.zone",
+  merchant_id: "chatnow.zone-prod",
   loyalty_member_id: "user-123",
   gross_amount: 99.99,
   tokens_purchased: 10000,
@@ -86,8 +86,8 @@ event = {
     "transaction_id": "txn_2024_001",
     "event_type": "token_purchase",
     "occurred_at": "2024-01-15T14:30:00.000Z",
-    "source_system": "xxxchatnow",
-    "merchant_id": "xxxchatnow-prod",
+    "source_system": "chatnow.zone",
+    "merchant_id": "chatnow.zone-prod",
     "loyalty_member_id": "user-123",
     "gross_amount": 99.99,
     "tokens_purchased": 10000,
