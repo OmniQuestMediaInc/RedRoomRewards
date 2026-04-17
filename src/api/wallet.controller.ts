@@ -136,9 +136,9 @@ export class WalletController {
     //   return cachedResult;
     // }
 
-    // In a full implementation, this would call a ledger service to create a debit transaction
-    // For now, we'll return a structured response
-    const previousBalance = 1000; // Placeholder
+    // Get current balance from wallet service
+    const balance = await this.walletService.getUserBalance(userId);
+    const previousBalance = balance.available;
     const newBalance = previousBalance - request.amount;
 
     const transaction = {
@@ -191,9 +191,9 @@ export class WalletController {
     //   return cachedResult;
     // }
 
-    // In a full implementation, this would call a ledger service to create a credit transaction
-    // For now, we'll return a structured response
-    const previousBalance = 1000; // Placeholder
+    // Get current balance from wallet service
+    const balance = await this.walletService.getUserBalance(userId);
+    const previousBalance = balance.available;
     const newBalance = previousBalance + request.amount;
 
     const transaction = {
