@@ -116,12 +116,11 @@ git checkout -b fix/your-bug-fix
 ```
 
 **Branch Naming Convention**:
-- `feature/` - New features
-- `fix/` - Bug fixes
-- `docs/` - Documentation updates
-- `test/` - Test additions
-- `refactor/` - Code refactoring
-- `security/` - Security fixes
+- `copilot/<directive-id>` — Copilot agent branches (auto-created)
+- `claude/<directive-id>` — Claude Code agent branches (auto-created)
+- `feature/<short-name>` — Human-authored features
+- `fix/<short-name>` — Bug fixes
+- `infra/<short-name>` — Infrastructure and CI changes
 
 ### 3. Make Your Changes
 
@@ -180,33 +179,87 @@ npm run format            # Format code
 
 ### 6. Commit Your Changes
 
-Use semantic commit messages:
+Use the **RRR commit prefix enum** (see `COPILOT_INSTRUCTIONS.md` § 13):
 
 ```bash
 git add .
-git commit -m "feat(wallets): implement GET /wallets/{userId} endpoint"
+git commit -m "API: implement GET /wallets/{userId} endpoint"
 ```
 
-**Commit Message Format**: `<type>(<scope>): <description>`
+**Commit Message Format**: `<PREFIX>: <description>`
 
-**Types**:
-- `feat` - New feature
-- `fix` - Bug fix
-- `docs` - Documentation
-- `test` - Testing
-- `refactor` - Code restructuring
-- `security` - Security fix
+**RRR Prefix Enum** (these are the ONLY valid prefixes):
+
+| Prefix | Scope |
+|--------|-------|
+| FIZ    | Financial Integrity Zone — ledger, wallet, balance, escrow |
+| DB     | Database models, Mongoose schemas, indexes |
+| API    | Controllers, routes, OpenAPI contract |
+| SVC    | Service layer (non-financial) |
+| INFRA  | Workflows, CI, config, infrastructure |
+| UI     | Frontend, dashboard (future) |
+| GOV    | Governance, policy, agent instruction documents |
+| TEST   | Test files only |
+| CHORE  | Maintenance, cleanup, non-code tasks |
+
+> **Do NOT use** `feat`, `fix`, `docs`, `refactor`, or other Conventional Commits prefixes — they are not valid in RRR.
+
+**FIZ-scoped commits** require additional fields in the commit body:
+```
+FIZ: prevent race condition in ledger balance updates
+REASON: concurrent earn requests could double-credit
+IMPACT: ledger transaction creation, wallet balance updates
+CORRELATION_ID: rrr-fiz-20260417-001
+```
 
 **Good Examples**:
 ```
-feat(earn): add POST /earn endpoint with idempotency
-fix(ledger): prevent race condition in transaction creation
-docs(api): update OpenAPI spec with webhook endpoints
-test(redeem): add edge case tests for insufficient balance
-security(auth): implement rate limiting on all endpoints
+API: add POST /earn endpoint with idempotency
+FIZ: prevent race condition in transaction creation
+CHORE: update OpenAPI spec with webhook endpoints
+TEST: add edge case tests for insufficient balance
+INFRA: implement rate limiting on all endpoints
 ```
 
-### 7. Push to Your Fork
+### 7. Resolve Merge Conflicts Before Pushing
+
+Before pushing, ensure your branch is current with `main`:
+
+```bash
+git fetch origin main
+git merge origin/main
+```
+
+**If conflicts occur:**
+
+1. **`package-lock.json`** — Do NOT manually edit. Accept either side, then
+   run `npm install` to regenerate:
+   ```bash
+   git checkout --theirs package-lock.json
+   npm install
+   git add package-lock.json
+   ```
+
+2. **Source files (`.ts`, `.js`)** — Resolve manually. Open each conflicted
+   file, look for `<<<<<<<` markers, pick the correct code, remove markers:
+   ```bash
+   git diff --name-only --diff-filter=U   # list conflicted files
+   # edit each file, then:
+   git add <resolved-file>
+   ```
+
+3. **Markdown / YAML config** — Resolve manually. Check that the result is
+   valid YAML or Markdown after resolution.
+
+4. **Finalize the merge:**
+   ```bash
+   git commit   # completes the merge commit
+   ```
+
+> **Important:** Never leave a merge half-finished. If `MERGE_HEAD` exists,
+> either complete the merge or abort with `git merge --abort`.
+
+### 8. Push to Your Fork
 
 ```bash
 git push origin feature/your-feature-name
