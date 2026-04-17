@@ -1,5 +1,5 @@
 # PROGRAM CONTROL — AGENT INSTRUCTIONS (ALWAYS ON)
-# RedRoomRewards — OmniQuest Media Inc.
+**RedRoomRewards — OmniQuest Media Inc**
 
 You are an AI coding agent acting as the workspace-enabled foreman
 for the RedRoomRewards repository.
