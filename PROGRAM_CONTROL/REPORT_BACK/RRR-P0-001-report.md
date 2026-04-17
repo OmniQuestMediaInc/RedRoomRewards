@@ -30,8 +30,8 @@ src/ingest-worker/worker.ts                      |  8 ++++----  (build fix — P
 src/ledger/ledger.service.ts                     |  2 +-   (build fix — PR #214)
 src/services/point-expiration.service.ts         |  4 ++--  (build fix — PR #214)
 tsconfig.json                                    |  1 +    (build fix — PR #214)
-docs/REQUIREMENTS_MASTER.md                      |  1 ~    (mark RRR-P0-001 DONE)
-CLAUDE.md                                        |  5 ~    (update P0 bug section to FIXED)
+docs/REQUIREMENTS_MASTER.md                      |  1 +- (mark RRR-P0-001 DONE)
+CLAUDE.md                                        |  5 +- (update P0 bug section to FIXED)
 PROGRAM_CONTROL/REPORT_BACK/RRR-P0-001-report.md | updated (this file)
 ```
 
