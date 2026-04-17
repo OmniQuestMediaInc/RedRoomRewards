@@ -107,6 +107,6 @@ Comprehensive test suite in `ledger.service.spec.ts`:
 
 ## Related Documentation
 
-- `/COPILOT_GOVERNANCE.md` - Section 2.1 for ledger-specific rules
+- `/docs/governance/COPILOT_GOVERNANCE.md` - Section 2.1 for ledger-specific rules
 - `/docs/WALLET_ESCROW_ARCHITECTURE.md` - Architecture details
 - `/docs/TESTING_STRATEGY.md` - Testing requirements

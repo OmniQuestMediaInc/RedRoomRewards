@@ -24,7 +24,7 @@ This document defines mandatory rules for GitHub Copilot when generating code, d
 **Requirements**:
 - ✅ Always read and understand existing code before generating new code
 - ✅ Follow established patterns and conventions in the codebase
-- ✅ Respect existing architecture decisions (see `/DECISIONS.md`)
+- ✅ Respect existing architecture decisions (see `/docs/DECISIONS.md`)
 - ✅ Reference documentation in `/docs/` for context
 - ❌ Do NOT invent behaviors not documented in the repository
 - ❌ Do NOT assume patterns from other projects apply here
@@ -32,7 +32,7 @@ This document defines mandatory rules for GitHub Copilot when generating code, d
 
 **Validation**:
 - Before generating code: Read relevant files in `/src/`, `/docs/`, and `/api/`
-- Before suggesting changes: Review `/DECISIONS.md` and `/docs/UNIVERSAL_ARCHITECTURE.md`
+- Before suggesting changes: Review `/docs/DECISIONS.md` and `/docs/UNIVERSAL_ARCHITECTURE.md`
 - If uncertain: Ask for clarification rather than assuming
 
 ---
@@ -257,7 +257,7 @@ async function earnPoints(req: any): Promise<any> { // ❌ No any types
   - Concurrent operations
   - Idempotency (duplicate requests)
   - Insufficient balance
-- ✅ Human review required (see `/COPILOT_GOVERNANCE.md` Section 2.1)
+- ✅ Human review required (see `/docs/governance/COPILOT_GOVERNANCE.md` Section 2.1)
 
 **Test Structure**:
 ```typescript
@@ -421,7 +421,7 @@ async function earnPoints(request: EarnRequest): Promise<TransactionResponse> {
 - ✅ Testing performed (unit, integration, manual)
 - ✅ Security considerations
 - ✅ Breaking changes (if any)
-- ✅ Checklist from `/COPILOT_GOVERNANCE.md`
+- ✅ Checklist from `/docs/governance/COPILOT_GOVERNANCE.md`
 
 **Example PR Description**:
 ```markdown
@@ -512,7 +512,7 @@ feat(wallets): ...     ❌ Not a valid RRR prefix
 
 **Rationale**: Financial integrity is critical. AI-assisted code needs human verification for these sensitive areas.
 
-**See**: `/COPILOT_GOVERNANCE.md` Section 2.1
+**See**: `/docs/governance/COPILOT_GOVERNANCE.md` Section 2.1
 
 ---
 
@@ -577,9 +577,9 @@ Before generating code, verify:
 
 **Required Reading**:
 - `/docs/UNIVERSAL_ARCHITECTURE.md` - Architectural principles and prohibitions
-- `/COPILOT_GOVERNANCE.md` - Repository-specific AI development rules
+- `/docs/governance/COPILOT_GOVERNANCE.md` - Repository-specific AI development rules
 - `/SECURITY.md` - Security policy and requirements
-- `/DECISIONS.md` - Historical decisions and rationale
+- `/docs/DECISIONS.md` - Historical decisions and rationale
 - `/api/openapi.yaml` - API contract (source of truth)
 
 **Development References**:

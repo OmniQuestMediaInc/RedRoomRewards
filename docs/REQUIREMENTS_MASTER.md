@@ -96,12 +96,12 @@
 | RRR-P4-001 | Execute CLEANUP.md checklist | NEEDS_DIRECTIVE | — | Slot machine confirmed retired |
 | RRR-P4-002 | MongoDB session transactions full implementation with integration tests | NEEDS_DIRECTIVE | — | Full resolution of wallet.service.ts C1 |
 | RRR-P4-003 | Replace any with typed FilterQuery in replay.ts:36 | NEEDS_DIRECTIVE | — | NoSQL injection risk |
-| RRR-P4-004 | Documentation consolidation: 28 root markdown files to ~8 | NEEDS_DIRECTIVE | — | Self-assessment M1 |
+| RRR-P4-004 | Documentation consolidation: 28 root markdown files to ~8 | DONE | — | Consolidated to 8 root docs, moved rest to docs/ subdirs |
 | RRR-P4-005 | Add .prettierrc | NEEDS_DIRECTIVE | — | Self-assessment M2 |
 | RRR-P4-006 | Pre-commit hooks: husky + lint-staged | NEEDS_DIRECTIVE | — | Self-assessment H4 |
 | RRR-P4-007 | Type splits: wallet/types.ts and services/types.ts | NEEDS_DIRECTIVE | — | Self-assessment H3 |
-| RRR-P4-008 | Remove/archive archive/xxxchatnow-seed/ | NEEDS_DIRECTIVE | — | CEO Decision 1 |
-| RRR-P4-009 | Fix garbled text in ROADMAP_AND_BACKLOG.md Milestone 2 | NEEDS_DIRECTIVE | — | LLM artifact |
+| RRR-P4-008 | Remove/archive archive/xxxchatnow-seed/ | DONE | — | Removed per CEO Decision D1 |
+| RRR-P4-009 | Fix garbled text in docs/ROADMAP_AND_BACKLOG.md Milestone 2 | NEEDS_DIRECTIVE | — | LLM artifact |
 
 ---
 

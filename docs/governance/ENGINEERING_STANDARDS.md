@@ -3,7 +3,7 @@
 ## Mandatory Specs & Docs Structure
 - Place all feature specs in `docs/specs/<FEATURE>_SPEC_vX.Y.md`
 - Enforce official checklists via `docs/copilot/COPILOT.md`
-- All design decisions go in `DECISIONS.md`; all major architectural choices/logs in `ARCHITECTURE.md`.
+- All design decisions go in `docs/DECISIONS.md`; all major architectural choices/logs in `ARCHITECTURE.md`.
 
 ## Branching, PR, & Token Authz
 - Feature branches per-topic (`chip-menu`, `slot-machine`, etc.).

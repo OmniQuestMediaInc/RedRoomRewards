@@ -288,7 +288,7 @@ Tests are automatically run in CI pipeline on:
 
 - [TEST_STRATEGY.md](/docs/TESTING_STRATEGY.md) - Testing requirements
 - [SECURITY.md](/SECURITY.md) - Security policy
-- [CORE_MODULES_IMPLEMENTATION.md](/CORE_MODULES_IMPLEMENTATION.md) - Implementation details
+- [CORE_MODULES_IMPLEMENTATION.md](/docs/history/CORE_MODULES_IMPLEMENTATION.md) - Implementation details
 
 ---
 

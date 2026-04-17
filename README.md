@@ -134,8 +134,8 @@ npm run dev
 - **[Universal Architecture](/docs/UNIVERSAL_ARCHITECTURE.md)** - Architectural principles and prohibitions
 - **[Security Policy](/SECURITY.md)** - Security guidelines and vulnerability reporting
 - **[Contributing Guide](/CONTRIBUTING.md)** - How to contribute to the project
-- **[Decisions Log](/DECISIONS.md)** - Key architectural decisions and rationale
-- **[Copilot Governance](/COPILOT_GOVERNANCE.md)** - AI development rules and standards
+- **[Decisions Log](/docs/DECISIONS.md)** - Key architectural decisions and rationale
+- **[Copilot Governance](/docs/governance/COPILOT_GOVERNANCE.md)** - AI development rules and standards
 - **[API Contract](/api/openapi.yaml)** - OpenAPI specification
 
 ---
@@ -158,7 +158,7 @@ npm run dev
 - **Testing**: Jest for unit/integration tests
 - **CI/CD**: GitHub Actions (CodeQL)
 
-For detailed development rules, see [`COPILOT_GOVERNANCE.md`](/COPILOT_GOVERNANCE.md).
+For detailed development rules, see [`COPILOT_GOVERNANCE.md`](/docs/governance/COPILOT_GOVERNANCE.md).
 
 ---
 
@@ -166,7 +166,7 @@ For detailed development rules, see [`COPILOT_GOVERNANCE.md`](/COPILOT_GOVERNANC
 
 ⚠️ **CRITICAL**: The following are strictly forbidden:
 
-- **NO legacy archived code** may be used (see `/archive/xxxchatnow-seed/`)
+- **NO legacy archived code** may be used (legacy archive removed per CEO Decision D1)
 - **NO runtime UI, chat, broadcast, or tipping code** in this repository
 - **NO game logic or RNG implementations** (external systems provide facts)
 - **NO secrets or credentials** committed to source control
@@ -210,9 +210,9 @@ Security is our top priority. RedRoomRewards follows industry best practices and
 ### Security Documentation
 
 - **[Security Policy](/SECURITY.md)** - Overview and vulnerability reporting
-- **[Security Best Practices](/SECURITY_BEST_PRACTICES.md)** - Developer guide (mandatory reading)
-- **[Security Audit Policy](/SECURITY_AUDIT_AND_NO_BACKDOOR_POLICY.md)** - Complete framework
-- **[Latest Security Review](/COMPREHENSIVE_SECURITY_REVIEW_2026-01-04.md)** - Detailed audit results
+- **[Security Best Practices](/docs/security/SECURITY_BEST_PRACTICES.md)** - Developer guide (mandatory reading)
+- **[Security Audit Policy](/docs/security/SECURITY_AUDIT_AND_NO_BACKDOOR_POLICY.md)** - Complete framework
+- **[Latest Security Review](/docs/security/COMPREHENSIVE_SECURITY_REVIEW_2026-01-04.md)** - Detailed audit results
 
 ### Key Security Features
 
@@ -229,7 +229,7 @@ Security is our top priority. RedRoomRewards follows industry best practices and
 
 **⚠️ NEVER commit secrets.** Use environment variables or secret management systems.
 
-See [`.env.example`](/.env.example) for required environment variables and [SECURITY_BEST_PRACTICES.md](/SECURITY_BEST_PRACTICES.md) for detailed security guidelines.
+See [`.env.example`](/.env.example) for required environment variables and [SECURITY_BEST_PRACTICES.md](/docs/security/SECURITY_BEST_PRACTICES.md) for detailed security guidelines.
 
 **Security Contact**: security@omniquestmedia.com
 
@@ -245,7 +245,7 @@ This project is licensed under the MIT License - see [`LICENSE`](/LICENSE) for d
 
 - **Issues**: [GitHub Issues](https://github.com/OmniQuestMedia/RedRoomRewards/issues)
 - **Documentation**: [`/docs/`](/docs/)
-- **Governance**: [`COPILOT_GOVERNANCE.md`](/COPILOT_GOVERNANCE.md)
+- **Governance**: [`COPILOT_GOVERNANCE.md`](/docs/governance/COPILOT_GOVERNANCE.md)
 
 ---
 
@@ -259,7 +259,7 @@ This project is licensed under the MIT License - see [`LICENSE`](/LICENSE) for d
 - Archived legacy code (no reuse permitted)
 - Added governance and compliance documentation
 
-See [`DECISIONS.md`](/DECISIONS.md) for detailed decision history.
+See [`DECISIONS.md`](/docs/DECISIONS.md) for detailed decision history.
 
 ---
 

@@ -43,9 +43,7 @@ This document defines the mandatory architectural principles and prohibitions fo
 
 **ABSOLUTE PROHIBITION**: No code, patterns, or logic from archived legacy systems may be referenced, copied, adapted, or used in RedRoomRewards.
 
-- **Archive Location**: `/archive/xxxchatnow-seed/`
-- **Purpose**: Historical reference and audit only
-- **Access**: View-only for understanding prior architecture mistakes
+- **Archive**: Removed per CEO Decision D1 (2026-04-17). Previously at `/archive/xxxchatnow-seed/`.
 - **Usage**: ZERO reuse permitted
 
 **Rationale**: Legacy archived code contains:
@@ -186,7 +184,7 @@ RedRoomRewards follows this **mandatory** structure:
   - Balance calculation updates
   - Transaction recording modifications
   - Security-sensitive code
-- See `COPILOT_GOVERNANCE.md` Section 2.1
+- See `/docs/governance/COPILOT_GOVERNANCE.md` Section 2.1
 
 ---
 
@@ -259,9 +257,9 @@ RedRoomRewards integrates with external systems (e.g., consuming applications) v
 
 All developers must read and comply with:
 - This document (`UNIVERSAL_ARCHITECTURE.md`)
-- `/COPILOT_GOVERNANCE.md` - AI development rules
+- `/docs/governance/COPILOT_GOVERNANCE.md` - AI development rules
 - `/SECURITY.md` - Security policy and procedures
-- `/DECISIONS.md` - Historical decisions and rationale
+- `/docs/DECISIONS.md` - Historical decisions and rationale
 - `/api/openapi.yaml` - API contract specification
 
 ---
@@ -280,7 +278,7 @@ All developers must read and comply with:
 
 For questions about this architecture:
 1. Review the specification documents in `/docs/`
-2. Consult `COPILOT_GOVERNANCE.md` for development rules
+2. Consult `/docs/governance/COPILOT_GOVERNANCE.md` for development rules
 3. Discuss in PR reviews for specific cases
 4. Update this document via PR for clarifications
 

@@ -11,7 +11,7 @@
 
 This document defines comprehensive testing requirements for the wallet and escrow system. Financial logic requires **100% test coverage** and human review before deployment.
 
-**Reference**: See `/COPILOT_GOVERNANCE.md` Section 2.1 for mandatory review requirements.
+**Reference**: See `/docs/governance/COPILOT_GOVERNANCE.md` Section 2.1 for mandatory review requirements.
 
 ---
 

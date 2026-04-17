@@ -188,7 +188,7 @@ When extending this module:
 
 ## Related Documentation
 
-- `/COPILOT_GOVERNANCE.md` - Section 2.4 for API boundary rules
+- `/docs/governance/COPILOT_GOVERNANCE.md` - Section 2.4 for API boundary rules
 - `/docs/WALLET_ESCROW_ARCHITECTURE.md` - Wallet and escrow design
 - `/docs/TESTING_STRATEGY.md` - Testing requirements
 - `/ARCHITECTURE.md` - Domain clarity and boundaries
