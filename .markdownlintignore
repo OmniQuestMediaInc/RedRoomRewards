@@ -2,7 +2,6 @@
 src/
 api/
 infra/
-archive/
 
 # Exclude build artifacts and dependencies
 node_modules/
