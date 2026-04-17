@@ -68,39 +68,40 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           CONFLICTS="${{ steps.conflict_check.outputs.conflicts_list }}"
+          cat > /tmp/conflict_comment.md <<'EOF'
+          ## ⚠️ Merge Conflicts Detected
 
-          COMMENT_BODY="## ⚠️ Merge Conflicts Detected
+          This PR has conflicts with the `main` branch that must be resolved before merging.
 
-This PR has conflicts with the \`main\` branch that must be resolved before merging.
+          **Conflicting files:**
+          ```
+          CONFLICTS_PLACEHOLDER
+          ```
 
-**Conflicting files:**
-\`\`\`
-$CONFLICTS
-\`\`\`
+          **To resolve:**
 
-**To resolve:**
+          1. Sync your branch with main:
+             ```bash
+             git fetch origin
+             git merge origin/main
+             ```
 
-1. Sync your branch with main:
-   \`\`\`bash
-   git fetch origin
-   git merge origin/main
-   \`\`\`
+          2. Resolve conflicts in each file
+          3. Commit and push:
+             ```bash
+             git add .
+             git commit -m "Resolve merge conflicts with main"
+             git push
+             ```
 
-2. Resolve conflicts in each file
-3. Commit and push:
-   \`\`\`bash
-   git add .
-   git commit -m \"Resolve merge conflicts with main\"
-   git push
-   \`\`\`
+          **See:** [`.github/PR_CONFLICT_RESOLUTION.md`](.github/PR_CONFLICT_RESOLUTION.md) for detailed guidance.
 
-**See:** [\`.github/PR_CONFLICT_RESOLUTION.md\`](.github/PR_CONFLICT_RESOLUTION.md) for detailed guidance.
-
-**For FIZ-scoped conflicts:** Request human review before resolving."
-
+          **For FIZ-scoped conflicts:** Request human review before resolving.
+          EOF
+          sed -i "s/CONFLICTS_PLACEHOLDER/$CONFLICTS/" /tmp/conflict_comment.md
           gh pr comment ${{ github.event.pull_request.number }} \
             --repo ${{ github.repository }} \
-            --body "$COMMENT_BODY" || echo "Could not post comment"
+            --body-file /tmp/conflict_comment.md || echo "Could not post comment"
 
       - name: Add conflict label
         if: steps.conflict_check.outputs.conflict == 'true'
@@ -141,25 +142,26 @@ $CONFLICTS
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          COMMENT_BODY="## ❌ Build Failed
+          cat > /tmp/build_fail_comment.md <<'EOF'
+          ## ❌ Build Failed
 
-The build for this PR is failing. Please fix the errors before merging.
+          The build for this PR is failing. Please fix the errors before merging.
 
-**Check the Actions tab for detailed error messages.**
+          **Check the Actions tab for detailed error messages.**
 
-Common issues:
-- TypeScript compilation errors
-- Missing dependencies
-- Import/export issues
+          Common issues:
+          - TypeScript compilation errors
+          - Missing dependencies
+          - Import/export issues
 
-Run locally:
-\`\`\`bash
-npm run build
-\`\`\`"
-
+          Run locally:
+          ```bash
+          npm run build
+          ```
+          EOF
           gh pr comment ${{ github.event.pull_request.number }} \
             --repo ${{ github.repository }} \
-            --body "$COMMENT_BODY" || echo "Could not post comment"
+            --body-file /tmp/build_fail_comment.md || echo "Could not post comment"
 
   check-tests:
     name: Verify Tests Pass
@@ -188,20 +190,21 @@ npm run build
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          COMMENT_BODY="## ❌ Tests Failed
+          cat > /tmp/test_fail_comment.md <<'EOF'
+          ## ❌ Tests Failed
 
-Some tests are failing in this PR. Please fix the failing tests before merging.
+          Some tests are failing in this PR. Please fix the failing tests before merging.
 
-**Check the Actions tab for detailed test results.**
+          **Check the Actions tab for detailed test results.**
 
-Run locally:
-\`\`\`bash
-npm test
-\`\`\`"
-
+          Run locally:
+          ```bash
+          npm test
+          ```
+          EOF
           gh pr comment ${{ github.event.pull_request.number }} \
             --repo ${{ github.repository }} \
-            --body "$COMMENT_BODY" || echo "Could not post comment"
+            --body-file /tmp/test_fail_comment.md || echo "Could not post comment"
 
   merge-readiness-summary:
     name: PR Merge Readiness Summary
@@ -220,19 +223,19 @@ npm test
 
           if [ "$CONFLICT_STATUS" = "success" ] && [ "$BUILD_STATUS" = "success" ] && [ "$TEST_STATUS" = "success" ]; then
             echo "✅ All checks passed - PR is ready for review and merge"
+            cat > /tmp/ready_comment.md <<'EOF'
+            ## ✅ Merge Readiness: READY
 
-            COMMENT_BODY="## ✅ Merge Readiness: READY
+            All automated checks have passed:
+            - ✅ No merge conflicts
+            - ✅ Build passes
+            - ✅ Tests pass
 
-All automated checks have passed:
-- ✅ No merge conflicts
-- ✅ Build passes
-- ✅ Tests pass
-
-This PR is ready for review. Once approved, auto-merge will handle the merge automatically."
-
+            This PR is ready for review. Once approved, auto-merge will handle the merge automatically.
+            EOF
             gh pr comment ${{ github.event.pull_request.number }} \
               --repo ${{ github.repository }} \
-              --body "$COMMENT_BODY" || echo "Could not post comment"
+              --body-file /tmp/ready_comment.md || echo "Could not post comment"
           else
             echo "❌ Some checks failed - PR needs attention"
 
@@ -241,14 +244,15 @@ This PR is ready for review. Once approved, auto-merge will handle the merge aut
             [ "$BUILD_STATUS" != "success" ] && FAILED="${FAILED}\n- ❌ Build failed"
             [ "$TEST_STATUS" != "success" ] && FAILED="${FAILED}\n- ❌ Tests failed"
 
-            COMMENT_BODY="## ❌ Merge Readiness: BLOCKED
+            cat > /tmp/blocked_comment.md <<EOF
+            ## ❌ Merge Readiness: BLOCKED
 
-Some checks need attention before this PR can be merged:
-$FAILED
+            Some checks need attention before this PR can be merged:
+            $(echo -e "$FAILED")
 
-Please address the failing checks and push updates."
-
+            Please address the failing checks and push updates.
+            EOF
             gh pr comment ${{ github.event.pull_request.number }} \
               --repo ${{ github.repository }} \
-              --body "$COMMENT_BODY" || echo "Could not post comment"
+              --body-file /tmp/blocked_comment.md || echo "Could not post comment"
           fi
