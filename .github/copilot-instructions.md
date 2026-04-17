@@ -70,10 +70,10 @@ Keep diffs small and reviewable.
 ### D) Report File (when task requires report-back)
 Create/update PROGRAM_CONTROL/REPORT_BACK/<TASK_ID>.md
 Report must include:
-  - Branch + HEAD
-  - Files changed (git diff --stat)
-  - Commands run + outputs
-  - Result: SUCCESS or HARD_STOP with exact error logs
+- Branch + HEAD
+- Files changed (git diff --stat)
+- Commands run + outputs
+- Result: SUCCESS or HARD_STOP with exact error logs
 
 ### E) Commit Prefixes
   FIZ:    Financial Integrity Zone — ledger, wallet, escrow, payout, point balances
