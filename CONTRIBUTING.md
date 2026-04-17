@@ -191,7 +191,7 @@ git commit -m "API: implement GET /wallets/{userId} endpoint"
 **RRR Prefix Enum** (these are the ONLY valid prefixes):
 
 | Prefix | Scope                                                      |
-|--------|------------------------------------------------------------|
+|--------|-----------------------------------------------------------|
 | FIZ    | Financial Integrity Zone — ledger, wallet, balance, escrow |
 | DB     | Database models, Mongoose schemas, indexes                 |
 | API    | Controllers, routes, OpenAPI contract                      |
@@ -205,7 +205,7 @@ git commit -m "API: implement GET /wallets/{userId} endpoint"
 > **Do NOT use** `feat`, `fix`, `docs`, `refactor`, or other Conventional Commits prefixes — they are not valid in RRR.
 
 **FIZ-scoped commits** require additional fields in the commit body:
-```text
+```bash
 FIZ: prevent race condition in ledger balance updates
 REASON: concurrent earn requests could double-credit
 IMPACT: ledger transaction creation, wallet balance updates
@@ -213,7 +213,7 @@ CORRELATION_ID: rrr-fiz-20260417-001
 ```
 
 **Good Examples**:
-```text
+```bash
 API: add POST /earn endpoint with idempotency
 FIZ: prevent race condition in transaction creation
 CHORE: update OpenAPI spec with webhook endpoints
@@ -347,7 +347,7 @@ const transaction = await createTransaction(data); // Duplicate risk
 
 ### File Organization
 
-```text
+```bash
 src/
 ├── ledger/
 │   ├── ledger.service.ts      # Business logic
