@@ -88,7 +88,7 @@ export interface BalanceUpdatedEvent extends BaseRewardEvent {
   ledgerEntryId: string;
   
   /** Additional metadata */
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -125,7 +125,7 @@ export interface EscrowHeldEvent extends BaseRewardEvent {
   userEscrowBalance: number;
   
   /** Additional metadata */
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -159,7 +159,7 @@ export interface EscrowSettledEvent extends BaseRewardEvent {
   modelEarnedBalance: number;
   
   /** Additional metadata */
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -193,7 +193,7 @@ export interface EscrowRefundedEvent extends BaseRewardEvent {
   userEscrowBalance: number;
   
   /** Additional metadata */
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -236,7 +236,7 @@ export interface EscrowPartialSettledEvent extends BaseRewardEvent {
   modelEarnedBalance: number;
   
   /** Additional metadata */
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -285,7 +285,7 @@ export interface LedgerEntryCreatedEvent extends BaseRewardEvent {
   queueItemId?: string;
   
   /** Additional metadata */
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**

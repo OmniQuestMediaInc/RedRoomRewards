@@ -33,7 +33,7 @@ export interface TransactionListResponse {
     amount: number;
     type: 'credit' | 'debit';
     reason: string;
-    metadata?: Record<string, any>;
+    metadata?: Record<string, unknown>;
     timestamp: string;
     idempotencyKey: string;
     previousBalance?: number;

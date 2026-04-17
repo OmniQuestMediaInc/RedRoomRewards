@@ -18,7 +18,7 @@ import { logIngestEvent } from '../metrics/ingest-logger';
 export interface PostEventRequest {
   eventId?: string;
   eventType: string;
-  payload: Record<string, any>;
+  payload: Record<string, unknown>;
   idempotencyKey: string;
   requestId?: string;
   replayable?: boolean;

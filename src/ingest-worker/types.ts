@@ -14,7 +14,7 @@ export interface EventProcessingContext {
   eventId: string;
   eventType?: string;
   eventScope?: string;
-  payload?: Record<string, any>;
+  payload?: Record<string, unknown>;
   attempts: number;
 }
 

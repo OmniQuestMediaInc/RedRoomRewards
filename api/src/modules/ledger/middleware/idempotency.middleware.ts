@@ -167,15 +167,17 @@ export async function storeIdempotentResponse(
  * @returns True if idempotency key is present
  */
 export function hasIdempotencyKey(req: Request): boolean {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return !!(req as any).idempotencyKey;
 }
 
 /**
  * Utility to get idempotency key from request
- * 
+ *
  * @param req - Express request object
  * @returns Idempotency key or null
  */
 export function getIdempotencyKey(req: Request): string | null {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return (req as any).idempotencyKey || null;
 }

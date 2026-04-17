@@ -162,7 +162,7 @@ export interface EscrowItem {
   reason: TransactionReason;
   
   /** Metadata for audit trail */
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   
   /** When escrow was created */
   createdAt: Date;
@@ -215,7 +215,7 @@ export interface Transaction {
   timestamp: Date;
   
   /** Additional context data */
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   
   /** Related escrow ID if applicable */
   escrowId?: string;
@@ -250,7 +250,7 @@ export interface EscrowHoldRequest {
   requestId: string;
   
   /** Additional metadata */
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -305,7 +305,7 @@ export interface EscrowSettleRequest {
   requestId: string;
   
   /** Additional metadata */
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -354,7 +354,7 @@ export interface EscrowRefundRequest {
   requestId: string;
   
   /** Additional metadata */
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -409,7 +409,7 @@ export interface EscrowPartialSettleRequest {
   requestId: string;
   
   /** Additional metadata */
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -492,7 +492,7 @@ export interface QueueIntakeEvent {
   timestamp: Date;
   
   /** Additional context */
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**
@@ -506,7 +506,7 @@ export interface FinancialEvent {
   templateId: string;
   
   /** Template variables */
-  variables: Record<string, any>;
+  variables: Record<string, unknown>;
   
   /** User or model to notify */
   recipientId: string;

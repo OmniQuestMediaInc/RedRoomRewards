@@ -30,7 +30,7 @@ describe('PointExpirationService - Comprehensive Tests', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    expirationService = new PointExpirationService(mockLedgerService as any);
+    expirationService = new PointExpirationService(mockLedgerService as any); // eslint-disable-line @typescript-eslint/no-explicit-any
   });
 
   describe('processUserExpiration', () => {
@@ -110,7 +110,7 @@ describe('PointExpirationService - Comprehensive Tests', () => {
       const checkDate = new Date('2026-01-02');
       const gracePeriodDays = 3;
 
-      expirationService = new PointExpirationService(mockLedgerService as any, {
+      expirationService = new PointExpirationService(mockLedgerService as any, { // eslint-disable-line @typescript-eslint/no-explicit-any
         gracePeriodDays,
       });
 
