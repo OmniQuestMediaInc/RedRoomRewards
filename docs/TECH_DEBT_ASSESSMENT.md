@@ -149,7 +149,7 @@ and infra scaffolding (no Docker/Terraform/K8s) are secondary but material.
 - `src/api/receipt-endpoint.example.ts:114`. Example code only, but either
   route through `Logger` or drop the file to avoid copy-paste precedent.
 
-**L3. `STATUS_REPORT.md` (20KB), `FINANCIAL_AUDIT_REPORT.md` (20KB), `SLOT_MACHINE_BRIEFING.md` (23KB)**
+**L3. `STATUS_REPORT.md` (20KB), `FINANCIAL_AUDIT_REPORT.md` (20KB)**
 - Large reference docs at the root. Move to `docs/` so the repo root stays
   navigable.
 

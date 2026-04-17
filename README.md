@@ -82,7 +82,7 @@ Per-user and model wallets with optimistic locking:
 #### Business Logic Services
 Domain services strictly separated from client/UI/auth logic:
 - **PointAccrualService**: Signup bonuses, referrals, promotions, admin credits
-- **PointRedemptionService**: Escrow holds for chip menu, slot machine, performances
+- **PointRedemptionService**: Escrow holds for chip menu and performances
 - **PointExpirationService**: Scheduled expiration with batch processing
 - **AdminOpsService**: Manual adjustments, refunds, balance corrections
 

@@ -21,7 +21,7 @@
   - `/admin/expiration/warnings` - Get users with expiring points
 - Added complete request/response examples for:
   - Earn operations (signup bonus, referral, promotional)
-  - Redeem operations (chip menu, slot machine)
+  - Redeem operations (chip menu)
 - Added schemas for:
   - AdminAdjustmentRequest/Response
   - AdminRefundRequest/Response

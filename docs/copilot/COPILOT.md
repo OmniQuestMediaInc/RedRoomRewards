@@ -1,6 +1,6 @@
 # Engineering Briefing (Authoritative Spec)
 Repo: RedRoomRewards
-Feature: Slot Machine, Chip Menu, Token Systems
+Feature: Chip Menu, Token Systems
 Version: v1.0
 Date: 2025-12-15
 Status: Approved
@@ -54,7 +54,7 @@ Status: Approved
 ---
 
 ## Audit Procedure
-1. Review `docs/specs/SLOT_MACHINE_SPEC_v1.0.md` and this file (COPILOT.md).
+1. Review this file (COPILOT.md) and relevant feature specs under `docs/specs/`.
 2. Scan all relevant code/branches (backend+frontend).
 3. List all spec mismatches.
 4. Make minimum necessary changes.
@@ -65,4 +65,4 @@ Status: Approved
 ---
 
 ## Version History
-- 2025-12-15: Initial authoring, slot machine spec included.
+- 2025-12-15: Initial authoring.

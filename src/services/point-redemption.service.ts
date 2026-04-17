@@ -3,7 +3,7 @@
  * 
  * Handles point redemption operations by orchestrating escrow holds
  * through the wallet service. This service provides business logic
- * for different types of redemptions (chip menu, slot machine, etc.).
+ * for different types of redemptions (chip menu, performances, etc.).
  * 
  * Settlement and refund are handled by the queue service, not here.
  * 
@@ -26,7 +26,7 @@ export interface RedeemPointsRequest {
   /** Amount to redeem */
   amount: number;
   
-  /** Type of redemption (chip_menu, slot_machine, etc.) */
+  /** Type of redemption (chip_menu, performance, etc.) */
   featureType: string;
   
   /** Model involved (if applicable) */
@@ -207,31 +207,6 @@ export class PointRedemptionService {
   }
   
   /**
-   * Redeem points for slot machine play
-   * 
-   * @param userId User ID
-   * @param amount Amount to redeem
-   * @param queueItemId Queue item ID
-   * @param requestId Request ID
-   * @returns Redemption response
-   */
-  async redeemForSlotMachine(
-    userId: string,
-    amount: number,
-    queueItemId: string,
-    requestId: string
-  ): Promise<RedeemPointsResponse> {
-    return this.redeemPoints({
-      userId,
-      amount,
-      featureType: 'slot_machine',
-      queueItemId,
-      reason: TransactionReason.SLOT_MACHINE_PLAY,
-      requestId,
-    });
-  }
-  
-  /**
    * Redeem points for spin wheel play
    * 
    * @param userId User ID
@@ -312,7 +287,6 @@ export class PointRedemptionService {
   private validateRedemptionReason(reason: TransactionReason): void {
     const redemptionReasons = [
       TransactionReason.CHIP_MENU_PURCHASE,
-      TransactionReason.SLOT_MACHINE_PLAY,
       TransactionReason.SPIN_WHEEL_PLAY,
       TransactionReason.PERFORMANCE_REQUEST,
     ];
@@ -328,7 +302,6 @@ export class PointRedemptionService {
   private validateFeatureType(featureType: string): void {
     const validFeatures = [
       'chip_menu',
-      'slot_machine',
       'spin_wheel',
       'performance',
     ];

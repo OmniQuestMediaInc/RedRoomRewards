@@ -193,12 +193,6 @@ Every settlement or refund request MUST include:
 
 ### 5.1 Fully Compliant Features
 
-**Slot Machine**:
-- ✅ Deducts to escrow atomically
-- ✅ Emits standardized queue intake event
-- ✅ Never settles directly
-- ✅ Properly reports outcomes to queue
-
 **Chip Menu**:
 - ✅ Deducts to escrow atomically
 - ✅ Emits standardized queue intake event

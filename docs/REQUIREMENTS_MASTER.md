@@ -45,7 +45,6 @@
 | RRR-P1-004 | Wrap wallet mutations in MongoDB sessions (startSession + transactions) | NEEDS_DIRECTIVE | — | Production concurrency safety |
 | RRR-P1-005 | Implement spend ordering (EARLIEST_EXPIRY_THEN_FIFO) | NEEDS_DIRECTIVE | — | Spec requirement |
 | RRR-P1-006 | Repo-wide rename: XXXChatNow.com to ChatNow.Zone in all docs, comments, configs, model defaults | NEEDS_DIRECTIVE | — | CEO Decision 2 |
-| RRR-P1-007 | Remove/archive slot machine code and spec documents | NEEDS_DIRECTIVE | — | CEO Decision 1 — retired |
 
 ---
 
@@ -93,7 +92,7 @@
 
 | ID | Requirement | Status | Directive | Notes |
 |----|-------------|--------|-----------|-------|
-| RRR-P4-001 | Execute CLEANUP.md checklist | NEEDS_DIRECTIVE | — | Slot machine confirmed retired |
+| RRR-P4-001 | Execute CLEANUP.md checklist | NEEDS_DIRECTIVE | — | Remaining items: media, social, commerce, discovery |
 | RRR-P4-002 | MongoDB session transactions full implementation with integration tests | NEEDS_DIRECTIVE | — | Full resolution of wallet.service.ts C1 |
 | RRR-P4-003 | Replace any with typed FilterQuery in replay.ts:36 | NEEDS_DIRECTIVE | — | NoSQL injection risk |
 | RRR-P4-004 | Documentation consolidation: 28 root markdown files to ~8 | DONE | — | Consolidated to 8 root docs, moved rest to docs/ subdirs |

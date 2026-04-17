@@ -640,15 +640,6 @@ paths:
                     queueItemId: "queue-abc123"
                     modelId: "model-456"
                     action: "dance"
-              slot_machine:
-                summary: Slot machine play
-                value:
-                  userId: "user-789"
-                  amount: 50
-                  reason: "slot_machine_play"
-                  metadata:
-                    featureType: "slot_machine"
-                    queueItemId: "queue-xyz789"
       responses:
         '201':
           description: Points redeemed successfully

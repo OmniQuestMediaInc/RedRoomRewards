@@ -94,7 +94,6 @@ This document summarizes the implementation of core modules for RedRoomRewards l
 **Operations**:
 - `redeemPoints()` - Generic redemption
 - `redeemForChipMenu()` - Chip menu actions
-- `redeemForSlotMachine()` - Slot plays
 - `redeemForSpinWheel()` - Wheel spins
 - `redeemForPerformance()` - Performance requests
 

@@ -63,7 +63,6 @@ export enum TransactionReason {
   
   // Purchasing reasons
   CHIP_MENU_PURCHASE = 'chip_menu_purchase',
-  SLOT_MACHINE_PLAY = 'slot_machine_play',
   SPIN_WHEEL_PLAY = 'spin_wheel_play',
   PERFORMANCE_REQUEST = 'performance_request',
   

@@ -518,10 +518,6 @@ describe('Feature Integration E2E', () => {
     
     // Verify all steps completed successfully
   });
-  
-  it('should handle slot machine play and win', async () => {
-    // Similar flow for slot machine
-  });
 });
 ```
 

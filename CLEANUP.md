@@ -9,8 +9,7 @@ This document tracks all features, files, modules, and logic inherited from the 
 ## Repository Structure Cleanup (completed 2026-04-17)
 
 - [x] Remove `archive/xxxchatnow-seed/` (CEO Decision D1)
-- [x] Remove `docs/specs/SLOT_MACHINE_SPEC_v1.0.md` (CEO Decision D1, retired)
-- [x] Archive `SLOT_MACHINE_BRIEFING.md` to `docs/history/` (CEO Decision D1)
+- [x] Remove retired feature spec and briefing documents (CEO Decision D1, RRR-P1-007)
 - [x] Remove stale resolution docs (PR81, Jest, dependency conflict)
 - [x] Remove duplicate `copilot-governance.md`
 - [x] Consolidate 28 root markdown files to 8 (RRR-P4-004)
@@ -32,7 +31,7 @@ This document tracks all features, files, modules, and logic inherited from the 
 ### 2. Social/Interactive Features
 - [ ] "Goal" systems (collective progress, reward milestones, shared "goals").
 - [ ] Liking functionality (user likes, upvotes, hearts, etc.).
-- [x] Spinning wheel / chance-based game logic. (CEO Decision D1: slot machine retired, spec and briefing removed/archived)
+- [ ] Spinning wheel / chance-based game logic.
 - [ ] User-to-user or "model-to-user" messaging (including chat, DMs, inboxes, notifications, public or private rooms).
 - [ ] Any direct messaging, notification, or "shout" systems.
 
