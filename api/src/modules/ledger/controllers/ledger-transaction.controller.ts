@@ -41,7 +41,7 @@ export interface CreateTransactionRequest {
   requestId?: string;
   
   /** Additional metadata */
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 /**

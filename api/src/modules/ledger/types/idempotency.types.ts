@@ -15,7 +15,7 @@ export interface IdempotencyCheckResult {
   isDuplicate: boolean;
   
   /** Stored result from previous request (if duplicate) */
-  storedResult?: any;
+  storedResult?: unknown;
   
   /** HTTP status code from previous request (if duplicate) */
   statusCode?: number;
@@ -35,7 +35,7 @@ export interface StoreIdempotencyRequest {
   operationType: string;
   
   /** Result data to store */
-  result: any;
+  result: unknown;
   
   /** HTTP status code */
   statusCode: number;
@@ -69,7 +69,7 @@ export interface IdempotentTransactionRequest {
   requestId?: string;
   
   /** Transaction-specific data */
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 /**
@@ -114,7 +114,7 @@ export interface IIdempotencyService {
   /**
    * Extract idempotency key from request
    */
-  extractIdempotencyKey(headers: any, body?: any): string | null;
+  extractIdempotencyKey(headers: Record<string, unknown>, body?: Record<string, unknown>): string | null;
 }
 
 /**
@@ -123,7 +123,7 @@ export interface IIdempotencyService {
 export class DuplicateRequestError extends Error {
   constructor(
     message: string,
-    public readonly storedResult: any,
+    public readonly storedResult: unknown,
     public readonly statusCode: number,
     public readonly originalTimestamp: Date
   ) {

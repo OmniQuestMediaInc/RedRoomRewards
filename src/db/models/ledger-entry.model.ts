@@ -24,7 +24,7 @@ export interface ILedgerEntry extends Document {
   balanceAfter: number;
   timestamp: Date;
   currency: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   escrowId?: string;
   queueItemId?: string;
   featureType?: string;

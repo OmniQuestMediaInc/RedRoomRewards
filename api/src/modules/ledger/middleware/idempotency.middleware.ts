@@ -99,7 +99,9 @@ export function createIdempotencyMiddleware(
       }
 
       // Store idempotency key in request for later use
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (req as any).idempotencyKey = idempotencyKey;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (req as any).operationType = operationType;
 
       // Proceed to handler
@@ -129,11 +131,13 @@ export function createIdempotencyMiddleware(
  */
 export async function storeIdempotentResponse(
   req: Request,
-  result: any,
+  result: unknown,
   statusCode: number,
   service?: IIdempotencyService
 ): Promise<void> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const idempotencyKey = (req as any).idempotencyKey;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const operationType = (req as any).operationType;
 
   if (!idempotencyKey || !operationType) {

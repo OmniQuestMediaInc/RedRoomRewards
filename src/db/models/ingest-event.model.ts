@@ -24,7 +24,7 @@ export interface IIngestEvent extends Document {
   attempts: number;
   lastErrorCode?: string;
   lastErrorAt?: Date;
-  payloadSnapshot?: Record<string, any>;
+  payloadSnapshot?: Record<string, unknown>;
   replayable: boolean;
   nextAttemptAt?: Date;
   correlationId?: string;

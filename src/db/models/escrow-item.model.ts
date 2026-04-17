@@ -16,7 +16,7 @@ export interface IEscrowItem extends Document {
   queueItemId: string;
   featureType: string;
   reason: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   createdAt: Date;
   processedAt?: Date;
   modelId?: string;
