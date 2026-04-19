@@ -33,8 +33,8 @@
 
 | Field | Value |
 |---|---|
-| PR number | [see below] |
-| PR URL | [see below] |
+| PR number | 223 |
+| PR URL | https://github.com/OmniQuestMediaInc/RedRoomRewards/pull/223 |
 | Branch | chore/reference-library-init |
 | Target | main |
 | Self-merged | NO |
