@@ -403,7 +403,6 @@ sendChat("You won!");  // Literal string
 
 | Feature | Escrow | Queue | Idempotency | Templates | Certified | Date |
 |---------|--------|-------|-------------|-----------|-----------|------|
-| Slot Machine | ✅ | ✅ | ✅ | ✅ | ✅ | 2025-12-15 |
 | Chip Menu | ✅ | ✅ | ✅ | ✅ | ✅ | 2025-12-15 |
 | Spin Wheel (Legacy) | ❌ | ❌ | ❌ | ❌ | ❌ | N/A |
 | [New Feature] | ⏳ | ⏳ | ⏳ | ⏳ | ⏳ | TBD |
@@ -434,7 +433,7 @@ sendChat("You won!");  // Literal string
 
 ### Questions About Compliance
 1. Review `/docs/WALLET_ESCROW_ARCHITECTURE.md`
-2. Review existing compliant features (Slot Machine, Chip Menu)
+2. Review existing compliant features (Chip Menu)
 3. Ask in architecture channel
 4. Consult with wallet service team
 

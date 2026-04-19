@@ -60,13 +60,12 @@ export enum TransactionReason {
   REFERRAL_BONUS = 'referral_bonus',
   PROMOTIONAL_AWARD = 'promotional_award',
   ADMIN_CREDIT = 'admin_credit',
-  
+
   // Purchasing reasons
   CHIP_MENU_PURCHASE = 'chip_menu_purchase',
-  SLOT_MACHINE_PLAY = 'slot_machine_play',
   SPIN_WHEEL_PLAY = 'spin_wheel_play',
   PERFORMANCE_REQUEST = 'performance_request',
-  
+
   // Settlement reasons
   PERFORMANCE_COMPLETED = 'performance_completed',
   PARTIAL_PERFORMANCE = 'partial_performance',

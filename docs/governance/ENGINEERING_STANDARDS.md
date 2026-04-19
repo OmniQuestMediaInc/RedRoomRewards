@@ -6,7 +6,7 @@
 - All design decisions go in `docs/DECISIONS.md`; all major architectural choices/logs in `ARCHITECTURE.md`.
 
 ## Branching, PR, & Token Authz
-- Feature branches per-topic (`chip-menu`, `slot-machine`, etc.).
+- Feature branches per-topic (`chip-menu`, etc.).
 - PRs must reference the spec version and checklist results.
 - All token actions logged, never rely on client-supplied values.
 - Audit all changes for non-regression and safety.
@@ -22,4 +22,5 @@
 ---
 
 ## Version History
-- 2025-12-15: Added standards as per slot machine and chip menu briefing.
+- 2025-12-15: Added standards as per chip menu briefing.
+- 2026-04-19: Removed slot machine references per CEO Decision D1.

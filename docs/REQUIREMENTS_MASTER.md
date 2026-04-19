@@ -45,7 +45,7 @@
 | RRR-P1-004 | Wrap wallet mutations in MongoDB sessions (startSession + transactions) | NEEDS_DIRECTIVE | — | Production concurrency safety |
 | RRR-P1-005 | Implement spend ordering (EARLIEST_EXPIRY_THEN_FIFO) | NEEDS_DIRECTIVE | — | Spec requirement |
 | RRR-P1-006 | Repo-wide rename: legacy platform name → ChatNow.Zone in all docs, comments, configs, model defaults | IN_PROGRESS | chore/rrr-p1-006 | CEO Decision D2 |
-| RRR-P1-007 | Remove/archive slot machine code and spec documents | NEEDS_DIRECTIVE | — | CEO Decision 1 — retired |
+| RRR-P1-007 | Remove slot machine code and spec documents per CEO Decision D1 | IN_PROGRESS | chore/rrr-p1-007 | CEO Decision D1 — retired |
 
 ---
 

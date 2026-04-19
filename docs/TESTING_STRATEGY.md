@@ -518,9 +518,9 @@ describe('Feature Integration E2E', () => {
     
     // Verify all steps completed successfully
   });
-  
-  it('should handle slot machine play and win', async () => {
-    // Similar flow for slot machine
+
+  it('should handle chip menu purchase and performance', async () => {
+    // Test flow for chip menu and performance redemptions
   });
 });
 ```
