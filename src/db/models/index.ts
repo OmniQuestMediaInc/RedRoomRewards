@@ -15,3 +15,8 @@ export * from './wallet.model';
 export * from './model-wallet.model';
 export * from './ledger-entry.model';
 export * from './escrow-item.model';
+export * from './valuation-config.model';
+export * from './earn-rate-config.model';
+export * from './tier-cap-config.model';
+export * from './micro-topup-config.model';
+export * from './spend-order-config.model';
