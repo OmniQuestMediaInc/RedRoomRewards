@@ -1,8 +1,8 @@
 /**
  * Point Redemption Service Tests
- * 
- * Tests for point redemption operations including chip menu,
- * slot machine, and performance requests.
+ *
+ * Tests for point redemption operations including chip menu
+ * and performance requests.
  */
 
 import { PointRedemptionService } from './point-redemption.service';
@@ -195,43 +195,6 @@ describe('PointRedemptionService', () => {
           metadata: expect.objectContaining({
             actionType: 'dance',
           }),
-        })
-      );
-    });
-  });
-
-  describe('redeemForSlotMachine', () => {
-    it('should redeem for slot machine', async () => {
-      // Arrange
-      mockWalletService.getUserBalance.mockResolvedValue({
-        available: 200,
-        escrow: 0,
-        total: 200,
-      });
-
-      mockWalletService.holdInEscrow.mockResolvedValue({
-        transactionId: 'tx-slot',
-        escrowId: 'esc-slot',
-        previousBalance: 200,
-        newAvailableBalance: 150,
-        escrowBalance: 50,
-        timestamp: new Date(),
-      });
-
-      // Act
-      const result = await service.redeemForSlotMachine(
-        'user-123',
-        50,
-        'queue-slot',
-        'req-slot'
-      );
-
-      // Assert
-      expect(result.amountRedeemed).toBe(50);
-      expect(mockWalletService.holdInEscrow).toHaveBeenCalledWith(
-        expect.objectContaining({
-          featureType: 'slot_machine',
-          reason: TransactionReason.SLOT_MACHINE_PLAY,
         })
       );
     });

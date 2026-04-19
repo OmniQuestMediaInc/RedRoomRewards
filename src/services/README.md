@@ -38,7 +38,6 @@ Orchestrates point redemptions by holding funds in escrow.
 **Operations:**
 - `redeemPoints()` - Generic redemption with validation
 - `redeemForChipMenu()` - Chip menu action purchases
-- `redeemForSlotMachine()` - Slot machine play requests
 - `redeemForSpinWheel()` - Spin wheel play requests
 - `redeemForPerformance()` - Performance request holds
 
