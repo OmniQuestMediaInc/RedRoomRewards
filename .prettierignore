@@ -1,0 +1,43 @@
+# .prettierignore — RedRoomRewards
+# Files and directories that Prettier should not format.
+# TODO: Review this list when new directories are added.
+
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+out/
+.next/
+coverage/
+
+# Lock files (auto-generated)
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Legacy archived configs (do not reformat)
+LEGACY_CONFIGS/
+
+# Generated / vendored files
+*.min.js
+*.min.css
+
+# Documentation with intentional formatting
+# TODO: Remove the docs/ exclusion if you want Prettier to lint markdown docs
+# docs/
+
+# Environment files
+.env*
+
+# Binary / non-text assets
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.ico
+*.woff
+*.woff2
+*.ttf
+*.eot

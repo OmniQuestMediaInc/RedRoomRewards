@@ -1,41 +1,42 @@
-# RedRoomRewards .gitignore
-# Updated: 2025-12-15
+# .gitignore — RedRoomRewards
+# Next.js 14+ / TypeScript / Node.js / Yarn / VSCode
+# Updated: 2026-04-19 (config refresh — legacy copy in LEGACY_CONFIGS/)
+# TODO: Review "Custom Exclusions" section for project-specific paths.
 
-# ===== Dependencies =====
+# ── Dependencies ──────────────────────────────────────────────────────────
 node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-lerna-debug.log*
+.pnp
+.pnp.js
+.yarn/install-state.gz
 
-# ===== Build Outputs =====
+# ── Build Outputs ─────────────────────────────────────────────────────────
 dist/
 build/
 out/
+.next/
 *.tsbuildinfo
 .tsbuildinfo
 
-# ===== Environment Variables =====
+# ── Environment Variables ──────────────────────────────────────────────────
+# NEVER commit real env files — only the example file is allowed
 .env
 .env.local
 .env.development
 .env.test
 .env.production
+.env.staging
 .env.*.local
-
-# Keep example file for documentation
 !.env.example
 
-# ===== IDE and Editor Files =====
-# VSCode
+# ── IDE and Editor Files ───────────────────────────────────────────────────
+# VSCode (allow shared workspace settings)
 .vscode/
 !.vscode/extensions.json
 !.vscode/settings.json
 !.vscode/tasks.json
 !.vscode/launch.json
 
-# IntelliJ / WebStorm
+# JetBrains (IntelliJ / WebStorm)
 .idea/
 *.iml
 *.iws
@@ -47,7 +48,6 @@ out/
 *~
 
 # Emacs
-*~
 \#*\#
 .\#*
 
@@ -55,73 +55,52 @@ out/
 *.sublime-project
 *.sublime-workspace
 
-# ===== Operating System Files =====
+# ── Operating System Files ─────────────────────────────────────────────────
 # macOS
 .DS_Store
 .AppleDouble
 .LSOverride
 ._*
-.DocumentRevisions-V100
-.fseventsd
 .Spotlight-V100
-.TemporaryItems
 .Trashes
-.VolumeIcon.icns
 .com.apple.timemachine.donotpresent
-.AppleDB
-.AppleDesktop
-Network Trash Folder
-Temporary Items
-.apdisk
 
 # Windows
 Thumbs.db
-Thumbs.db:encryptable
 ehthumbs.db
-ehthumbs_vista.db
-*.stackdump
 [Dd]esktop.ini
 $RECYCLE.BIN/
-*.cab
-*.msi
-*.msix
-*.msm
-*.msp
-*.lnk
 
 # Linux
 .Trash-*
 .nfs*
 
-# ===== Testing =====
+# ── Testing & Coverage ─────────────────────────────────────────────────────
 coverage/
 *.lcov
 .nyc_output/
 test-results/
 junit.xml
 
-# ===== Logs =====
+# ── Logs ──────────────────────────────────────────────────────────────────
 logs/
 *.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
-lerna-debug.log*
 
-# ===== Temporary Files =====
-tmp/
-temp/
-*.tmp
-*.temp
+# ── Cache & Runtime ────────────────────────────────────────────────────────
+.cache/
+.parcel-cache/
+.npm/
+.eslintcache
+.stylelintcache
+.node_repl_history
+.yarn-integrity
+*.tgz
 
-# ===== MongoDB =====
-data/
-*.db
-*.lock
-
-# ===== Secrets and Credentials =====
-# Ensure no secrets are committed
+# ── Secrets and Credentials ────────────────────────────────────────────────
 secrets/
 *.pem
 *.key
@@ -130,39 +109,28 @@ secrets/
 *.pfx
 .credentials
 
-# ===== Cache and Runtime =====
-.cache/
-.parcel-cache/
-.npm/
-.eslintcache
-.node_repl_history
-.yarn-integrity
-.pnp.*
-.pnp.js
+# ── MongoDB / Database ─────────────────────────────────────────────────────
+data/
 
-# ===== Package Manager Locks (keep package-lock.json) =====
-# Uncomment if using yarn
-# yarn.lock
+# ── Temporary Files ────────────────────────────────────────────────────────
+tmp/
+temp/
+*.tmp
+*.temp
 
-# Uncomment if using pnpm
-# pnpm-lock.yaml
-
-# ===== Documentation Build =====
+# ── Documentation Build ─────────────────────────────────────────────────────
 docs/.vitepress/cache
 docs/.vitepress/dist
 
-# ===== Miscellaneous =====
+# ── Miscellaneous ──────────────────────────────────────────────────────────
 .serverless/
 .webpack/
 .dynamodb/
-.fusebox/
 .tern-port
 .vscode-test
 
-# ===== Archive (Do not commit archive contents) =====
-# Archive is for reference only, not for active use
-# Exclude from linting and scanning
+# ── Archive (reference only, not active code) ─────────────────────────────
 archive/
 
-# ===== Custom Exclusions =====
-# Add project-specific exclusions below this line
+# ── Custom Exclusions ──────────────────────────────────────────────────────
+# TODO: Add project-specific exclusions below this line

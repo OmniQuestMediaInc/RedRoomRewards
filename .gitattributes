@@ -1,53 +1,54 @@
 # .gitattributes — RedRoomRewards
-# Merge strategies and file handling for conflict prevention
+# Git merge strategies, line-ending enforcement, and diff quality settings.
 #
 # Authority: OmniQuest Media Inc.
-# Date: 2026-04-17
+# Updated: 2026-04-19 (config refresh — legacy copy in LEGACY_CONFIGS/)
+#
+# TODO: Add binary entries for any new asset types added to the project.
 
-# ──────────────────────────────────────────────
-# Lock files — auto-generated; always accept the incoming version
-# on merge to avoid unsolvable textual conflicts.
-# Re-run `npm install` after merge to reconcile.
-# ──────────────────────────────────────────────
-package-lock.json merge=ours
-
-# ──────────────────────────────────────────────
-# Line endings — enforce LF for all text files
-# regardless of contributor OS
-# ──────────────────────────────────────────────
+# ── Default: auto-detect text / enforce LF ────────────────────────────────
 * text=auto eol=lf
 
-# Explicitly mark common text formats
-*.ts text eol=lf
-*.tsx text eol=lf
-*.js text eol=lf
-*.json text eol=lf
-*.yaml text eol=lf
-*.yml text eol=lf
-*.md text eol=lf
-*.html text eol=lf
-*.css text eol=lf
-*.sh text eol=lf
+# ── Explicit text formats ─────────────────────────────────────────────────
+*.ts        text eol=lf
+*.tsx       text eol=lf
+*.js        text eol=lf
+*.jsx       text eol=lf
+*.mjs       text eol=lf
+*.cjs       text eol=lf
+*.json      text eol=lf
+*.yaml      text eol=lf
+*.yml       text eol=lf
+*.md        text eol=lf
+*.mdx       text eol=lf
+*.html      text eol=lf
+*.css       text eol=lf
+*.scss      text eol=lf
+*.sh        text eol=lf
+*.env       text eol=lf
 
-# Shell scripts need LF and executable bit
-# ──────────────────────────────────────────────
-# Binary files — never diff or merge as text
-# ──────────────────────────────────────────────
-*.png binary
-*.jpg binary
-*.jpeg binary
-*.gif binary
-*.ico binary
-*.svg binary
-*.woff binary
-*.woff2 binary
-*.ttf binary
-*.eot binary
+# ── Lock files — accept incoming version on merge ─────────────────────────
+# Re-run `npm install` or `yarn install` after merge to reconcile.
+package-lock.json   merge=ours
+yarn.lock           merge=ours
 
-# ──────────────────────────────────────────────
-# Diff drivers — improve diff quality for
-# structured files
-# ──────────────────────────────────────────────
-*.ts diff=typescript
-*.tsx diff=typescript
-*.md diff=markdown
+# ── Binary files — never diff or merge as text ────────────────────────────
+*.png       binary
+*.jpg       binary
+*.jpeg      binary
+*.gif       binary
+*.ico       binary
+*.svg       binary
+*.woff      binary
+*.woff2     binary
+*.ttf       binary
+*.eot       binary
+*.pdf       binary
+*.zip       binary
+*.gz        binary
+
+# ── Diff drivers — improve diff quality for structured files ──────────────
+*.ts        diff=typescript
+*.tsx       diff=typescript
+*.md        diff=markdown
+*.json      diff=json

@@ -3,30 +3,23 @@
   "version": "0.1.0",
   "description": "A Ledger-Based Loyalty and Rewards Platform",
   "main": "dist/index.js",
-  "packageManager": "yarn@4.9.1",
   "scripts": {
     "build": "tsc",
-    "dev": "ts-node src/index.ts",
-    "start": "node dist/index.js",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
     "test:verbose": "jest --verbose",
     "test:ci": "jest --ci --coverage --maxWorkers=2",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "format": "prettier --write \"src/**/*.{ts,tsx,js,json}\"",
-    "format:check": "prettier --check \"src/**/*.{ts,tsx,js,json}\"",
-    "validate:schema": "node validate-schema.js",
-    "type-check": "tsc --noEmit"
+    "format": "prettier --write \"src/**/*.ts\"",
+    "dev": "ts-node src/index.ts",
+    "validate:schema": "node validate-schema.js"
   },
   "keywords": [
     "loyalty",
     "rewards",
     "ledger",
-    "wallet",
-    "nextjs",
-    "typescript"
+    "wallet"
   ],
   "author": "OmniQuestMedia",
   "license": "UNLICENSED",
@@ -52,6 +45,6 @@
   },
   "engines": {
     "node": ">=22.0.0",
-    "yarn": ">=4.0.0"
+    "npm": ">=9.0.0"
   }
 }
