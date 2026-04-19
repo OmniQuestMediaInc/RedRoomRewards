@@ -1001,7 +1001,7 @@ Create docs/REQUIREMENTS_MASTER.md with the following content exactly.
 
 | ID | Requirement | Status | Directive | Notes |
 |----|-------------|--------|-----------|-------|
-| RRR-P4-001 | Execute CLEANUP.md checklist | NEEDS_DIRECTIVE | — | Slot machine confirmed retired |
+| RRR-P4-001 | Execute CLEANUP.md checklist | NEEDS_DIRECTIVE | — | Remaining items: media, social, commerce, discovery |
 | RRR-P4-002 | MongoDB session transactions full implementation with integration tests | NEEDS_DIRECTIVE | — | Full resolution of wallet.service.ts C1 |
 | RRR-P4-003 | Replace any with typed FilterQuery in replay.ts:36 | NEEDS_DIRECTIVE | — | NoSQL injection risk |
 | RRR-P4-004 | Documentation consolidation: 28 root markdown files to ~8 | NEEDS_DIRECTIVE | — | Self-assessment M1 |
