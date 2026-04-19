@@ -1,26 +1,47 @@
 {
+  "$schema": "https://json.schemastore.org/tsconfig",
   "compilerOptions": {
+    // ── Language & Output ──────────────────────────────────────────────────
     "target": "ES2022",
     "module": "commonjs",
     "lib": ["ES2022"],
-    "types": ["node", "jest"],
     "outDir": "./dist",
     "rootDir": "./src",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "ignoreDeprecations": "6.0",
+
+    // ── Module Resolution ──────────────────────────────────────────────────
+    // TODO: Migrate to "bundler" when moving to Next.js app router
     "moduleResolution": "node",
+    // Required for TypeScript 6.x with moduleResolution: "node"
+    "ignoreDeprecations": "6.0",
     "resolveJsonModule": true,
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
+    "esModuleInterop": true,
+
+    // ── Type Checking (strict) ─────────────────────────────────────────────
+    "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    // TODO: Enable exactOptionalPropertyTypes once codebase is ready
+    // "exactOptionalPropertyTypes": true,
+
+    // ── Emit ──────────────────────────────────────────────────────────────
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+
+    // ── Interop ───────────────────────────────────────────────────────────
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+
+    // ── Type Roots ────────────────────────────────────────────────────────
+    "types": ["node", "jest"]
+
+    // TODO: Add path aliases when the project grows:
+    // "paths": {
+    //   "@/*": ["./src/*"]
+    // }
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "**/*.spec.ts", "**/*.test.ts"]
+  "exclude": ["node_modules", "dist", "**/*.spec.ts", "**/*.test.ts", "LEGACY_CONFIGS"]
 }

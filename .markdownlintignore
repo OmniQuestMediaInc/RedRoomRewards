@@ -1,3 +1,7 @@
+# .markdownlintignore — RedRoomRewards
+# Updated: 2026-04-19 (config refresh — legacy copy in LEGACY_CONFIGS/)
+# TODO: Remove entries that no longer apply as the project structure changes.
+
 # Exclude application code directories from markdown linting
 src/
 api/
@@ -7,9 +11,14 @@ infra/
 node_modules/
 dist/
 build/
+out/
+.next/
 coverage/
 .venv/
 vendor/
+
+# Exclude archived configs (may contain non-standard markdown)
+LEGACY_CONFIGS/
 
 # Exclude Super-Linter output
 super-linter-output/
