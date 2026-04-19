@@ -13,8 +13,7 @@ Slot machine and chance-based game logic is retired. Archive or remove from repo
 - archive/xxxchatnow-seed/: remove
 
 ## D2 — Primary Tenant: ChatNow.Zone
-XXXChatNow.com was the prior platform name. All references must be updated to ChatNow.Zone.
-ChatNow.Zone is merchant tenant 1. RedRoomPleasures and Cyrano onboard first (Phase 1).
+ChatNow.Zone is the canonical platform name. ChatNow.Zone is merchant tenant 1. RedRoomPleasures and Cyrano onboard first (Phase 1).
 ChatNow.Zone is Phase 2 with full CNZ integration.
 
 ## D3 — Diamond Concierge Earn: Zero Points

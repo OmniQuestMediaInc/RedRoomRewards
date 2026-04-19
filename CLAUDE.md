@@ -102,7 +102,7 @@ Full detail in docs/RRR_CEO_DECISIONS_FINAL_2026-04-17.md.
 Summary:
 
 D1 — Slot machine: RETIRED. Remove all slot machine code.
-D2 — Platform name: ChatNow.Zone (not XXXChatNow.com).
+D2 — Platform name: ChatNow.Zone.
 D3 — Diamond Concierge: 0 earn points. Burn eligible.
 D4 — Inferno Bonus: configurable via inferno_multiplier on EarnRateConfig.
 D5 — GGS Integration: deferred. Webhook endpoints only.

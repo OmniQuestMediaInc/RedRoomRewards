@@ -1,6 +1,6 @@
 # CLEANUP CHECKLIST — RedRoomRewards
 
-This document tracks all features, files, modules, and logic inherited from the xxxchatnow stack that MUST be removed or audited out of this repository.
+This document tracks all features, files, modules, and logic inherited from the chatnow.zone stack that MUST be removed or audited out of this repository.
 
 **Goal:** Ensure RedRoomRewards is strictly limited to isolated, auditable, self-profile and points logic, with NO leftover social, media, or marketplace code.
 
@@ -37,7 +37,7 @@ This document tracks all features, files, modules, and logic inherited from the 
 
 ### 3. Market/Commerce Logic
 - [ ] Product listing/posting UIs, APIs, DB models (including "offers," "items," or similar concepts).
-- [ ] Purchase, checkout, payment, or "sales" features as implemented for xxxchatnow.
+- [ ] Purchase, checkout, payment, or "sales" features as implemented for chatnow.zone.
 - [ ] Cart/wishlist, purchasing, or marketplace endpoints.
 - [ ] Any product-discovery, store, or model-monetization logic.
 

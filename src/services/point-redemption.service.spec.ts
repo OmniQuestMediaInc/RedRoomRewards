@@ -1,8 +1,8 @@
 /**
  * Point Redemption Service Tests
  *
- * Tests for point redemption operations including chip menu,
- * spin wheel, and performance requests.
+ * Tests for point redemption operations including chip menu
+ * and performance requests.
  */
 
 import { PointRedemptionService } from './point-redemption.service';

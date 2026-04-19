@@ -2,7 +2,7 @@
 
 ## Overview
 
-RedRoomRewards implements robust idempotency and conflict handling to ensure reliable integration with merchant clients like XXXChatNow. This document defines the rules and behaviors for duplicate detection, conflict resolution, and replay protection.
+RedRoomRewards implements robust idempotency and conflict handling to ensure reliable integration with merchant clients like ChatNow.Zone. This document defines the rules and behaviors for duplicate detection, conflict resolution, and replay protection.
 
 ## Core Principles
 
@@ -385,8 +385,8 @@ Content-Type: application/json
   "transaction_id": "txn_2024_001",
   "event_type": "token_purchase",
   "occurred_at": "2024-01-15T14:30:00.000Z",
-  "source_system": "xxxchatnow",
-  "merchant_id": "xxxchatnow-prod",
+  "source_system": "chatnow.zone",
+  "merchant_id": "chatnow.zone-prod",
   "loyalty_member_id": "user-123",
   "gross_amount": 99.99,
   "tokens_purchased": 10000,
@@ -432,8 +432,8 @@ POST /api/events/ingest
   "transaction_id": "txn_2024_001",  // Same ID
   "event_type": "token_purchase",
   "occurred_at": "2024-01-15T14:30:00.000Z",
-  "source_system": "xxxchatnow",
-  "merchant_id": "xxxchatnow-prod",
+  "source_system": "chatnow.zone",
+  "merchant_id": "chatnow.zone-prod",
   "loyalty_member_id": "user-123",
   "gross_amount": 99.99,
   "tokens_purchased": 15000,  // DIFFERENT AMOUNT

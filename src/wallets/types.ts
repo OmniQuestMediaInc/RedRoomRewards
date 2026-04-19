@@ -2,7 +2,7 @@
  * Wallet and Escrow Type Definitions
  * 
  * These types define the core wallet and escrow structures for RedRoomRewards.
- * Based on established patterns from XXXChatNow integration requirements.
+ * Based on established patterns from ChatNow.Zone integration requirements.
  * 
  * @see /docs/WALLET_ESCROW_ARCHITECTURE.md for detailed specifications
  */
@@ -60,12 +60,12 @@ export enum TransactionReason {
   REFERRAL_BONUS = 'referral_bonus',
   PROMOTIONAL_AWARD = 'promotional_award',
   ADMIN_CREDIT = 'admin_credit',
-  
+
   // Purchasing reasons
   CHIP_MENU_PURCHASE = 'chip_menu_purchase',
   SPIN_WHEEL_PLAY = 'spin_wheel_play',
   PERFORMANCE_REQUEST = 'performance_request',
-  
+
   // Settlement reasons
   PERFORMANCE_COMPLETED = 'performance_completed',
   PARTIAL_PERFORMANCE = 'partial_performance',

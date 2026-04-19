@@ -1,7 +1,7 @@
-# RedRoomRewards Loyalty Engine Specification (XXXChatNow Launch)
+# RedRoomRewards Loyalty Engine Specification (ChatNow.Zone Launch)
 
 Owner: OmniQuest Media Inc.  
-Primary Launch Tenant: XXXChatNow.com  
+Primary Launch Tenant: ChatNow.Zone  
 Planned Expansion: RedRoomRewards network plus third-party tenants (target 12 to 18 months after launch)
 
 ---
@@ -9,7 +9,7 @@ Planned Expansion: RedRoomRewards network plus third-party tenants (target 12 to
 ## 1) Objectives and scope
 
 ### Program goals
-- Launch the first branded loyalty rewards points program in adult entertainment on XXXChatNow.
+- Launch the first branded loyalty rewards points program in adult entertainment on ChatNow.Zone.
 - Increase retention, repeat token-pack purchases, and VIP tier progression.
 - Enable model-driven loyalty: models receive monthly point allocations and gift points to fans in-stream.
 - Provide near real-time balances and deterministic, auditable earn and redeem decisions.
@@ -37,7 +37,7 @@ Planned Expansion: RedRoomRewards network plus third-party tenants (target 12 to
 Tier policies must be configured via effective-dated tables, no hard-coded caps or rates.
 
 ### Identity linking
-- One loyalty account can link multiple XXXChatNow usernames.
+- One loyalty account can link multiple ChatNow.Zone usernames.
 - Engine must resolve: loyalty_account_id ⇄ {tenant_id, site_username}, role, current tier.
 
 ---
@@ -141,7 +141,7 @@ Recommended default:
 
 ## 8) Model gifting (critical feature)
 
-### UX requirement (XXXChatNow)
+### UX requirement (ChatNow.Zone)
 In the model dashboard:
 - Model sees points available to award.
 - Model selects a viewer currently in the stream.

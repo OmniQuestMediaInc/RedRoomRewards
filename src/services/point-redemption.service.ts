@@ -3,7 +3,7 @@
  * 
  * Handles point redemption operations by orchestrating escrow holds
  * through the wallet service. This service provides business logic
- * for different types of redemptions (chip menu, performances, etc.).
+ * for different types of redemptions (chip menu, etc.).
  * 
  * Settlement and refund are handled by the queue service, not here.
  * 
@@ -26,7 +26,7 @@ export interface RedeemPointsRequest {
   /** Amount to redeem */
   amount: number;
   
-  /** Type of redemption (chip_menu, performance, etc.) */
+  /** Type of redemption (chip_menu, etc.) */
   featureType: string;
   
   /** Model involved (if applicable) */
@@ -205,7 +205,7 @@ export class PointRedemptionService {
       },
     });
   }
-  
+
   /**
    * Redeem points for spin wheel play
    * 

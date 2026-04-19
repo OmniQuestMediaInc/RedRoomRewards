@@ -23,3 +23,4 @@
 
 ## Version History
 - 2025-12-15: Added standards as per chip menu briefing.
+- 2026-04-19: Removed slot machine references per CEO Decision D1.

@@ -54,7 +54,7 @@ Status: Approved
 ---
 
 ## Audit Procedure
-1. Review this file (COPILOT.md) and relevant feature specs under `docs/specs/`.
+1. Review this file (COPILOT.md) and relevant spec files.
 2. Scan all relevant code/branches (backend+frontend).
 3. List all spec mismatches.
 4. Make minimum necessary changes.
@@ -65,4 +65,5 @@ Status: Approved
 ---
 
 ## Version History
-- 2025-12-15: Initial authoring.
+- 2025-12-15: Initial authoring, chip menu and token systems.
+- 2026-04-19: Removed slot machine per CEO Decision D1.

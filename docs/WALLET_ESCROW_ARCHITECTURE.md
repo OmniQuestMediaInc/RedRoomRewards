@@ -3,25 +3,25 @@
 **Document Type**: Technical Specification  
 **Status**: Authoritative  
 **Date**: 2025-12-23  
-**Source**: XXXChatNow Established Patterns  
+**Source**: ChatNow.Zone Established Patterns  
 **Applies To**: RedRoomRewards Platform
 
 ---
 
 ## Executive Summary
 
-This document defines the wallet and escrow architecture for RedRoomRewards, based on established patterns and requirements from XXXChatNow. This architecture ensures financial integrity, audit compliance, and proper separation of concerns between feature modules, performance queues, and wallet services.
+This document defines the wallet and escrow architecture for RedRoomRewards, based on established patterns and requirements from ChatNow.Zone. This architecture ensures financial integrity, audit compliance, and proper separation of concerns between feature modules, performance queues, and wallet services.
 
 ---
 
 ## 1. Platform Context
 
 RedRoomRewards is designed to be a loyalty and rewards system that is:
-- **Separate from XXXChatNow**: Not tied exclusively to any single platform
+- **Separate from ChatNow.Zone**: Not tied exclusively to any single platform
 - **Not a UI feature**: Server-side authority for all financial operations
 - **Auditable first**: Compliance and correctness over raw speed
 
-**Integration Context**: While initially integrating with XXXChatNow (an adult live-streaming platform with interactive paid features), RedRoomRewards maintains clear boundaries and can support multiple platforms.
+**Integration Context**: While initially integrating with ChatNow.Zone (an adult live-streaming platform with interactive paid features), RedRoomRewards maintains clear boundaries and can support multiple platforms.
 
 ---
 
@@ -560,7 +560,7 @@ The following items are **intentionally undecided** and require further explorat
 
 ### 10.1 Physical Escrow Location
 - Should escrow physically reside in:
-  - XXXChatNow database?
+  - ChatNow.Zone database?
   - RedRoomRewards database?
   - Mirrored across both?
 - Decision impacts: API latency, consistency model, deployment complexity
@@ -596,7 +596,7 @@ The following assumptions guide RedRoomRewards design:
 
 ### 11.1 Ownership
 - RedRoomRewards **owns or coordinates** loyalty balances
-- Not exclusively tied to XXXChatNow
+- Not exclusively tied to ChatNow.Zone
 - Designed for multi-platform support
 
 ### 11.2 Priorities
@@ -607,7 +607,7 @@ The following assumptions guide RedRoomRewards design:
 
 ### 11.3 User Model
 - Users create RedRoomRewards account
-- Link to XXXChatNow (and other platform) credentials
+- Link to ChatNow.Zone (and other platform) credentials
 - Single loyalty identity across platforms
 
 ### 11.4 Transaction SLA
