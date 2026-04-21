@@ -300,7 +300,7 @@ Goal: clean the governance surface, resolve known contradictions, install the ga
 
 #### Task A-005 — Harden auto-merge.yml against FIZ and CEO\_GATE labels
 
-- **Status:** QUEUED  
+- **Status:** DONE  
 - **Agent:** copilot  
 - **Type:** INFRA  
 - **CEO\_GATE:** NO  
@@ -316,7 +316,9 @@ Goal: clean the governance surface, resolve known contradictions, install the ga
   - Workflow file contains explicit `if:` clauses excluding both labels  
   - Sample dry-run on a labeled PR confirms skip  
 - **Commit format:** `INFRA: auto-merge skips fiz and ceo-gate labels — RRR-GOV-002-A005`  
-- **Report-back:** `PROGRAM_CONTROL/REPORT_BACK/RRR-GOV-002-A005-report.md`
+- **Report-back:** `PROGRAM_CONTROL/REPORT_BACK/RRR-GOV-002-A005-report.md`  
+- **Merge SHA:** 4813eb89a481372e4a3422ddbc236a396823d1f3 (PR \#238, closure — see DONE record for note on parallel PR \#237 `506137a` by copilot)  
+- **DONE record:** RRR-GOV-002-A005-DONE.md
 
 ---
 
