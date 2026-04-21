@@ -39,13 +39,13 @@
 
 | ID | Requirement | Status | Directive | Notes |
 |----|-------------|--------|-----------|-------|
-| RRR-P1-001 | Implement PointLot MongoDB model and lot-aware earn/expiry | NEEDS_DIRECTIVE | — | All spec features depend on this |
+| RRR-P1-001 | Implement PointLot MongoDB model and lot-aware earn/expiry | DONE | RRR-P1-001 | Shipped in PR #218 — PointLot model on main |
 | RRR-P1-002 | Implement LoyaltyAccount + IdentityLink models. Default tenant: ChatNow.Zone | NEEDS_DIRECTIVE | — | CEO Decision 2 |
-| RRR-P1-003 | Effective-dated config models: ValuationConfig, EarnRateConfig, TierCapConfig (merchant-configurable), MicroTopupConfig, SpendOrderConfig | NEEDS_DIRECTIVE | — | All configurable per merchant |
+| RRR-P1-003 | Effective-dated config models: ValuationConfig, EarnRateConfig, TierCapConfig (merchant-configurable), MicroTopupConfig, SpendOrderConfig | DONE | RRR-P1-CFG | Shipped in PR #226 — all five config models on main |
 | RRR-P1-004 | Wrap wallet mutations in MongoDB sessions (startSession + transactions) | NEEDS_DIRECTIVE | — | Production concurrency safety |
 | RRR-P1-005 | Implement spend ordering (EARLIEST_EXPIRY_THEN_FIFO) | NEEDS_DIRECTIVE | — | Spec requirement |
-| RRR-P1-006 | Repo-wide rename: legacy platform name → ChatNow.Zone in all docs, comments, configs, model defaults | IN_PROGRESS | chore/rrr-p1-006 | CEO Decision D2 |
-| RRR-P1-007 | Remove slot machine code and spec documents per CEO Decision D1 | IN_PROGRESS | chore/rrr-p1-007 | CEO Decision D1 — retired |
+| RRR-P1-006 | Repo-wide rename: legacy platform name → ChatNow.Zone in all docs, comments, configs, model defaults | DONE | RRR-P1-006 | Shipped in PR #219 — CEO Decision D2 |
+| RRR-P1-007 | Remove slot machine code and spec documents per CEO Decision D1 | DONE | RRR-P1-007 | Shipped in PR #222 — CEO Decision D1, slot machine retired |
 
 ---
 
@@ -126,3 +126,9 @@
 *Maintained by: Claude Chat (architecture) + Copilot/Claude Code (execution)*
 *Update this file as part of every directive report-back commit.*
 *CEO authority: Kevin B. Hartley — OmniQuest Media Inc.*
+
+---
+
+**Last verified:** 2026-04-21
+**Source:** Phase 1 assessment (see RRR-GOV-002 charter §5.1 — current build state on `main`)
+**Verified by:** RRR-GOV-002-A004

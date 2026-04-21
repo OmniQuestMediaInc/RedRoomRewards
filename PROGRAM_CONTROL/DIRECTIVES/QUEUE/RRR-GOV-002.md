@@ -201,7 +201,7 @@ Goal: clean the governance surface, resolve known contradictions, install the ga
 
 #### Task A-001 — Archive CLAUDE.md
 
-- **Status:** QUEUED  
+- **Status:** DONE  
 - **Agent:** either  
 - **Type:** GOV  
 - **CEO\_GATE:** YES  
@@ -220,8 +220,8 @@ Goal: clean the governance surface, resolve known contradictions, install the ga
   - `grep -r "RRR-GOV-002" .github/copilot-instructions.md` → at least one match  
 - **Commit format:** `GOV: archive CLAUDE.md, redirect agents to RRR-GOV-002 — RRR-GOV-002-A001`  
 - **Report-back:** `PROGRAM_CONTROL/REPORT_BACK/RRR-GOV-002-A001-report.md`  
-- **Merge SHA:** *(to be filled on completion)*  
-- **DONE record:** *(to be filled on completion)*
+- **Merge SHA:** 954dec932c3ba95f6ca05d0dc1cc2a5ce8a7dba5  
+- **DONE record:** RRR-GOV-002-A001-DONE.md
 
 ---
 
@@ -272,7 +272,7 @@ Goal: clean the governance surface, resolve known contradictions, install the ga
 
 #### Task A-004 — Refresh REQUIREMENTS\_MASTER.md stale statuses
 
-- **Status:** QUEUED  
+- **Status:** DONE  
 - **Agent:** claude-code  
 - **Type:** GOV  
 - **CEO\_GATE:** NO  
@@ -287,7 +287,9 @@ Goal: clean the governance surface, resolve known contradictions, install the ga
   - `grep -E "Missing|IN_PROGRESS" docs/REQUIREMENTS_MASTER.md` for the listed items → no matches  
   - Footer present  
 - **Commit format:** `GOV: refresh REQUIREMENTS_MASTER stale P1 statuses — RRR-GOV-002-A004`  
-- **Report-back:** `PROGRAM_CONTROL/REPORT_BACK/RRR-GOV-002-A004-report.md`
+- **Report-back:** `PROGRAM_CONTROL/REPORT_BACK/RRR-GOV-002-A004-report.md`  
+- **Merge SHA:** d9bd6de517351fc2984c26918e676a6fd8bd618b  
+- **DONE record:** RRR-GOV-002-A004-DONE.md
 
 ---
 

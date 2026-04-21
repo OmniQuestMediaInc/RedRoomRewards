@@ -129,9 +129,5 @@ docs/.vitepress/dist
 .tern-port
 .vscode-test
 
-# ── Archive (read-only governance + history docs — tracked) ──────────────────
-# archive/ is intentionally tracked (governance documents, superseded specs).
-# Add sub-paths here only for generated/binary artefacts that should not be tracked.
-
 # ── Custom Exclusions ──────────────────────────────────────────────────────
 # TODO: Add project-specific exclusions below this line
