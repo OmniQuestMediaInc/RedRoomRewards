@@ -14,6 +14,18 @@ jest.mock('../db/models');
 jest.mock('../metrics');
 jest.mock('../metrics/ingest-logger');
 
+type ValidationErrorDetail = { field: string; message: string; code: string };
+type ValidationFailedError = Error & { validationErrors: ValidationErrorDetail[] };
+
+function hasValidationErrors(e: unknown): e is ValidationFailedError {
+  return (
+    typeof e === 'object' &&
+    e !== null &&
+    'validationErrors' in e &&
+    Array.isArray((e as { validationErrors: unknown }).validationErrors)
+  );
+}
+
 describe('EventsController', () => {
   let controller: EventsController;
 
@@ -253,16 +265,12 @@ describe('EventsController', () => {
         await controller.postEvent(invalidRequest);
         fail('Should have thrown validation error');
       } catch (error: unknown) {
-        expect(error).toBeInstanceOf(Error);
+        expect(hasValidationErrors(error)).toBe(true);
+        if (!hasValidationErrors(error)) return;
 
-        const err = error as Error & { validationErrors?: unknown };
+        expect(error.validationErrors.length).toBeGreaterThan(0);
 
-        expect(err.validationErrors).toBeDefined();
-        expect(Array.isArray(err.validationErrors)).toBe(true);
-        expect((err.validationErrors as unknown[]).length).toBeGreaterThan(0);
-
-        // Check structure of validation errors
-        const validationError = (err.validationErrors as any[])[0];
+        const validationError = error.validationErrors[0];
         expect(validationError).toHaveProperty('field');
         expect(validationError).toHaveProperty('message');
         expect(validationError).toHaveProperty('code');
