@@ -11,6 +11,7 @@ prior reports.
 **Repository:** RedRoomRewards
 **Owner:** OmniQuest Media Inc.
 **Source of Truth:** This repository
+**Active Charter:** PROGRAM_CONTROL/DIRECTIVES/QUEUE/RRR-GOV-002.md — persistent governance + active work stream (supersedes the retired root governance document, archived at archive/governance/CLAUDE_2026-04-21.md)
 **Coding Doctrine:** COPILOT_INSTRUCTIONS.md (root) — always read before executing
 **Domain Glossary:** docs/DOMAIN_GLOSSARY.md (naming authority)
 **Requirements:** docs/REQUIREMENTS_MASTER.md (live build state)

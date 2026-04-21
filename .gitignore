@@ -129,8 +129,5 @@ docs/.vitepress/dist
 .tern-port
 .vscode-test
 
-# ── Archive (reference only, not active code) ─────────────────────────────
-archive/
-
 # ── Custom Exclusions ──────────────────────────────────────────────────────
 # TODO: Add project-specific exclusions below this line
