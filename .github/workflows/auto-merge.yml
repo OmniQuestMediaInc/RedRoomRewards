@@ -1,9 +1,30 @@
+# Auto Merge
+#
+# Label-driven gating per RRR-GOV-002 §3.5 item 18:
+#   - PRs labeled `fiz`      → skip. FIZ work requires human review; no auto-merge.
+#   - PRs labeled `ceo-gate` → skip. CEO_GATE: YES merges manually by the CEO.
+#   - Otherwise              → auto-merge enabled when CI is green.
+#
+# These rules are load-bearing governance. Any change to the gating labels or
+# the skip logic must land via a charter amendment (see RRR-GOV-002 §9).
+#
+# Dry-run: trigger this workflow from the Actions UI (workflow_dispatch) with
+# a PR number to preview the gating decision without issuing `gh pr merge`.
+#
+# Hardened under task RRR-GOV-002-A005.
+
 name: Auto Merge
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
+    types: [opened, synchronize, reopened, labeled, unlabeled]
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: 'PR number to preview the gating decision against'
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -12,6 +33,10 @@ permissions:
 jobs:
   enable-auto-merge:
     name: Enable Auto Merge
+    if: >-
+      github.event_name == 'pull_request' &&
+      !contains(github.event.pull_request.labels.*.name, 'fiz') &&
+      !contains(github.event.pull_request.labels.*.name, 'ceo-gate')
     runs-on: ubuntu-latest
 
     steps:
@@ -27,3 +52,40 @@ jobs:
           else
             echo "WARNING: Auto-merge could not be enabled — may already be set or branch protection not configured"
           fi
+
+  skip-gated:
+    name: Skip Gated PR
+    if: >-
+      github.event_name == 'pull_request' &&
+      (contains(github.event.pull_request.labels.*.name, 'fiz') ||
+       contains(github.event.pull_request.labels.*.name, 'ceo-gate'))
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Log skip reason
+        run: |
+          echo "SKIP: PR #${{ github.event.pull_request.number }} carries a gating label (fiz or ceo-gate)."
+          echo "Auto-merge will NOT be enabled. Human review (FIZ) or CEO manual merge (CEO_GATE) required per RRR-GOV-002 §3.5 item 18."
+
+  dry-run:
+    name: Dry-run Gating Decision
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Preview gating decision for PR ${{ inputs.pr_number }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          pr="${{ inputs.pr_number }}"
+          labels=$(gh pr view "$pr" \
+            --repo "${{ github.repository }}" \
+            --json labels \
+            --jq '[.labels[].name] | join(",")')
+          echo "PR #$pr labels: ${labels:-<none>}"
+          if echo ",${labels}," | grep -qE ',(fiz|ceo-gate),'; then
+            echo "DECISION: SKIP — PR #$pr carries a gating label (fiz or ceo-gate). Auto-merge would NOT be enabled."
+            exit 0
+          fi
+          echo "DECISION: ENABLE — PR #$pr has no gating label. Auto-merge would be enabled when CI is green."
