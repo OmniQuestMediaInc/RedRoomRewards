@@ -3,7 +3,6 @@
   "version": "0.1.0",
   "description": "A Ledger-Based Loyalty and Rewards Platform",
   "main": "dist/index.js",
-  "packageManager": "yarn@4.9.1",
   "scripts": {
     "build": "tsc",
     "dev": "ts-node src/index.ts",
@@ -51,7 +50,6 @@
     "typescript": "^6.0.3"
   },
   "engines": {
-    "node": ">=22.0.0",
-    "yarn": ">=4.0.0"
+    "node": ">=22.0.0"
   }
 }
