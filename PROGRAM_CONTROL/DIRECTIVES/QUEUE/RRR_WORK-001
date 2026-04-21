@@ -178,7 +178,9 @@ Wave A must close before Wave B FIZ work begins.
 
 #### Task A-001 — Install RRR-scoped `OQMI_SYSTEM_STATE_RRR.md`
 
-- **Status:** QUEUED
+- **Status:** DONE
+- **Merge SHA:** *<set on merge>*
+- **DONE record:** RRR-WORK-001-A001-DONE.md
 - **Agent:** claude-code
 - **Type:** GOV
 - **FIZ:** NO
