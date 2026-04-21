@@ -46,6 +46,30 @@ export class LedgerService implements ILedgerService {
    * Create a new immutable ledger entry
    */
   async createEntry(request: CreateLedgerEntryRequest): Promise<LedgerEntry> {
+    // Validate state/accountType compatibility
+    if (request.accountType === 'user' && request.balanceState === 'earned') {
+      throw new Error('Invalid state transition: users cannot use earned balance state');
+    }
+    if (request.accountType === 'model' && request.balanceState === 'escrow') {
+      throw new Error('Invalid state transition: models cannot use escrow balance state');
+    }
+
+    // Validate metadata does not contain PII
+    if (request.metadata) {
+      // Use exact key names to avoid false positives on legitimate fields like emailCount
+      const piiFieldNames = new Set(['email', 'password', 'ssn', 'creditcard', 'phonenumber', 'phone']);
+      const emailPattern = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/;
+      for (const key of Object.keys(request.metadata)) {
+        if (piiFieldNames.has(key.toLowerCase())) {
+          throw new Error(`PII detected in metadata: field "${key}" may contain sensitive data`);
+        }
+        const val = request.metadata[key];
+        if (typeof val === 'string' && emailPattern.test(val)) {
+          throw new Error(`PII detected in metadata: field "${key}" contains an email address`);
+        }
+      }
+    }
+
     // Generate IDs if not provided
     const entryId = uuidv4();
     const transactionId = request.transactionId || uuidv4();

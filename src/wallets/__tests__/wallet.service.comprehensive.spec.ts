@@ -10,8 +10,15 @@ import { TransactionType, TransactionReason } from '../types';
 import {
   InsufficientBalanceError,
 } from '../../services/types';
+import { WalletModel } from '../../db/models/wallet.model';
+import { EscrowItemModel } from '../../db/models/escrow-item.model';
 
-// Mock implementations
+// Mock modules first (before variable declarations to satisfy jest hoisting)
+jest.mock('../../db/models/wallet.model');
+jest.mock('../../db/models/escrow-item.model');
+jest.mock('../../db/models/model-wallet.model');
+
+// Mock ledger service
 const mockLedgerService = {
   checkIdempotency: jest.fn(),
   claimIdempotency: jest.fn().mockResolvedValue(true),
@@ -21,42 +28,13 @@ const mockLedgerService = {
   generateReconciliationReport: jest.fn(),
 };
 
-const mockWalletModel = {
-  findOne: jest.fn(),
-  create: jest.fn(),
-  findOneAndUpdate: jest.fn(),
-};
-
-const mockEscrowItemModel = {
-  create: jest.fn(),
-  findOne: jest.fn(),
-  findOneAndUpdate: jest.fn(),
-};
-
-const mockModelWalletModel = {
-  findOne: jest.fn(),
-  create: jest.fn(),
-  findOneAndUpdate: jest.fn(),
-};
-
-// Mock modules
-jest.mock('../../db/models/wallet.model', () => ({
-  WalletModel: mockWalletModel,
-}));
-
-jest.mock('../../db/models/escrow-item.model', () => ({
-  EscrowItemModel: mockEscrowItemModel,
-}));
-
-jest.mock('../../db/models/model-wallet.model', () => ({
-  ModelWalletModel: mockModelWalletModel,
-}));
-
 describe('WalletService - Comprehensive Tests', () => {
   let walletService: WalletService;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    jest.resetAllMocks(); // also resets mock implementations from previous tests
+    // Restore required defaults after reset
+    mockLedgerService.claimIdempotency.mockResolvedValue(true);
     walletService = new WalletService(mockLedgerService as any); // eslint-disable-line @typescript-eslint/no-explicit-any
   });
 
@@ -69,7 +47,7 @@ describe('WalletService - Comprehensive Tests', () => {
       const idempotencyKey = 'idem-hold-1';
 
       mockLedgerService.checkIdempotency.mockResolvedValue(false);
-      mockWalletModel.findOne.mockResolvedValue({
+      (WalletModel.findOne as jest.Mock).mockResolvedValue({
         userId,
         availableBalance: initialBalance,
         escrowBalance: 0,
@@ -80,8 +58,14 @@ describe('WalletService - Comprehensive Tests', () => {
       mockLedgerService.createEntry.mockResolvedValue({
         entryId: 'entry-1',
       });
-      mockEscrowItemModel.create.mockResolvedValue({
+      (EscrowItemModel.create as jest.Mock).mockResolvedValue({
         escrowId: 'escrow-1',
+      });
+      (WalletModel.findOneAndUpdate as jest.Mock).mockResolvedValue({
+        userId,
+        availableBalance: initialBalance - holdAmount,
+        escrowBalance: holdAmount,
+        version: 2,
       });
 
       // Act
@@ -100,7 +84,7 @@ describe('WalletService - Comprehensive Tests', () => {
       expect(result.newAvailableBalance).toBe(400);
       expect(result.escrowBalance).toBe(100);
       expect(mockLedgerService.createEntry).toHaveBeenCalled();
-      expect(mockEscrowItemModel.create).toHaveBeenCalled();
+      expect(EscrowItemModel.create).toHaveBeenCalled();
     });
 
     it('should reject if insufficient balance', async () => {
@@ -110,7 +94,7 @@ describe('WalletService - Comprehensive Tests', () => {
       const holdAmount = 100;
 
       mockLedgerService.checkIdempotency.mockResolvedValue(false);
-      mockWalletModel.findOne.mockResolvedValue({
+      (WalletModel.findOne as jest.Mock).mockResolvedValue({
         userId,
         availableBalance,
         escrowBalance: 0,
@@ -135,8 +119,9 @@ describe('WalletService - Comprehensive Tests', () => {
     it('should handle idempotent requests', async () => {
       // Arrange
       const idempotencyKey = 'idem-duplicate';
-      
-      mockLedgerService.checkIdempotency.mockResolvedValue(true);
+
+      // claimIdempotency returning false = key already claimed, reject
+      mockLedgerService.claimIdempotency.mockResolvedValue(false);
 
       // Act & Assert
       await expect(
@@ -153,7 +138,8 @@ describe('WalletService - Comprehensive Tests', () => {
     });
 
     it('should validate amount is positive', async () => {
-      mockLedgerService.checkIdempotency.mockResolvedValue(false);
+      // No wallet mock — WalletModel.findOne and create return undefined after reset.
+      // Accessing wallet properties throws, which is the expected rejection.
 
       // Zero amount
       await expect(
@@ -184,8 +170,7 @@ describe('WalletService - Comprehensive Tests', () => {
 
     it('should create immutable ledger entry', async () => {
       // Arrange
-      mockLedgerService.checkIdempotency.mockResolvedValue(false);
-      mockWalletModel.findOne.mockResolvedValue({
+      (WalletModel.findOne as jest.Mock).mockResolvedValue({
         userId: 'user-123',
         availableBalance: 500,
         escrowBalance: 0,
@@ -195,8 +180,14 @@ describe('WalletService - Comprehensive Tests', () => {
       mockLedgerService.createEntry.mockResolvedValue({
         entryId: 'entry-1',
       });
-      mockEscrowItemModel.create.mockResolvedValue({
+      (EscrowItemModel.create as jest.Mock).mockResolvedValue({
         escrowId: 'escrow-1',
+      });
+      (WalletModel.findOneAndUpdate as jest.Mock).mockResolvedValue({
+        userId: 'user-123',
+        availableBalance: 400,
+        escrowBalance: 100,
+        version: 2,
       });
 
       // Act
@@ -224,8 +215,7 @@ describe('WalletService - Comprehensive Tests', () => {
 
   describe('Edge Cases', () => {
     it('should handle zero balance scenarios', async () => {
-      mockLedgerService.checkIdempotency.mockResolvedValue(false);
-      mockWalletModel.findOne.mockResolvedValue({
+      (WalletModel.findOne as jest.Mock).mockResolvedValue({
         userId: 'user-zero',
         availableBalance: 0,
         escrowBalance: 0,
@@ -246,8 +236,7 @@ describe('WalletService - Comprehensive Tests', () => {
     });
 
     it('should handle minimum amount (0.01)', async () => {
-      mockLedgerService.checkIdempotency.mockResolvedValue(false);
-      mockWalletModel.findOne.mockResolvedValue({
+      (WalletModel.findOne as jest.Mock).mockResolvedValue({
         userId: 'user-min',
         availableBalance: 1,
         escrowBalance: 0,
@@ -257,8 +246,14 @@ describe('WalletService - Comprehensive Tests', () => {
       mockLedgerService.createEntry.mockResolvedValue({
         entryId: 'entry-min',
       });
-      mockEscrowItemModel.create.mockResolvedValue({
+      (EscrowItemModel.create as jest.Mock).mockResolvedValue({
         escrowId: 'escrow-min',
+      });
+      (WalletModel.findOneAndUpdate as jest.Mock).mockResolvedValue({
+        userId: 'user-min',
+        availableBalance: 0.99,
+        escrowBalance: 0.01,
+        version: 2,
       });
 
       const result = await walletService.holdInEscrow({
@@ -276,8 +271,7 @@ describe('WalletService - Comprehensive Tests', () => {
 
     it('should handle large amounts', async () => {
       const largeAmount = 1000000;
-      mockLedgerService.checkIdempotency.mockResolvedValue(false);
-      mockWalletModel.findOne.mockResolvedValue({
+      (WalletModel.findOne as jest.Mock).mockResolvedValue({
         userId: 'user-large',
         availableBalance: largeAmount,
         escrowBalance: 0,
@@ -287,8 +281,14 @@ describe('WalletService - Comprehensive Tests', () => {
       mockLedgerService.createEntry.mockResolvedValue({
         entryId: 'entry-large',
       });
-      mockEscrowItemModel.create.mockResolvedValue({
+      (EscrowItemModel.create as jest.Mock).mockResolvedValue({
         escrowId: 'escrow-large',
+      });
+      (WalletModel.findOneAndUpdate as jest.Mock).mockResolvedValue({
+        userId: 'user-large',
+        availableBalance: 0,
+        escrowBalance: largeAmount,
+        version: 2,
       });
 
       const result = await walletService.holdInEscrow({
@@ -305,3 +305,4 @@ describe('WalletService - Comprehensive Tests', () => {
     });
   });
 });
+

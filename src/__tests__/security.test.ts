@@ -5,69 +5,98 @@
  * as specified in TEST_STRATEGY.md Section 5
  */
 
-import { AuthService } from '../services/auth.service';
+import { AuthService, UserRole, JWTPayload, AuthServiceConfig } from '../services/auth.service';
+import { TransactionReason } from '../wallets/types';
+import { QueueSettlementAuthorization } from '../services/types';
 
 describe('Security Tests', () => {
   let authService: AuthService;
+  const config: AuthServiceConfig = {
+    jwtSecret: 'test-secret-32-chars-minimum-len',
+    tokenExpirySeconds: 3600,
+    algorithm: 'HS256',
+  };
 
   beforeEach(() => {
-    authService = new AuthService();
+    authService = new AuthService(config);
   });
 
   describe('Authorization Validation', () => {
     describe('Queue Authorization Tokens', () => {
-      it('should reject tampered authorization token', async () => {
-        const token = authService.generateSettlementAuthorization({
-          queueItemId: 'queue-123',
-          escrowId: 'escrow-123',
-          modelId: 'model-456',
-        });
+      it('should reject tampered authorization token', () => {
+        const authObj = authService.generateSettlementAuthorization(
+          'queue-123',
+          'escrow-123',
+          'model-456',
+          100,
+          TransactionReason.CHIP_MENU_PURCHASE
+        );
 
-        const tamperedToken = token.slice(0, -5) + 'XXXXX';
+        const tamperedToken = authObj.token.slice(0, -5) + 'XXXXX';
 
-        await expect(
+        expect(() =>
           authService.verifyAuthorizationToken(tamperedToken)
-        ).rejects.toThrow();
+        ).toThrow();
       });
 
-      it('should reject tokens with wrong operation type', async () => {
-        const refundToken = authService.generateRefundAuthorization({
-          queueItemId: 'queue-123',
-          escrowId: 'escrow-123',
-          userId: 'user-123',
-        });
+      it('should reject tokens with wrong operation type', () => {
+        const refundAuth = authService.generateRefundAuthorization(
+          'queue-123',
+          'escrow-123',
+          'user-123',
+          50,
+          TransactionReason.ADMIN_REFUND
+        );
 
-        // Try to use refund token for settlement
-        await expect(
-          authService.validateSettlementAuthorization(refundToken, {
-            queueItemId: 'queue-123',
-            escrowId: 'escrow-123',
-            modelId: 'model-456',
-          })
-        ).rejects.toThrow();
+        // Wrap refund token inside a fake settlement-shaped object
+        // so the settlement validator receives a token signed for the wrong type
+        const fakeSettlement: QueueSettlementAuthorization = {
+          queueItemId: refundAuth.queueItemId,
+          token: refundAuth.token,
+          escrowId: refundAuth.escrowId,
+          modelId: 'model-456',
+          amount: refundAuth.amount,
+          reason: refundAuth.reason,
+          issuedAt: refundAuth.issuedAt,
+          expiresAt: refundAuth.expiresAt,
+        };
+
+        // Try to use refund token for settlement — should throw
+        expect(() =>
+          authService.validateSettlementAuthorization(
+            fakeSettlement,
+            'queue-123',
+            'escrow-123'
+          )
+        ).toThrow();
       });
     });
 
     describe('Admin Authorization', () => {
       it('should validate admin roles for operations', () => {
-        const adminContext = {
-          adminId: 'admin-123',
-          adminUsername: 'admin@example.com',
-          roles: ['admin', 'support'],
+        const adminPayload: JWTPayload = {
+          sub: 'admin-123',
+          role: UserRole.ADMIN,
+          iat: Math.floor(Date.now() / 1000),
+          exp: Math.floor(Date.now() / 1000) + 3600,
+          type: 'admin',
         };
 
-        expect(authService.hasRole(adminContext, 'admin')).toBe(true);
-        expect(authService.hasRole(adminContext, 'user')).toBe(false);
+        expect(authService.hasRole(adminPayload, UserRole.ADMIN)).toBe(true);
+        // Admin has access to all roles
+        expect(authService.hasRole(adminPayload, UserRole.USER)).toBe(true);
       });
 
       it('should reject operations without required admin role', () => {
-        const userContext = {
-          adminId: 'user-123',
-          adminUsername: 'user@example.com',
-          roles: ['user'],
+        const userPayload: JWTPayload = {
+          sub: 'user-123',
+          role: UserRole.USER,
+          iat: Math.floor(Date.now() / 1000),
+          exp: Math.floor(Date.now() / 1000) + 3600,
+          type: 'user',
         };
 
-        expect(authService.hasRole(userContext, 'admin')).toBe(false);
+        expect(authService.hasRole(userPayload, UserRole.ADMIN)).toBe(false);
       });
     });
   });
@@ -181,3 +210,4 @@ function redactSensitiveData(data: any): any { // eslint-disable-line @typescrip
   }
   return redacted;
 }
+
