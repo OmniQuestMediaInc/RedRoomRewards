@@ -2,7 +2,7 @@
 
 **Document:** `PROGRAM_CONTROL/DIRECTIVES/QUEUE/OQMI_SYSTEM_STATE_RRR.md`
 **Repo:** OmniQuestMediaInc/RedRoomRewards
-**Version:** v1.0 (first population — RRR-scoped companion to the ChatNowZone–BUILD file)
+**Version:** v1.1 (A-002 ratification — A-001 moved to DONE; charter retirement recorded)
 **Last Updated:** 2026-04-21
 **Owner:** Kevin B. Hartley, CEO — OmniQuest Media Inc.
 **Governing Document:** `PROGRAM_CONTROL/DIRECTIVES/QUEUE/OQMI_GOVERNANCE.md`
@@ -75,6 +75,11 @@ Wallet, ModelWallet, EscrowItem, LedgerEntry, Idempotency, PointLot, plus the fi
 
 Merged on `main` and verified as of 2026-04-21. Mirrors `RRR-WORK-001.md §5.1`. Reverse-chronological by wave; within a wave, by task ID.
 
+### RRR-WORK-001 Wave A — opening bundle
+
+- RRR-WORK-001-A001 — `OQMI_SYSTEM_STATE_RRR.md` installed (PR #244, merge SHA `231665d`)
+- RRR-WORK-001-A002 — charter ratified; RRR-GOV-002 retired to `archive/governance/RRR-GOV-002_2026-04-21.md`; `.github/copilot-instructions.md` active-charter reference swapped to RRR-WORK-001; `PROGRAM_CONTROL/HANDOFFS/` installed with thread-06 handoff; `docs/TECH_DEBT_ASSESSMENT.md` archived to `docs/history/TECH_DEBT_ASSESSMENT_2026-04-21.md` *(merge SHA backfilled by A-003 or next PR)*
+
 ### RRR-GOV-002 Wave A (governance scaffolding — all DONE on `main`)
 
 - A-001 through A-005 — DONE records present at `PROGRAM_CONTROL/DIRECTIVES/DONE/RRR-GOV-002-A00{1..5}-DONE.md`
@@ -107,10 +112,9 @@ Current in-progress work, by branch and agent.
 
 | Task | Charter | Branch | Agent | Status |
 |---|---|---|---|---|
-| RRR-WORK-001-A001 — Install `OQMI_SYSTEM_STATE_RRR.md` | RRR-WORK-001 | `claude/install-rrr-system-state-X2ump` | claude-code | PR open |
-| RRR-WORK-001-A002 — Charter ratification + RRR-GOV-002 retirement | RRR-WORK-001 | (pending A-001 merge) | claude-code | BLOCKED on A-001 |
+| RRR-WORK-001-A002 — Charter ratification + RRR-GOV-002 retirement | RRR-WORK-001 | `claude/ratify-rrr-work-001-X2ump` | claude-code | PR open |
 
-Wave A tasks A-003 through A-011 and A-CLEAN are `QUEUED` in the charter and will unblock on A-002 merge (A-007 further depends on A-004). See `RRR-WORK-001.md §6` for the full task stream with acceptance criteria.
+Wave A tasks A-003 through A-011 are **unblocked on A-002 merge** and may be claimed in parallel (A-007 further depends on A-004). A-CLEAN depends on all preceding Wave A tasks. See `RRR-WORK-001.md §6` for the full task stream with acceptance criteria.
 
 ---
 
@@ -165,6 +169,8 @@ Decisions and artifacts locked as permanently retired. Do not reintroduce.
 - **Root `CLAUDE.md`.** Retired; archived at `archive/governance/CLAUDE_2026-04-21.md`. The active agent-instructions file is `.github/copilot-instructions.md`.
 - **Directive workflow automation** — `.github/workflows/directive-intake.yml` and `.github/workflows/directive-dispatch.yml`. Deletion pending in Task A-005 (per CEO Decision W1: agents own the full lifecycle in their final commit; no workflow automation).
 - **`CEO_GATE` field on directives.** Retired in favor of `OQMI_GOVERNANCE.md §2.2` Human-Review Categories. Historic references remain in archived governance docs.
+- **`RRR-GOV-002.md`** — retired on A-002 merge; archived at `archive/governance/RRR-GOV-002_2026-04-21.md`. Replaced as the active charter by `RRR-WORK-001.md`.
+- **Thread #5 tech-debt assessment** (root `docs/TECH_DEBT_ASSESSMENT.md`) — archived on A-002 merge to `docs/history/TECH_DEBT_ASSESSMENT_2026-04-21.md`. Findings absorbed into `RRR-WORK-001.md §5` and this file's §5 / §6.
 
 ---
 

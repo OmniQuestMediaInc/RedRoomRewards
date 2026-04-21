@@ -179,8 +179,9 @@ Wave A must close before Wave B FIZ work begins.
 #### Task A-001 — Install RRR-scoped `OQMI_SYSTEM_STATE_RRR.md`
 
 - **Status:** DONE
-- **Merge SHA:** *<set on merge>*
+- **Merge SHA:** 231665d8c31139ae32c0b0816553003ee470f32a
 - **DONE record:** RRR-WORK-001-A001-DONE.md
+- **PR:** #244
 - **Agent:** claude-code
 - **Type:** GOV
 - **FIZ:** NO
@@ -213,7 +214,9 @@ Wave A must close before Wave B FIZ work begins.
 
 #### Task A-002 — Charter ratification + RRR-GOV-002 retirement
 
-- **Status:** IN_PROGRESS
+- **Status:** DONE
+- **Merge SHA:** *<set on merge — backfilled by A-003 PR or the first Wave A parallel task PR before A-003's charter-integrity CI goes live>*
+- **DONE record:** RRR-WORK-001-A002-DONE.md
 - **Agent:** claude-code
 - **Type:** GOV
 - **FIZ:** NO
@@ -1010,6 +1013,7 @@ Any agent or session that attempts to amend this charter without following these
 |Date      |Change                                                                                                                                                                                                                                                                                                                                                              |Author                                                             |Rationale                                                                                                                   |
 |:---------|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:------------------------------------------------------------------|:---------------------------------------------------------------------------------------------------------------------------|
 |2026-04-21|Charter opened. Supersedes RRR-GOV-002 (all Wave A tasks confirmed DONE on `main`). Absorbs Phase 1, Phase 2, and thread #5 tech debt assessment. Wave A = cleanup bundle (Path 2 transition). A-001 installs RRR-scoped `OQMI_SYSTEM_STATE_RRR.md` as first task (Q1 resolution). A-005 reissued as a clean task with CEO closing any in-flight PR (Q2 resolution).|Architecture Coordinator (Claude Chat Thread #6), per CEO direction|Successor charter with correct repo scoping, clean governance task reissue, and full FIZ wiring backlog from the assessment.|
+|2026-04-21|A-001 merged (PR #244, merge SHA `231665d`): `OQMI_SYSTEM_STATE_RRR.md` installed. A-002 ratification carried in this PR: charter file renamed from `RRR_WORK-001` (no extension, initial commit naming) to `RRR-WORK-001.md` so A-003's charter-integrity CI parses the correct path; RRR-GOV-002 retired to `archive/governance/RRR-GOV-002_2026-04-21.md`; `.github/copilot-instructions.md` **Active Charter** line swapped to RRR-WORK-001; `PROGRAM_CONTROL/HANDOFFS/` installed with thread-06 handoff; `docs/TECH_DEBT_ASSESSMENT.md` archived to `docs/history/TECH_DEBT_ASSESSMENT_2026-04-21.md`.|claude-code, per CEO direction|Ratifies the successor charter and closes out the thread-05 tech-debt assessment as a historical document. Enables Wave A parallel claims (A-003 through A-011, A-007 behind A-004).|
 
 -----
 
