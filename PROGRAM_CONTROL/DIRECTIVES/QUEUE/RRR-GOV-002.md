@@ -252,7 +252,7 @@ Goal: clean the governance surface, resolve known contradictions, install the ga
 
 #### Task A-003 — Create GOV-GATE-TRACKER.md
 
-- **Status:** QUEUED  
+- **Status:** DONE  
 - **Agent:** copilot  
 - **Type:** GOV  
 - **CEO\_GATE:** NO  
@@ -268,7 +268,9 @@ Goal: clean the governance surface, resolve known contradictions, install the ga
   - File exists, parseable as Markdown table  
   - Both seed rows present  
 - **Commit format:** `GOV: install GOV-GATE-TRACKER for CEO_GATE visibility — RRR-GOV-002-A003`  
-- **Report-back:** `PROGRAM_CONTROL/REPORT_BACK/RRR-GOV-002-A003-report.md`
+- **Report-back:** `PROGRAM_CONTROL/REPORT_BACK/RRR-GOV-002-A003-report.md`  
+- **Merge SHA:** e71ef5bec742674628c003d70d9f31e9fc29f8f7  
+- **DONE record:** RRR-GOV-002-A003-DONE.md
 
 ---
 
