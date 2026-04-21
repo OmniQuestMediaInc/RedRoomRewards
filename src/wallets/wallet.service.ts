@@ -89,6 +89,11 @@ export class WalletService implements IWalletService {
    * Hold funds in escrow (deduct from available balance)
    */
   async holdInEscrow(request: EscrowHoldRequest): Promise<EscrowHoldResponse> {
+    // Money-like operations must have a strictly positive amount.
+    if (!(request.amount > 0)) {
+      throw new Error(`Invalid amount: ${request.amount}. Amount must be positive.`);
+    }
+
     // Atomically claim the idempotency key so concurrent calls with the same
     // key cannot both proceed to mutate the wallet.
     const claimed = await this.ledgerService.claimIdempotency(

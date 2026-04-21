@@ -341,16 +341,18 @@ export class PointAccrualService {
    * Validate award amount is within acceptable range
    */
   private validateAmount(amount: number): void {
+    // Fundamental check first: amount must be a positive finite number.
+    // This catches 0, negatives, NaN, and Infinity before any range check.
+    if (!Number.isFinite(amount) || amount <= 0) {
+      throw new Error('Amount must be a positive finite number');
+    }
+
     if (amount < this.config.minAwardAmount) {
       throw new Error(`Amount must be at least ${this.config.minAwardAmount}`);
     }
-    
+
     if (amount > this.config.maxAwardAmount) {
       throw new Error(`Amount cannot exceed ${this.config.maxAwardAmount}`);
-    }
-    
-    if (!Number.isFinite(amount) || amount <= 0) {
-      throw new Error('Amount must be a positive finite number');
     }
   }
   

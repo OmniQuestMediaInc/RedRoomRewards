@@ -1,73 +1,96 @@
 /**
  * Security and Authorization Tests
- * 
+ *
  * Tests authorization validation, input validation, and security controls
- * as specified in TEST_STRATEGY.md Section 5
+ * as specified in TEST_STRATEGY.md Section 5.
  */
 
-import { AuthService } from '../services/auth.service';
+import { AuthService, JWTPayload, UserRole } from '../services/auth.service';
+import { TransactionReason } from '../wallets/types';
+
+const TEST_AUTH_CONFIG = {
+  jwtSecret: 'test-secret-do-not-use-in-production',
+  tokenExpirySeconds: 300,
+  algorithm: 'HS256' as const,
+};
+
+function makeJWTPayload(partial: Partial<JWTPayload> & { role: UserRole; sub: string }): JWTPayload {
+  const now = Math.floor(Date.now() / 1000);
+  return {
+    iat: now,
+    exp: now + 300,
+    type: 'test',
+    ...partial,
+  };
+}
 
 describe('Security Tests', () => {
   let authService: AuthService;
 
   beforeEach(() => {
-    authService = new AuthService();
+    authService = new AuthService(TEST_AUTH_CONFIG);
   });
 
   describe('Authorization Validation', () => {
     describe('Queue Authorization Tokens', () => {
-      it('should reject tampered authorization token', async () => {
-        const token = authService.generateSettlementAuthorization({
-          queueItemId: 'queue-123',
-          escrowId: 'escrow-123',
-          modelId: 'model-456',
-        });
+      it('should reject tampered authorization token', () => {
+        const authorization = authService.generateSettlementAuthorization(
+          'queue-123',
+          'escrow-123',
+          'model-456',
+          100,
+          TransactionReason.PERFORMANCE_COMPLETED
+        );
 
-        const tamperedToken = token.slice(0, -5) + 'XXXXX';
+        const tamperedToken = authorization.token.slice(0, -5) + 'XXXXX';
 
-        await expect(
-          authService.verifyAuthorizationToken(tamperedToken)
-        ).rejects.toThrow();
+        expect(() => authService.verifyAuthorizationToken(tamperedToken)).toThrow();
       });
 
-      it('should reject tokens with wrong operation type', async () => {
-        const refundToken = authService.generateRefundAuthorization({
-          queueItemId: 'queue-123',
-          escrowId: 'escrow-123',
-          userId: 'user-123',
-        });
+      it('should reject tokens with wrong operation type', () => {
+        const refundAuth = authService.generateRefundAuthorization(
+          'queue-123',
+          'escrow-123',
+          'user-123',
+          100,
+          TransactionReason.PERFORMANCE_ABANDONED
+        );
 
-        // Try to use refund token for settlement
-        await expect(
-          authService.validateSettlementAuthorization(refundToken, {
-            queueItemId: 'queue-123',
-            escrowId: 'escrow-123',
-            modelId: 'model-456',
-          })
-        ).rejects.toThrow();
+        // A refund token must not satisfy a settlement check.
+        const refundAsSettlement = {
+          queueItemId: refundAuth.queueItemId,
+          token: refundAuth.token,
+          escrowId: refundAuth.escrowId,
+          modelId: 'model-456',
+          amount: refundAuth.amount,
+          reason: refundAuth.reason,
+          issuedAt: refundAuth.issuedAt,
+          expiresAt: refundAuth.expiresAt,
+        };
+
+        expect(() =>
+          authService.validateSettlementAuthorization(
+            refundAsSettlement,
+            'queue-123',
+            'escrow-123'
+          )
+        ).toThrow('Invalid authorization type');
       });
     });
 
     describe('Admin Authorization', () => {
       it('should validate admin roles for operations', () => {
-        const adminContext = {
-          adminId: 'admin-123',
-          adminUsername: 'admin@example.com',
-          roles: ['admin', 'support'],
-        };
+        const adminPayload = makeJWTPayload({ sub: 'admin-123', role: UserRole.ADMIN });
 
-        expect(authService.hasRole(adminContext, 'admin')).toBe(true);
-        expect(authService.hasRole(adminContext, 'user')).toBe(false);
+        expect(authService.hasRole(adminPayload, UserRole.ADMIN)).toBe(true);
+        // Admin is allowed to satisfy any role requirement.
+        expect(authService.hasRole(adminPayload, UserRole.USER)).toBe(true);
       });
 
       it('should reject operations without required admin role', () => {
-        const userContext = {
-          adminId: 'user-123',
-          adminUsername: 'user@example.com',
-          roles: ['user'],
-        };
+        const userPayload = makeJWTPayload({ sub: 'user-123', role: UserRole.USER });
 
-        expect(authService.hasRole(userContext, 'admin')).toBe(false);
+        expect(authService.hasRole(userPayload, UserRole.ADMIN)).toBe(false);
       });
     });
   });
@@ -132,7 +155,7 @@ describe('Security Tests', () => {
 });
 
 // Helper validation functions
-function validateUserId(userId: any): void { // eslint-disable-line @typescript-eslint/no-explicit-any
+function validateUserId(userId: unknown): void {
   if (typeof userId !== 'string') {
     throw new Error('Invalid user ID format');
   }
@@ -156,7 +179,7 @@ function sanitizeMetadata(metadata: Record<string, unknown>): Record<string, unk
   return sanitized;
 }
 
-function validateAmount(amount: any): void { // eslint-disable-line @typescript-eslint/no-explicit-any
+function validateAmount(amount: unknown): void {
   if (typeof amount !== 'number') {
     throw new Error('Amount must be a number');
   }
@@ -168,15 +191,20 @@ function validateAmount(amount: any): void { // eslint-disable-line @typescript-
   }
 }
 
-function redactSensitiveData(data: any): any { // eslint-disable-line @typescript-eslint/no-explicit-any
-  const redacted = { ...data };
+function redactSensitiveData(
+  data: Record<string, unknown>
+): Record<string, unknown> {
+  const redacted: Record<string, unknown> = { ...data };
   const sensitiveFields = ['password', 'creditCard', 'ssn', 'apiKey', 'token'];
   sensitiveFields.forEach((field) => {
     if (redacted[field]) {
       delete redacted[field];
     }
   });
-  if (redacted.user && typeof redacted.user === 'string' && redacted.user.includes('@')) {
+  if (
+    typeof redacted.user === 'string' &&
+    redacted.user.includes('@')
+  ) {
     redacted.user = '[REDACTED_EMAIL]';
   }
   return redacted;

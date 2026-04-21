@@ -21,36 +21,50 @@ const mockLedgerService = {
   generateReconciliationReport: jest.fn(),
 };
 
-const mockWalletModel = {
-  findOne: jest.fn(),
-  create: jest.fn(),
-  findOneAndUpdate: jest.fn(),
-};
-
-const mockEscrowItemModel = {
-  create: jest.fn(),
-  findOne: jest.fn(),
-  findOneAndUpdate: jest.fn(),
-};
-
-const mockModelWalletModel = {
-  findOne: jest.fn(),
-  create: jest.fn(),
-  findOneAndUpdate: jest.fn(),
-};
-
-// Mock modules
+// Mock modules. The factories must construct jest.fn() inline because
+// jest.mock is hoisted above any const declarations in this file.
 jest.mock('../../db/models/wallet.model', () => ({
-  WalletModel: mockWalletModel,
+  WalletModel: {
+    findOne: jest.fn(),
+    create: jest.fn(),
+    findOneAndUpdate: jest.fn(),
+    updateOne: jest.fn(),
+  },
 }));
 
 jest.mock('../../db/models/escrow-item.model', () => ({
-  EscrowItemModel: mockEscrowItemModel,
+  EscrowItemModel: {
+    create: jest.fn(),
+    findOne: jest.fn(),
+    findOneAndUpdate: jest.fn(),
+    updateOne: jest.fn(),
+    deleteOne: jest.fn(),
+  },
 }));
 
 jest.mock('../../db/models/model-wallet.model', () => ({
-  ModelWalletModel: mockModelWalletModel,
+  ModelWalletModel: {
+    findOne: jest.fn(),
+    create: jest.fn(),
+    findOneAndUpdate: jest.fn(),
+  },
 }));
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const mockWalletModel = require('../../db/models/wallet.model').WalletModel as {
+  findOne: jest.Mock;
+  create: jest.Mock;
+  findOneAndUpdate: jest.Mock;
+  updateOne: jest.Mock;
+};
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const mockEscrowItemModel = require('../../db/models/escrow-item.model').EscrowItemModel as {
+  create: jest.Mock;
+  findOne: jest.Mock;
+  findOneAndUpdate: jest.Mock;
+  updateOne: jest.Mock;
+  deleteOne: jest.Mock;
+};
 
 describe('WalletService - Comprehensive Tests', () => {
   let walletService: WalletService;
@@ -58,6 +72,21 @@ describe('WalletService - Comprehensive Tests', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     walletService = new WalletService(mockLedgerService as any); // eslint-disable-line @typescript-eslint/no-explicit-any
+
+    // Default idempotency claim succeeds unless a test overrides it.
+    mockLedgerService.claimIdempotency.mockResolvedValue(true);
+
+    // Default optimistic-lock behavior: findOneAndUpdate "succeeds" by
+    // returning a truthy document. Individual tests can override with
+    // mockResolvedValueOnce to simulate a version conflict.
+    mockWalletModel.findOneAndUpdate.mockResolvedValue({
+      userId: 'user-123',
+      availableBalance: 0,
+      escrowBalance: 0,
+      version: 2,
+    });
+    mockEscrowItemModel.updateOne.mockResolvedValue({ acknowledged: true, modifiedCount: 1 });
+    mockEscrowItemModel.deleteOne.mockResolvedValue({ acknowledged: true, deletedCount: 0 });
   });
 
   describe('holdInEscrow', () => {
@@ -133,10 +162,10 @@ describe('WalletService - Comprehensive Tests', () => {
     });
 
     it('should handle idempotent requests', async () => {
-      // Arrange
+      // Arrange: claim fails because another caller already claimed this key.
       const idempotencyKey = 'idem-duplicate';
-      
-      mockLedgerService.checkIdempotency.mockResolvedValue(true);
+
+      mockLedgerService.claimIdempotency.mockResolvedValueOnce(false);
 
       // Act & Assert
       await expect(
