@@ -8,9 +8,9 @@
 
 **Merged:** 2026-04-21
 
-**Merge commit:** *<set on merge — this record is filed in the same PR as the work per charter §3.4; Merge SHA backfilled by A-CLEAN or immediate follow-up commit before A-003's charter-integrity CI is live>*
+**Merge commit:** 231665d8c31139ae32c0b0816553003ee470f32a
 
-**PR:** *<set on open>*
+**PR:** #244
 
 **Agent executed:** claude-code
 
