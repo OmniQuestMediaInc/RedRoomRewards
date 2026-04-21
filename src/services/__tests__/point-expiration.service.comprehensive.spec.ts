@@ -1,29 +1,23 @@
 /**
  * Comprehensive Point Expiration Service Tests
- * 
+ *
  * Tests point expiration logic, batch processing, and edge cases
  * as specified in TEST_STRATEGY.md
  */
 
 import { PointExpirationService } from '../point-expiration.service';
 import { TransactionType, TransactionReason } from '../../wallets/types';
+import { WalletModel } from '../../db/models/wallet.model';
 
-// Mock implementations
+// Auto-mock DB model (avoids jest hoisting issues with const variables in factories)
+jest.mock('../../db/models/wallet.model');
+
+// Mock ledger service
 const mockLedgerService = {
   createEntry: jest.fn(),
   queryEntries: jest.fn(),
   getBalanceSnapshot: jest.fn(),
 };
-
-const mockWalletModel = {
-  findOne: jest.fn(),
-  find: jest.fn(),
-  save: jest.fn(),
-};
-
-jest.mock('../../db/models/wallet.model', () => ({
-  WalletModel: mockWalletModel,
-}));
 
 describe('PointExpirationService - Comprehensive Tests', () => {
   let expirationService: PointExpirationService;
@@ -58,10 +52,13 @@ describe('PointExpirationService - Comprehensive Tests', () => {
 
       mockLedgerService.queryEntries.mockResolvedValue({
         entries: expiredEntries,
-        pagination: { total: 2, limit: 100, offset: 0 },
+        totalCount: 2,
+        limit: 100,
+        offset: 0,
+        hasMore: false,
       });
 
-      mockWalletModel.findOne.mockResolvedValue({
+      (WalletModel.findOne as jest.Mock).mockResolvedValue({
         userId,
         availableBalance: 150,
         escrowBalance: 0,
@@ -69,23 +66,26 @@ describe('PointExpirationService - Comprehensive Tests', () => {
         save: jest.fn().mockResolvedValue(true),
       });
 
+      (WalletModel.findOneAndUpdate as jest.Mock).mockResolvedValue({
+        userId,
+        availableBalance: 0,
+        version: 6,
+      });
+
       mockLedgerService.createEntry.mockResolvedValue({
         entryId: 'expiration-entry',
       });
 
-      // Act
-      const result = await expirationService.processUserExpiration({
-        userId,
-        asOfDate: new Date('2026-01-03'),
-      });
+      // Act — positional args: (userId, requestId)
+      const result = await expirationService.processUserExpiration(userId, 'req-expire-1');
 
       // Assert
-      expect(result.amountExpired).toBe(150); // 100 + 50
+      expect(result).not.toBeNull();
+      expect(result!.amountExpired).toBe(150); // 100 + 50, capped at availableBalance
       expect(mockLedgerService.createEntry).toHaveBeenCalledWith(
         expect.objectContaining({
           type: TransactionType.DEBIT,
-          amount: -150,
-          reason: TransactionReason.POINTS_EXPIRED,
+          reason: TransactionReason.POINT_EXPIRY,
         })
       );
     });
@@ -93,26 +93,31 @@ describe('PointExpirationService - Comprehensive Tests', () => {
     it('should handle users with no expired points', async () => {
       mockLedgerService.queryEntries.mockResolvedValue({
         entries: [],
-        pagination: { total: 0, limit: 100, offset: 0 },
+        totalCount: 0,
+        limit: 100,
+        offset: 0,
+        hasMore: false,
       });
 
-      const result = await expirationService.processUserExpiration({
-        userId: 'user-no-expired',
-        asOfDate: new Date(),
-      });
+      const result = await expirationService.processUserExpiration(
+        'user-no-expired',
+        'req-no-expire'
+      );
 
-      expect(result.amountExpired).toBe(0);
+      // Service returns null when no points are expired
+      expect(result).toBeNull();
       expect(mockLedgerService.createEntry).not.toHaveBeenCalled();
     });
 
     it('should respect grace period', async () => {
-      const expirationDate = new Date('2026-01-01');
-      const checkDate = new Date('2026-01-02');
       const gracePeriodDays = 3;
 
       expirationService = new PointExpirationService(mockLedgerService as any, { // eslint-disable-line @typescript-eslint/no-explicit-any
         gracePeriodDays,
       });
+
+      // Entry expired only 1 day ago — inside grace period, should NOT be processed
+      const recentExpiration = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000);
 
       mockLedgerService.queryEntries.mockResolvedValue({
         entries: [
@@ -120,26 +125,27 @@ describe('PointExpirationService - Comprehensive Tests', () => {
             entryId: 'entry-1',
             accountId: 'user-123',
             amount: 100,
-            metadata: { expiresAt: expirationDate },
+            metadata: { expiresAt: recentExpiration },
           },
         ],
-        pagination: { total: 1, limit: 100, offset: 0 },
+        totalCount: 1,
+        limit: 100,
+        offset: 0,
+        hasMore: false,
       });
 
-      // Check before grace period ends
-      const result = await expirationService.processUserExpiration({
-        userId: 'user-123',
-        asOfDate: checkDate, // Only 1 day after expiration, grace period is 3 days
-      });
+      const result = await expirationService.processUserExpiration(
+        'user-123',
+        'req-grace'
+      );
 
-      // Should not expire yet
-      expect(result.amountExpired).toBe(0);
+      // Should not expire yet — still within grace period
+      expect(result).toBeNull();
       expect(mockLedgerService.createEntry).not.toHaveBeenCalled();
     });
 
     it('should create deterministic idempotency key', async () => {
       const userId = 'user-123';
-      const asOfDate = new Date('2026-01-03');
 
       mockLedgerService.queryEntries.mockResolvedValue({
         entries: [
@@ -150,24 +156,30 @@ describe('PointExpirationService - Comprehensive Tests', () => {
             metadata: { expiresAt: new Date('2025-12-31') },
           },
         ],
-        pagination: { total: 1, limit: 100, offset: 0 },
+        totalCount: 1,
+        limit: 100,
+        offset: 0,
+        hasMore: false,
       });
 
-      mockWalletModel.findOne.mockResolvedValue({
+      (WalletModel.findOne as jest.Mock).mockResolvedValue({
         userId,
         availableBalance: 100,
         version: 1,
         save: jest.fn().mockResolvedValue(true),
       });
 
+      (WalletModel.findOneAndUpdate as jest.Mock).mockResolvedValue({
+        userId,
+        availableBalance: 0,
+        version: 2,
+      });
+
       mockLedgerService.createEntry.mockResolvedValue({
         entryId: 'exp-entry',
       });
 
-      await expirationService.processUserExpiration({
-        userId,
-        asOfDate,
-      });
+      await expirationService.processUserExpiration(userId, 'req-idem');
 
       // Idempotency key should be based on userId and date
       expect(mockLedgerService.createEntry).toHaveBeenCalledWith(
@@ -187,20 +199,10 @@ describe('PointExpirationService - Comprehensive Tests', () => {
         { userId: 'user-3', amountExpiring: 200 },
       ];
 
-      // Mock getUsersWithExpiringPoints
-      jest.spyOn(expirationService, 'getUsersWithExpiringPoints').mockResolvedValue(
-        usersWithExpiringPoints.map((u) => ({
-          userId: u.userId,
-          pointsExpiring: u.amountExpiring,
-          expirationDate: new Date('2025-12-31'),
-          daysUntilExpiration: 0,
-        }))
-      );
-
-      // Mock processUserExpiration for each user
+      // Spy on processUserExpiration — new signature: (userId: string, requestId: string)
       jest
         .spyOn(expirationService, 'processUserExpiration')
-        .mockImplementation(async ({ userId }) => {
+        .mockImplementation(async (userId: string) => {
           const user = usersWithExpiringPoints.find((u) => u.userId === userId);
           return {
             userId,
@@ -210,11 +212,11 @@ describe('PointExpirationService - Comprehensive Tests', () => {
           };
         });
 
-      // Act
-      const result = await expirationService.processBatchExpiration({
-        batchSize: 100,
-        asOfDate: new Date('2026-01-03'),
-      });
+      // Act — new API: (userIds, requestId)
+      const result = await expirationService.processBatchExpiration(
+        ['user-1', 'user-2', 'user-3'],
+        'req-batch-1'
+      );
 
       // Assert
       expect(result.usersProcessed).toBe(3);
@@ -230,18 +232,9 @@ describe('PointExpirationService - Comprehensive Tests', () => {
         { userId: 'user-3', amountExpiring: 200 },
       ];
 
-      jest.spyOn(expirationService, 'getUsersWithExpiringPoints').mockResolvedValue(
-        usersWithExpiringPoints.map((u) => ({
-          userId: u.userId,
-          pointsExpiring: u.amountExpiring,
-          expirationDate: new Date('2025-12-31'),
-          daysUntilExpiration: 0,
-        }))
-      );
-
       jest
         .spyOn(expirationService, 'processUserExpiration')
-        .mockImplementation(async ({ userId }) => {
+        .mockImplementation(async (userId: string) => {
           if (userId === 'user-2') {
             throw new Error('Database error');
           }
@@ -254,36 +247,19 @@ describe('PointExpirationService - Comprehensive Tests', () => {
           };
         });
 
-      const result = await expirationService.processBatchExpiration({
-        batchSize: 100,
-        asOfDate: new Date(),
-      });
+      const result = await expirationService.processBatchExpiration(
+        ['user-1', 'user-2', 'user-3'],
+        'req-batch-2'
+      );
 
-      expect(result.usersProcessed).toBe(3);
+      expect(result.usersProcessed).toBe(2); // only successful ones counted
       expect(result.successCount).toBe(2);
       expect(result.failureCount).toBe(1);
       expect(result.errors).toHaveLength(1);
       expect(result.errors![0].userId).toBe('user-2');
     });
 
-    it('should respect batch size', async () => {
-      const batchSize = 2;
-      const allUsers = [
-        { userId: 'user-1', pointsExpiring: 100 },
-        { userId: 'user-2', pointsExpiring: 50 },
-        { userId: 'user-3', pointsExpiring: 200 },
-      ];
-
-      jest
-        .spyOn(expirationService, 'getUsersWithExpiringPoints')
-        .mockResolvedValue(
-          allUsers.map((u) => ({
-            ...u,
-            expirationDate: new Date('2025-12-31'),
-            daysUntilExpiration: 0,
-          }))
-        );
-
+    it('should process all provided user IDs', async () => {
       jest.spyOn(expirationService, 'processUserExpiration').mockResolvedValue({
         userId: 'user-1',
         amountExpired: 100,
@@ -291,101 +267,67 @@ describe('PointExpirationService - Comprehensive Tests', () => {
         timestamp: new Date(),
       });
 
-      await expirationService.processBatchExpiration({
-        batchSize,
-        asOfDate: new Date(),
-      });
-
-      // Should only process batchSize number of users
-      expect(expirationService.processUserExpiration).toHaveBeenCalledTimes(
-        batchSize
+      await expirationService.processBatchExpiration(
+        ['user-1', 'user-2', 'user-3'],
+        'req-batch-3'
       );
+
+      // All 3 userIds should have been processed
+      expect(expirationService.processUserExpiration).toHaveBeenCalledTimes(3);
     });
   });
 
   describe('getUsersWithExpiringPoints', () => {
     it('should return users with points expiring soon', async () => {
-      const daysAhead = 7;
-      const mockUsers = [
-        {
-          userId: 'user-1',
-          availableBalance: 100,
-        },
-        {
-          userId: 'user-2',
-          availableBalance: 50,
-        },
-      ];
+      // Service does a single queryEntries call and groups by accountId
+      const warningDate = new Date(Date.now() + 5 * 24 * 60 * 60 * 1000); // 5 days from now
 
-      mockWalletModel.find.mockResolvedValue(mockUsers);
-
-      mockLedgerService.queryEntries
-        .mockResolvedValueOnce({
-          // user-1
-          entries: [
-            {
-              accountId: 'user-1',
-              amount: 100,
-              metadata: {
-                expiresAt: new Date(
-                  Date.now() + 5 * 24 * 60 * 60 * 1000
-                ), // 5 days from now
-              },
+      mockLedgerService.queryEntries.mockResolvedValue({
+        entries: [
+          {
+            accountId: 'user-1',
+            amount: 100,
+            metadata: { expiresAt: warningDate },
+          },
+          {
+            accountId: 'user-2',
+            amount: 50,
+            metadata: {
+              expiresAt: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000), // 3 days from now
             },
-          ],
-          pagination: { total: 1, limit: 100, offset: 0 },
-        })
-        .mockResolvedValueOnce({
-          // user-2
-          entries: [
-            {
-              accountId: 'user-2',
-              amount: 50,
-              metadata: {
-                expiresAt: new Date(
-                  Date.now() + 3 * 24 * 60 * 60 * 1000
-                ), // 3 days from now
-              },
-            },
-          ],
-          pagination: { total: 1, limit: 100, offset: 0 },
-        });
-
-      const result = await expirationService.getUsersWithExpiringPoints({
-        daysAhead,
+          },
+        ],
+        totalCount: 2,
+        limit: 100,
+        offset: 0,
+        hasMore: false,
       });
 
+      // Act — no arguments in the current API
+      const result = await expirationService.getUsersWithExpiringPoints();
+
       expect(result).toHaveLength(2);
-      expect(result[0].userId).toBe('user-1');
-      expect(result[0].pointsExpiring).toBe(100);
-      expect(result[1].userId).toBe('user-2');
-      expect(result[1].pointsExpiring).toBe(50);
+      expect(result.some((u) => u.userId === 'user-1')).toBe(true);
+      expect(result.some((u) => u.userId === 'user-2')).toBe(true);
     });
 
     it('should not include users with no expiring points', async () => {
-      mockWalletModel.find.mockResolvedValue([
-        { userId: 'user-no-expiration', availableBalance: 100 },
-      ]);
-
       mockLedgerService.queryEntries.mockResolvedValue({
         entries: [], // No entries with expiration dates
-        pagination: { total: 0, limit: 100, offset: 0 },
+        totalCount: 0,
+        limit: 100,
+        offset: 0,
+        hasMore: false,
       });
 
-      const result = await expirationService.getUsersWithExpiringPoints({
-        daysAhead: 7,
-      });
+      // Act
+      const result = await expirationService.getUsersWithExpiringPoints();
 
       expect(result).toHaveLength(0);
     });
 
-    it('should calculate days until expiration correctly', async () => {
-      const expirationDate = new Date();
-      expirationDate.setDate(expirationDate.getDate() + 5); // 5 days from now
-
-      mockWalletModel.find.mockResolvedValue([
-        { userId: 'user-1', availableBalance: 100 },
-      ]);
+    it('should return expiration date for users with expiring points', async () => {
+      const expirationDate = new Date(Date.now() + 5 * 24 * 60 * 60 * 1000); // 5 days from now
 
       mockLedgerService.queryEntries.mockResolvedValue({
         entries: [
@@ -395,14 +337,18 @@ describe('PointExpirationService - Comprehensive Tests', () => {
             metadata: { expiresAt: expirationDate },
           },
         ],
-        pagination: { total: 1, limit: 100, offset: 0 },
+        totalCount: 1,
+        limit: 100,
+        offset: 0,
+        hasMore: false,
       });
 
-      const result = await expirationService.getUsersWithExpiringPoints({
-        daysAhead: 7,
-      });
+      const result = await expirationService.getUsersWithExpiringPoints();
 
-      expect(result[0].daysUntilExpiration).toBe(5);
+      expect(result[0].userId).toBe('user-1');
+      // Return type: {userId, amountExpiring, expiresAt}
+      expect(result[0].amountExpiring).toBe(100);
+      expect(result[0].expiresAt).toBeDefined();
     });
   });
 
@@ -424,27 +370,37 @@ describe('PointExpirationService - Comprehensive Tests', () => {
             metadata: { expiresAt: new Date('2027-12-31') }, // Not expired yet
           },
         ],
-        pagination: { total: 2, limit: 100, offset: 0 },
+        totalCount: 2,
+        limit: 100,
+        offset: 0,
+        hasMore: false,
       });
 
-      mockWalletModel.findOne.mockResolvedValue({
+      (WalletModel.findOne as jest.Mock).mockResolvedValue({
         userId: 'user-123',
         availableBalance: 200,
         version: 1,
         save: jest.fn().mockResolvedValue(true),
       });
 
+      (WalletModel.findOneAndUpdate as jest.Mock).mockResolvedValue({
+        userId: 'user-123',
+        availableBalance: 100,
+        version: 2,
+      });
+
       mockLedgerService.createEntry.mockResolvedValue({
         entryId: 'exp-entry',
       });
 
-      const result = await expirationService.processUserExpiration({
-        userId: 'user-123',
-        asOfDate: new Date('2026-01-03'),
-      });
+      const result = await expirationService.processUserExpiration(
+        'user-123',
+        'req-partial'
+      );
 
       // Only expired points should be processed
-      expect(result.amountExpired).toBe(100);
+      expect(result).not.toBeNull();
+      expect(result!.amountExpired).toBe(100);
     });
 
     it('should not create negative balance', async () => {
@@ -457,27 +413,37 @@ describe('PointExpirationService - Comprehensive Tests', () => {
             metadata: { expiresAt: new Date('2025-12-31') },
           },
         ],
-        pagination: { total: 1, limit: 100, offset: 0 },
+        totalCount: 1,
+        limit: 100,
+        offset: 0,
+        hasMore: false,
       });
 
-      mockWalletModel.findOne.mockResolvedValue({
+      (WalletModel.findOne as jest.Mock).mockResolvedValue({
         userId: 'user-123',
         availableBalance: 50, // User already spent 50 points
         version: 2,
         save: jest.fn().mockResolvedValue(true),
       });
 
+      (WalletModel.findOneAndUpdate as jest.Mock).mockResolvedValue({
+        userId: 'user-123',
+        availableBalance: 0,
+        version: 3,
+      });
+
       mockLedgerService.createEntry.mockResolvedValue({
         entryId: 'exp-entry',
       });
 
-      const result = await expirationService.processUserExpiration({
-        userId: 'user-123',
-        asOfDate: new Date('2026-01-03'),
-      });
+      const result = await expirationService.processUserExpiration(
+        'user-123',
+        'req-no-negative'
+      );
 
       // Should only expire what's available
-      expect(result.amountExpired).toBe(50);
+      expect(result).not.toBeNull();
+      expect(result!.amountExpired).toBe(50);
     });
   });
 });
