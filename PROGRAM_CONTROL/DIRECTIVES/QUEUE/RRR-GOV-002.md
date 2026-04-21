@@ -272,7 +272,7 @@ Goal: clean the governance surface, resolve known contradictions, install the ga
 
 #### Task A-004 — Refresh REQUIREMENTS\_MASTER.md stale statuses
 
-- **Status:** QUEUED  
+- **Status:** DONE  
 - **Agent:** claude-code  
 - **Type:** GOV  
 - **CEO\_GATE:** NO  
@@ -287,7 +287,9 @@ Goal: clean the governance surface, resolve known contradictions, install the ga
   - `grep -E "Missing|IN_PROGRESS" docs/REQUIREMENTS_MASTER.md` for the listed items → no matches  
   - Footer present  
 - **Commit format:** `GOV: refresh REQUIREMENTS_MASTER stale P1 statuses — RRR-GOV-002-A004`  
-- **Report-back:** `PROGRAM_CONTROL/REPORT_BACK/RRR-GOV-002-A004-report.md`
+- **Report-back:** `PROGRAM_CONTROL/REPORT_BACK/RRR-GOV-002-A004-report.md`  
+- **Merge SHA:** d9bd6de517351fc2984c26918e676a6fd8bd618b  
+- **DONE record:** RRR-GOV-002-A004-DONE.md
 
 ---
 
