@@ -226,7 +226,7 @@ Goal: clean the governance surface, resolve known contradictions, install the ga
 
 #### Task A-002 — Resolve package-manager contradiction (npm)
 
-- **Status:** QUEUED  
+- **Status:** DONE  
 - **Agent:** either  
 - **Type:** CHORE  
 - **CEO\_GATE:** NO  
@@ -243,13 +243,15 @@ Goal: clean the governance surface, resolve known contradictions, install the ga
   - `jq '.engines.yarn' package.json` → `null`  
   - `npm install` runs clean, no lockfile changes beyond timestamp  
 - **Commit format:** `CHORE: remove vestigial yarn fields, lock to npm — RRR-GOV-002-A002`  
-- **Report-back:** `PROGRAM_CONTROL/REPORT_BACK/RRR-GOV-002-A002-report.md`
+- **Report-back:** `PROGRAM_CONTROL/REPORT_BACK/RRR-GOV-002-A002-report.md`  
+- **Merge SHA:** a408653418e04831d72596bf5b3cc1cc12c704cf  
+- **DONE record:** RRR-GOV-002-A002-DONE.md
 
 ---
 
 #### Task A-003 — Create GOV-GATE-TRACKER.md
 
-- **Status:** QUEUED  
+- **Status:** DONE  
 - **Agent:** copilot  
 - **Type:** GOV  
 - **CEO\_GATE:** NO  
@@ -265,7 +267,9 @@ Goal: clean the governance surface, resolve known contradictions, install the ga
   - File exists, parseable as Markdown table  
   - Both seed rows present  
 - **Commit format:** `GOV: install GOV-GATE-TRACKER for CEO_GATE visibility — RRR-GOV-002-A003`  
-- **Report-back:** `PROGRAM_CONTROL/REPORT_BACK/RRR-GOV-002-A003-report.md`
+- **Report-back:** `PROGRAM_CONTROL/REPORT_BACK/RRR-GOV-002-A003-report.md`  
+- **Merge SHA:** e71ef5bec742674628c003d70d9f31e9fc29f8f7  
+- **DONE record:** RRR-GOV-002-A003-DONE.md
 
 ---
 
