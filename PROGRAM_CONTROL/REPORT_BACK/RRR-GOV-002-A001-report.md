@@ -71,8 +71,12 @@ git ls-files archive/governance/CLAUDE_2026-04-21.md
 
 **SUCCESS** — all 4 acceptance criteria verified.
 
+## PR
+
+**#229** — https://github.com/OmniQuestMediaInc/RedRoomRewards/pull/229
+CEO_GATE: YES — merge manually. Auto-merge must NOT be enabled.
+`ceo-gate` label: agent lacked label-write permission; **must be applied manually by operator**.
+
 ## Follow-ups
 
-- This task carries CEO_GATE: YES. PR must be merged manually by Kevin B. Hartley.
-- Wave A tasks A-002 (depends-on A-001) and A-003 (depends-on A-001) are unblocked
-  after this merges.
+- Wave A tasks A-002 (depends-on A-001) and A-003 (depends-on A-001) unblock after merge.
