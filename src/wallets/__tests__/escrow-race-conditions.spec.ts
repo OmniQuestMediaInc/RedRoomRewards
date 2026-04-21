@@ -31,6 +31,8 @@ describe('Escrow Race Condition Protection', () => {
     jest.clearAllMocks();
     ledgerService = new LedgerService();
     walletService = new WalletService(ledgerService);
+    // Default: idempotency claims succeed unless a test overrides this.
+    (ledgerService.claimIdempotency as jest.Mock).mockResolvedValue(true);
   });
 
   describe('Settlement Race Condition Prevention', () => {

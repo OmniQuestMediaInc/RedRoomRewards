@@ -336,7 +336,16 @@ export interface ILedgerService {
    * Verify idempotency key hasn't been used
    */
   checkIdempotency(key: string, operationType: string): Promise<boolean>;
-  
+
+  /**
+   * Atomically claim an idempotency key. Returns true if this caller is the
+   * winner (the claim was created) and false if another caller already
+   * claimed the same key. Used as a concurrency gate so that only one of N
+   * simultaneous requests with the same idempotency key proceeds to mutate
+   * state.
+   */
+  claimIdempotency(key: string, operationType: string): Promise<boolean>;
+
   /**
    * Store idempotency result
    */

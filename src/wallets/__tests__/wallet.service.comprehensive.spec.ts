@@ -14,6 +14,7 @@ import {
 // Mock implementations
 const mockLedgerService = {
   checkIdempotency: jest.fn(),
+  claimIdempotency: jest.fn().mockResolvedValue(true),
   createEntry: jest.fn(),
   queryEntries: jest.fn(),
   getBalanceSnapshot: jest.fn(),
