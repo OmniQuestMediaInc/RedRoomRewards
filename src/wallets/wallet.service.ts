@@ -89,12 +89,13 @@ export class WalletService implements IWalletService {
    * Hold funds in escrow (deduct from available balance)
    */
   async holdInEscrow(request: EscrowHoldRequest): Promise<EscrowHoldResponse> {
-    // Check idempotency
-    const exists = await this.ledgerService.checkIdempotency(
+    // Atomically claim the idempotency key so concurrent calls with the same
+    // key cannot both proceed to mutate the wallet.
+    const claimed = await this.ledgerService.claimIdempotency(
       request.idempotencyKey,
       'hold_escrow'
     );
-    if (exists) {
+    if (!claimed) {
       throw new Error('Idempotency key already used');
     }
 
@@ -274,12 +275,12 @@ export class WalletService implements IWalletService {
       throw new Error('Authorization required');
     }
     
-    // Check idempotency
-    const exists = await this.ledgerService.checkIdempotency(
+    // Atomically claim the idempotency key for this settle operation.
+    const claimed = await this.ledgerService.claimIdempotency(
       request.idempotencyKey,
       'settle_escrow'
     );
-    if (exists) {
+    if (!claimed) {
       throw new Error('Idempotency key already used');
     }
 
@@ -452,12 +453,12 @@ export class WalletService implements IWalletService {
       throw new Error('Authorization required');
     }
     
-    // Check idempotency
-    const exists = await this.ledgerService.checkIdempotency(
+    // Atomically claim the idempotency key for this refund operation.
+    const claimed = await this.ledgerService.claimIdempotency(
       request.idempotencyKey,
       'refund_escrow'
     );
-    if (exists) {
+    if (!claimed) {
       throw new Error('Idempotency key already used');
     }
 
@@ -599,12 +600,12 @@ export class WalletService implements IWalletService {
       throw new Error('Authorization required');
     }
     
-    // Check idempotency
-    const exists = await this.ledgerService.checkIdempotency(
+    // Atomically claim the idempotency key for this partial-settle operation.
+    const claimed = await this.ledgerService.claimIdempotency(
       request.idempotencyKey,
       'partial_settle_escrow'
     );
-    if (exists) {
+    if (!claimed) {
       throw new Error('Idempotency key already used');
     }
 

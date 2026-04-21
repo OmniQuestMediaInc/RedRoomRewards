@@ -265,13 +265,15 @@ export class LedgerService implements ILedgerService {
       dateRange.start
     );
 
-    // Get entries in date range
+    // Get entries in date range. Sort by timestamp ascending with entryId as
+    // a deterministic tie-breaker so the reconciliation output is stable and
+    // auditable even when multiple entries share a timestamp.
     const entries = await LedgerEntryModel.find({
       accountId: { $eq: accountId },
       accountType: { $eq: accountType },
       timestamp: { $gte: dateRange.start, $lte: dateRange.end },
     })
-      .sort({ timestamp: 1 })
+      .sort({ timestamp: 1, entryId: 1 })
       .lean()
       .exec();
 
@@ -352,6 +354,38 @@ export class LedgerService implements ILedgerService {
     }).lean().exec();
 
     return existing !== null;
+  }
+
+  /**
+   * Atomically claim an idempotency key by inserting a reservation record
+   * backed by the unique index on (pointsIdempotencyKey, eventScope).
+   * Returns true if this caller won the race, false if another caller already
+   * claimed the same key. This is the concurrency gate that ensures only one
+   * of N simultaneous requests with the same idempotency key proceeds.
+   */
+  async claimIdempotency(key: string, operationType: string): Promise<boolean> {
+    try {
+      await IdempotencyRecordModel.create({
+        pointsIdempotencyKey: key,
+        eventScope: operationType,
+        resultHash: 'pending',
+        storedResult: {},
+        // Short-lived claim; finalized by storeIdempotencyResult on success.
+        expiresAt: new Date(Date.now() + 60_000),
+        retentionUntil: new Date(Date.now() + 60_000),
+      });
+      return true;
+    } catch (error: unknown) {
+      if (
+        error &&
+        typeof error === 'object' &&
+        'code' in error &&
+        (error as { code?: number }).code === 11000
+      ) {
+        return false;
+      }
+      throw error;
+    }
   }
 
   /**

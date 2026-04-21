@@ -119,7 +119,7 @@ export class EventBus {
     
     // Mark event as processed
     if (this.config.enableDeduplication) {
-      this.markProcessed(event.eventId);
+      this.markProcessed(event);
     }
     
     // Get subscribers for this event type
@@ -217,18 +217,36 @@ export class EventBus {
   }
 
   /**
-   * Check if event was already processed
+   * Check if event was already processed by eventId or idempotencyKey
    */
   private isDuplicate(event: BaseRewardEvent): boolean {
-    return this.processedEvents.has(event.eventId) ||
-           this.processedEvents.has(event.idempotencyKey);
+    for (const key of this.dedupeKeys(event)) {
+      if (this.processedEvents.has(key)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**
-   * Mark event as processed
+   * Mark event as processed by both eventId and idempotencyKey (when present)
    */
-  private markProcessed(eventId: string): void {
-    this.processedEvents.set(eventId, Date.now());
+  private markProcessed(event: BaseRewardEvent): void {
+    const now = Date.now();
+    for (const key of this.dedupeKeys(event)) {
+      this.processedEvents.set(key, now);
+    }
+  }
+
+  /**
+   * Build namespaced dedupe keys so eventId and idempotencyKey cannot collide
+   */
+  private dedupeKeys(event: BaseRewardEvent): string[] {
+    const keys: string[] = [`eventId:${event.eventId}`];
+    if (event.idempotencyKey) {
+      keys.push(`idem:${event.idempotencyKey}`);
+    }
+    return keys;
   }
 
   /**
@@ -238,13 +256,16 @@ export class EventBus {
     this.cleanupInterval = setInterval(() => {
       const now = Date.now();
       const ttl = this.config.deduplicationTtlMs;
-      
-      for (const [eventId, timestamp] of this.processedEvents.entries()) {
+
+      for (const [key, timestamp] of this.processedEvents.entries()) {
         if (now - timestamp > ttl) {
-          this.processedEvents.delete(eventId);
+          this.processedEvents.delete(key);
         }
       }
     }, 60000); // Cleanup every minute
+
+    // Don't block Node process exit (important for test teardown)
+    this.cleanupInterval.unref?.();
   }
 
   /**

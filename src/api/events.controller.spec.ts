@@ -253,12 +253,16 @@ describe('EventsController', () => {
         await controller.postEvent(invalidRequest);
         fail('Should have thrown validation error');
       } catch (error: unknown) {
-        expect(error.validationErrors).toBeDefined();
-        expect(Array.isArray(error.validationErrors)).toBe(true);
-        expect(error.validationErrors.length).toBeGreaterThan(0);
-        
+        expect(error).toBeInstanceOf(Error);
+
+        const err = error as Error & { validationErrors?: unknown };
+
+        expect(err.validationErrors).toBeDefined();
+        expect(Array.isArray(err.validationErrors)).toBe(true);
+        expect((err.validationErrors as unknown[]).length).toBeGreaterThan(0);
+
         // Check structure of validation errors
-        const validationError = error.validationErrors[0];
+        const validationError = (err.validationErrors as any[])[0];
         expect(validationError).toHaveProperty('field');
         expect(validationError).toHaveProperty('message');
         expect(validationError).toHaveProperty('code');
