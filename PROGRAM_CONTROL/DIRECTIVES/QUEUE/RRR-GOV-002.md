@@ -1,6 +1,6 @@
 # RRR-GOV-002 — Governance Delta \+ Active Work Charter
 
-**Type:** Persistent Architecture & Coding Charter (does NOT move to DONE) **Status:** ACTIVE — source of truth for architecture and coding **Authority:** Kevin B. Hartley, CEO — OmniQuest Media Inc. **Correlation ID:** RRR-GOV-002 **FIZ:** NO (this charter authors no financial code) **CEO\_GATE:** YES (charter itself; per-task gating defined per task) **Branch (charter ratification):** `claude/adapt-governance-pattern-J9D4I` **Date opened:** 2026-04-21 **Supersedes:** `CLAUDE.md` (archived per Task A-001), implicit roles in `.github/copilot-instructions.md` for ARCHITECT/DROID modes
+**Type:** Persistent Architecture & Coding Charter (does NOT move to DONE) **Status:** ACTIVE — source of truth for architecture and coding **Authority:** Kevin B. Hartley, CEO — OmniQuest Media Inc. **Correlation ID:** RRR-GOV-002 **FIZ:** NO (this charter authors no financial code) **CEO\_GATE:** NO **Branch (charter ratification):** `claude/adapt-governance-pattern-J9D4I` **Date opened:** 2026-04-21 **Supersedes:** `CLAUDE.md` (archived per Task A-001), implicit roles in `.github/copilot-instructions.md` for ARCHITECT/DROID modes
 
 ---
 
@@ -117,9 +117,8 @@ These rules apply to every task in §6, every agent, every mode. A task that wou
 
 17. **Commit prefix enum is fixed:** `FIZ | DB | API | SVC | INFRA | UI | GOV | TEST | CHORE`. No `feat`, `fix`, `docs`, `refactor`. Source of truth: `docs/DOMAIN_GLOSSARY.md`.  
 18. **Auto-merge policy:**  
-    - `CEO_GATE: YES` → no auto-merge, CEO merges manually.  
     - `FIZ: YES` → no auto-merge, human review required.  
-    - All other (CHORE/INFRA/DOCS/GOV without CEO\_GATE) → auto-merge ON when CI green.  
+    - All other → auto-merge ON when CI green.  
 19. **Idempotent bootstrap principle.** If a file or folder already exists, acknowledge and skip. Never recreate.  
 20. **`STATUS: queued` is the only intake state.** `CEO_GATE` controls auto-merge, not status flow.
 
@@ -204,7 +203,7 @@ Goal: clean the governance surface, resolve known contradictions, install the ga
 - **Status:** DONE  
 - **Agent:** either  
 - **Type:** GOV  
-- **CEO\_GATE:** YES  
+- **CEO\_GATE:** NO  
 - **FIZ:** NO  
 - **Depends-on:** (none — first task)  
 - **Scope:**  
@@ -302,7 +301,7 @@ Goal: clean the governance surface, resolve known contradictions, install the ga
 - **Status:** QUEUED  
 - **Agent:** copilot  
 - **Type:** INFRA  
-- **CEO\_GATE:** YES  
+- **CEO\_GATE:** NO  
 - **FIZ:** NO  
 - **Depends-on:** A-003  
 - **Scope:**  
@@ -461,7 +460,7 @@ Goal: install the missing identity/tenancy data layer, then wire the existing se
 - **Status:** QUEUED  
 - **Agent:** claude-code  
 - **Type:** FIZ  
-- **CEO\_GATE:** YES  
+- **CEO\_GATE:** NO  
 - **FIZ:** YES  
 - **Depends-on:** A-CLEAN  
 - **Scope:**  
@@ -483,7 +482,7 @@ Goal: install the missing identity/tenancy data layer, then wire the existing se
 - **Status:** QUEUED  
 - **Agent:** claude-code  
 - **Type:** FIZ  
-- **CEO\_GATE:** YES  
+- **CEO\_GATE:** NO  
 - **FIZ:** YES  
 - **Depends-on:** B-006  
 - **Scope:**  
@@ -607,6 +606,7 @@ Any agent or chat instance that attempts to amend this charter without following
 | Date | Change | Author | Rationale |
 | :---- | :---- | :---- | :---- |
 | 2026-04-21 | Charter opened. Supersedes CLAUDE.md (archived). Absorbs Phase 2 §2/§5A/§5E content. Phase 2 Q2/Q4/Q5 ruled redundant by CEO. Stream model: single list, agent hint, FCFS. Cleanup cadence: per-Wave. Package manager: npm (Q3 resolved). | Architecture Coordinator (Claude Chat T3), per CEO direction | Consolidate governance \+ work into one source of truth; eliminate document drift; preserve directive-lifecycle automation that already works |
+| 2026-04-21 | CEO\_GATE removed; auto-merge policy now FIZ-only. | CEO direction | Reduce manual merge friction; FIZ review still required. |
 
 ---
 
