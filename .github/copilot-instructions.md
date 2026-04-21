@@ -12,6 +12,7 @@ prior reports.
 **Owner:** OmniQuest Media Inc.
 **Source of Truth:** This repository
 **Coding Doctrine:** COPILOT_INSTRUCTIONS.md (root) — always read before executing
+**Active Governance Charter:** PROGRAM_CONTROL/DIRECTIVES/QUEUE/RRR-GOV-002.md (persistent — supersedes prior governance; archived copy at archive/governance/)
 **Domain Glossary:** docs/DOMAIN_GLOSSARY.md (naming authority)
 **Requirements:** docs/REQUIREMENTS_MASTER.md (live build state)
 **CEO Decisions:** docs/RRR_CEO_DECISIONS_FINAL_2026-04-17.md
