@@ -42,10 +42,11 @@ This eliminates the multi-document drift that produced the stale Build State in 
 
 **DROID MODE (default for executing agents)**
 
-- Either Copilot or Claude Code, executing a single task from §6.  
+- `claude-code`, executing a single task from §6. (Copilot was retired from this workflow on 2026-04-21 — see §2.3 and §10.)  
 - May only act on the task currently claimed.  
 - HARD\_STOP on any ambiguity, missing dependency, missing operator decision, or invariant conflict (§3).  
 - Reports back to `PROGRAM_CONTROL/REPORT_BACK/<task-id>-report.md` on every task.  
+- **May open GitHub pull requests against `main` for any task it has validly claimed.** Standing CEO authorization granted 2026-04-21 — the agent does not need to ask per-task. The `CEO_GATE` and `FIZ` label-driven auto-merge gating (§3.5 item 18, enforced by `.github/workflows/auto-merge.yml` per task A-005) remains the merge control; PR *creation* is unrestricted, PR *merge* is not.  
 - May not author new tasks, amend the charter, or modify governance files outside the task's declared scope.
 
 **ARCHITECT MODE (rare, explicitly invoked)**
@@ -57,12 +58,13 @@ This eliminates the multi-document drift that produced the stale Build State in 
 
 ### 2.3 Stream model
 
-**Single ordered list, agent-hint per task, first-come-first-served.**
+**Single ordered list, first-come-first-served. Single active agent (`claude-code`) as of 2026-04-21.**
 
 - Each task carries an `Agent:` hint: `copilot` | `claude-code` | `either`.  
 - The hint is a routing suggestion, not an exclusivity lock.  
 - An agent claims the next unblocked task whose `Depends-on:` are all `DONE`.  
-- An agent that cannot satisfy a task's `Agent:` hint may still execute it if no other agent has claimed it within 24h, but must note the override in the report-back.
+- **Copilot retired 2026-04-21** (CEO directive). `claude-code` is the sole executing agent for the remainder of this charter. Existing `copilot` and `either` hints in §6 are historical and do not block `claude-code` from claiming any unblocked task — the 24-hour hint-override wait below is suspended while the roster remains single-agent.  
+- *(Dormant until a second agent is re-introduced.)* An agent that cannot satisfy a task's `Agent:` hint may still execute it if no other agent has claimed it within 24h, but must note the override in the report-back.
 
 ### 2.4 Cleanup cadence
 
@@ -607,6 +609,7 @@ Any agent or chat instance that attempts to amend this charter without following
 | Date | Change | Author | Rationale |
 | :---- | :---- | :---- | :---- |
 | 2026-04-21 | Charter opened. Supersedes CLAUDE.md (archived). Absorbs Phase 2 §2/§5A/§5E content. Phase 2 Q2/Q4/Q5 ruled redundant by CEO. Stream model: single list, agent hint, FCFS. Cleanup cadence: per-Wave. Package manager: npm (Q3 resolved). | Architecture Coordinator (Claude Chat T3), per CEO direction | Consolidate governance \+ work into one source of truth; eliminate document drift; preserve directive-lifecycle automation that already works |
+| 2026-04-21 | §2.2 amended: DROID MODE granted **standing permission to open GitHub pull requests** against `main` for any validly claimed task (no per-task authorization required; merge gating via labels still applies). §2.2 roster line tightened from "Either Copilot or Claude Code" to "`claude-code`" to match §2.3. §2.3 amended: **Copilot retired from this workflow** by CEO directive; `claude-code` is now the sole executing agent. The 24h hint-override wait is suspended while the roster is single-agent (dormant clause retained for future re-introduction of a second agent). | Architecture Coordinator (Claude Chat, ARCHITECT MODE — CEO authorization in-session 2026-04-21: *"You can certainly open PRs as needed, if you want to overwrite and make a corrected directives file that includes that permission from me please do so"* and *"We have retired copilot on GitHub from this workflow it will be you alone"*) | Codify the CEO's in-session authorizations so future agent sessions can execute against the charter without re-asking; align the charter text with the operational reality that Copilot is no longer available |
 
 ---
 
