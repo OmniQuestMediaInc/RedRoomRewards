@@ -20,5 +20,11 @@ vendor/
 # Exclude archived configs (may contain non-standard markdown)
 LEGACY_CONFIGS/
 
+# Exclude archived / historical documents — lint rules in force when they were
+# authored may not match current config; archives are preserved as-is and not
+# live-edited. Matches the LEGACY_CONFIGS/ pattern above.
+docs/history/
+archive/
+
 # Exclude Super-Linter output
 super-linter-output/

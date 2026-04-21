@@ -11,8 +11,12 @@ prior reports.
 **Repository:** RedRoomRewards
 **Owner:** OmniQuest Media Inc.
 **Source of Truth:** This repository
-**Active Charter:** PROGRAM_CONTROL/DIRECTIVES/QUEUE/RRR-WORK-001.md — persistent governance + active work stream (supersedes RRR-GOV-002, archived at archive/governance/RRR-GOV-002_2026-04-21.md; and the retired root governance document, archived at archive/governance/CLAUDE_2026-04-21.md)
-**Repo State Tracker:** PROGRAM_CONTROL/DIRECTIVES/QUEUE/OQMI_SYSTEM_STATE_RRR.md — living RRR-scoped state (DONE / WIP / OUTSTANDING / BLOCKERS / RETIRED)
+**Active Charter:** PROGRAM_CONTROL/DIRECTIVES/QUEUE/RRR-WORK-001.md
+— persistent governance + active work stream. Supersedes RRR-GOV-002
+(archived at archive/governance/RRR-GOV-002_2026-04-21.md) and the retired
+root governance document (archived at archive/governance/CLAUDE_2026-04-21.md).
+**Repo State Tracker:** PROGRAM_CONTROL/DIRECTIVES/QUEUE/OQMI_SYSTEM_STATE_RRR.md
+— living RRR-scoped state (DONE / WIP / OUTSTANDING / BLOCKERS / RETIRED).
 **Coding Doctrine:** COPILOT_INSTRUCTIONS.md (root) — always read before executing
 **Domain Glossary:** docs/DOMAIN_GLOSSARY.md (naming authority)
 **Requirements:** docs/REQUIREMENTS_MASTER.md (live build state)
