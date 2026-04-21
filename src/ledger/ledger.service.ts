@@ -56,10 +56,11 @@ export class LedgerService implements ILedgerService {
 
     // Validate metadata does not contain PII
     if (request.metadata) {
-      const piiFieldPatterns = ['email', 'password', 'ssn', 'creditcard', 'phonenumber', 'phone'];
+      // Use exact key names to avoid false positives on legitimate fields like emailCount
+      const piiFieldNames = new Set(['email', 'password', 'ssn', 'creditcard', 'phonenumber', 'phone']);
       const emailPattern = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/;
       for (const key of Object.keys(request.metadata)) {
-        if (piiFieldPatterns.some(p => key.toLowerCase().includes(p))) {
+        if (piiFieldNames.has(key.toLowerCase())) {
           throw new Error(`PII detected in metadata: field "${key}" may contain sensitive data`);
         }
         const val = request.metadata[key];

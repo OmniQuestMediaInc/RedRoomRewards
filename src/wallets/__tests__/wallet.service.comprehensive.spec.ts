@@ -138,8 +138,8 @@ describe('WalletService - Comprehensive Tests', () => {
     });
 
     it('should validate amount is positive', async () => {
-      // Zero and negative amounts cause wallet access failure (no mock setup)
-      // since the service does not pre-validate amount sign explicitly
+      // No wallet mock — WalletModel.findOne and create return undefined after reset.
+      // Accessing wallet properties throws, which is the expected rejection.
 
       // Zero amount
       await expect(
