@@ -67,4 +67,4 @@ Execute steps in order.
 
 If these rules conflict with a work order, follow the work order.
 
-If a work order says “follow COPILOT_EXECUTION_RULES.md” and also pastes rules inline, and there is a conflict, the inline pasted rules win.
+If a work order says “follow AGENT_EXECUTION_RULES.md” and also pastes rules inline, and there is a conflict, the inline pasted rules win.

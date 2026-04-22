@@ -354,7 +354,7 @@ RedRoomRewards (Monorepo)
 
 **Required Reading**:
 - `/docs/UNIVERSAL_ARCHITECTURE.md` - Detailed architectural guidance
-- `/docs/governance/COPILOT_GOVERNANCE.md` - AI development rules
+- `/.github/copilot-instructions.md` - AI development rules (§9 Coding Doctrine)
 - `/docs/security/SECURITY_AUDIT_AND_NO_BACKDOOR_POLICY.md` - Security principles
 - `/api/openapi.yaml` - API contract specification
 

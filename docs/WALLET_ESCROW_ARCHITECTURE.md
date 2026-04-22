@@ -669,7 +669,7 @@ Before production deployment, features must demonstrate:
 
 **Related Documents**:
 - `/docs/UNIVERSAL_ARCHITECTURE.md` - Overall architecture
-- `/docs/governance/COPILOT_GOVERNANCE.md` - Development rules
+- `.github/copilot-instructions.md` - Development rules (see §9 Coding Doctrine)
 - `/api/openapi.yaml` - API contract
 - `/SECURITY.md` - Security requirements
 

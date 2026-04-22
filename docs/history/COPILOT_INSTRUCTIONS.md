@@ -1,4 +1,9 @@
-# COPILOT_INSTRUCTIONS.md
+# COPILOT_INSTRUCTIONS.md (ARCHIVED)
+
+> **ARCHIVED 2026-04-22 — RRR-WORK-001-A006.** Consolidated into
+> [`.github/copilot-instructions.md`](../../.github/copilot-instructions.md)
+> §9 "Coding Doctrine". Kept for historical reference only. Do not
+> update; edit the authoritative file instead.
 
 **Repository**: RedRoomRewards  
 **Purpose**: Standardize GitHub Copilot behavior across all OmniQuestMedia repositories  

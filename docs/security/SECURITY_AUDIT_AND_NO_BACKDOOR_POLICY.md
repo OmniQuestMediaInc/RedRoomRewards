@@ -751,8 +751,7 @@ This document establishes the security principles, audit requirements, and no-ba
 
 **Required Reading**:
 - This document (Security Audit and No Backdoor Policy)
-- `/docs/governance/COPILOT_GOVERNANCE.md` - Development rules
-- `/COPILOT_INSTRUCTIONS.md` - Coding standards
+- `.github/copilot-instructions.md` - Development rules and coding standards (see §9 Coding Doctrine)
 - `/docs/UNIVERSAL_ARCHITECTURE.md` - Architecture
 - `/SECURITY.md` - Security policy
 

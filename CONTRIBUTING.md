@@ -86,9 +86,8 @@ Instances of unacceptable behavior may be reported to the project maintainers. A
 
 Before contributing, please read:
 
-- **[COPILOT_INSTRUCTIONS.md](COPILOT_INSTRUCTIONS.md)** - Core development rules
+- **[.github/copilot-instructions.md](.github/copilot-instructions.md)** - Core development rules (§9 Coding Doctrine)
 - **[docs/UNIVERSAL_ARCHITECTURE.md](docs/UNIVERSAL_ARCHITECTURE.md)** - Architectural principles
-- **[COPILOT_GOVERNANCE.md](docs/governance/COPILOT_GOVERNANCE.md)** - Repository-specific rules
 - **[SECURITY.md](SECURITY.md)** - Security policy
 - **[api/openapi.yaml](api/openapi.yaml)** - API contract
 
@@ -179,7 +178,7 @@ npm run format            # Format code
 
 ### 6. Commit Your Changes
 
-Use the **RRR commit prefix enum** (see `COPILOT_INSTRUCTIONS.md` § 13):
+Use the **RRR commit prefix enum** (see `.github/copilot-instructions.md` §9 "Coding Doctrine"):
 
 ```bash
 git add .
@@ -552,8 +551,7 @@ None / [Description of breaking changes and migration path]
 
 - **Architecture**: [docs/UNIVERSAL_ARCHITECTURE.md](docs/UNIVERSAL_ARCHITECTURE.md)
 - **API Contract**: [api/openapi.yaml](api/openapi.yaml)
-- **Development Rules**: [COPILOT_INSTRUCTIONS.md](COPILOT_INSTRUCTIONS.md)
-- **Governance**: [COPILOT_GOVERNANCE.md](docs/governance/COPILOT_GOVERNANCE.md)
+- **Development Rules**: [.github/copilot-instructions.md](.github/copilot-instructions.md) (§9 Coding Doctrine)
 
 ---
 
@@ -568,7 +566,7 @@ By contributing, you agree that your contributions will be licensed under the MI
 Thank you for contributing to RedRoomRewards! Your efforts help build a secure, reliable loyalty platform.
 
 **Key Resources**:
-- [COPILOT_INSTRUCTIONS.md](COPILOT_INSTRUCTIONS.md) - Mandatory reading
+- [.github/copilot-instructions.md](.github/copilot-instructions.md) - Mandatory reading (§9 Coding Doctrine)
 - [docs/UNIVERSAL_ARCHITECTURE.md](docs/UNIVERSAL_ARCHITECTURE.md) - Architecture guide
 - [SECURITY.md](SECURITY.md) - Security policy
 

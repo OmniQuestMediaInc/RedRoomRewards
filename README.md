@@ -135,7 +135,7 @@ npm run dev
 - **[Security Policy](/SECURITY.md)** - Security guidelines and vulnerability reporting
 - **[Contributing Guide](/CONTRIBUTING.md)** - How to contribute to the project
 - **[Decisions Log](/docs/DECISIONS.md)** - Key architectural decisions and rationale
-- **[Copilot Governance](/docs/governance/COPILOT_GOVERNANCE.md)** - AI development rules and standards
+- **[Copilot Instructions](/.github/copilot-instructions.md)** - AI development rules and standards (§9 Coding Doctrine)
 - **[API Contract](/api/openapi.yaml)** - OpenAPI specification
 
 ---
@@ -158,7 +158,7 @@ npm run dev
 - **Testing**: Jest for unit/integration tests
 - **CI/CD**: GitHub Actions (CodeQL)
 
-For detailed development rules, see [`COPILOT_GOVERNANCE.md`](/docs/governance/COPILOT_GOVERNANCE.md).
+For detailed development rules, see [`.github/copilot-instructions.md`](/.github/copilot-instructions.md) §9 "Coding Doctrine".
 
 ---
 
@@ -245,7 +245,7 @@ This project is licensed under the MIT License - see [`LICENSE`](/LICENSE) for d
 
 - **Issues**: [GitHub Issues](https://github.com/OmniQuestMedia/RedRoomRewards/issues)
 - **Documentation**: [`/docs/`](/docs/)
-- **Governance**: [`COPILOT_GOVERNANCE.md`](/docs/governance/COPILOT_GOVERNANCE.md)
+- **Governance**: [`.github/copilot-instructions.md`](/.github/copilot-instructions.md)
 
 ---
 

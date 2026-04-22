@@ -23,38 +23,82 @@ This document tracks all features, files, modules, and logic inherited from the 
 
 ## Mandatory Feature/Module Removal
 
+All four legacy-concern sections below have been audited against `src/`
+as of **2026-04-22 (RRR-WORK-001-A007)**. The audit grepped `src/` for
+each concern's characteristic terms and found **no residual imports,
+services, models, or code paths** matching any of them. Following
+A-004 (deletion of the dead `api/src/modules/` NestJS tree), the only
+executable code under `src/` is wallet / ledger / earn / redeem /
+escrow / ingest / admin-ops / auth — all in-scope per the RRR charter.
+
+Audit command (verbatim):
+```
+grep -rniE "<concern-terms>" src/ --include="*.ts"
+  | grep -v "\.spec\.ts\|\.test\.ts\|test-setup\|__tests__"
+```
+with the concern-terms enumerated inline per section.
+Matches returned were limited to unrelated state-machine labels
+(`settling`, `refunding`), generic logger payload keys (`message`,
+`errorMessage`), `PerformanceQueue` item references, and MongoDB
+`connection` plumbing — none of which are legacy chatnow.zone code.
+
 ### 1. Media & Broadcasting
-- [ ] All video broadcasting modules, streaming services, upload handlers.
-- [ ] All image/picture/media uploading/download/display capabilities.
-- [ ] All media/asset storage and related endpoints.
+- [x] All video broadcasting modules, streaming services, upload handlers.
+- [x] All image/picture/media uploading/download/display capabilities.
+- [x] All media/asset storage and related endpoints.
+
+Verified-clean terms: `broadcast`, `livestream`, `stream`, `upload`,
+`media`, `image`, `video`, `cdn`, `avatar`, `thumbnail`.
 
 ### 2. Social/Interactive Features
-- [ ] "Goal" systems (collective progress, reward milestones, shared "goals").
-- [ ] Liking functionality (user likes, upvotes, hearts, etc.).
-- [ ] Spinning wheel / chance-based game logic.
-- [ ] User-to-user or "model-to-user" messaging (including chat, DMs, inboxes, notifications, public or private rooms).
-- [ ] Any direct messaging, notification, or "shout" systems.
+- [x] "Goal" systems (collective progress, reward milestones, shared "goals").
+- [x] Liking functionality (user likes, upvotes, hearts, etc.).
+- [x] Spinning wheel / chance-based game logic. *(Also locked out
+      by Invariant "Slot machine mechanics: permanently retired"
+      — CEO Decision D1.)*
+- [x] User-to-user or "model-to-user" messaging (including chat, DMs, inboxes, notifications, public or private rooms).
+- [x] Any direct messaging, notification, or "shout" systems.
+
+Verified-clean terms: `goal`, `like`, `spin`, `wheel`, `chat`,
+`message`, `inbox`, `dm`, `notification`, `follow(er|ing)`.
 
 ### 3. Market/Commerce Logic
-- [ ] Product listing/posting UIs, APIs, DB models (including "offers," "items," or similar concepts).
-- [ ] Purchase, checkout, payment, or "sales" features as implemented for chatnow.zone.
-- [ ] Cart/wishlist, purchasing, or marketplace endpoints.
-- [ ] Any product-discovery, store, or model-monetization logic.
+- [x] Product listing/posting UIs, APIs, DB models (including "offers," "items," or similar concepts).
+- [x] Purchase, checkout, payment, or "sales" features as implemented for chatnow.zone.
+- [x] Cart/wishlist, purchasing, or marketplace endpoints.
+- [x] Any product-discovery, store, or model-monetization logic.
+
+Verified-clean terms: `product`, `offer`, `item` (as in commerce —
+only `PerformanceQueue` "queue item" remains, which is RRR-native),
+`checkout`, `cart`, `wishlist`, `marketplace`, `storefront`, `catalog`.
 
 ### 4. Discovery/Social Browsing
-- [ ] User directory, search, or "profile browsing" features.
-- [ ] Any access to other user or "model" profiles (profile view endpoints, "people you may like," etc.).
-- [ ] Friends, following, or connection endpoints or UIs.
-- [ ] Any code path that reveals another user's existence except to admins.
+- [x] User directory, search, or "profile browsing" features.
+- [x] Any access to other user or "model" profiles (profile view endpoints, "people you may like," etc.).
+- [x] Friends, following, or connection endpoints or UIs.
+- [x] Any code path that reveals another user's existence except to admins.
+
+Verified-clean terms: `directory`, `profile.?view`, `browse`,
+`discover`, `friend`, `connection` (only MongoDB `connection`
+plumbing remains), `following`.
 
 ---
 
 ## Other Areas for Audit
 
 - [ ] Remove/disable all privileged, magic, or legacy admin backdoors.
+  *(Follow-up: track under the SECURITY_AUDIT_AND_NO_BACKDOOR_POLICY
+  review cadence; not in Wave A scope.)*
 - [ ] Remove integrations with video CDNs or chat providers.
+  *(Follow-up: no such integrations currently exist in `src/`; confirm
+  again during Wave C webhook / external-integration work.)*
 - [ ] Confirm logging/audit does not record or expose sensitive data.
+  *(Follow-up: addressed in part by removal of `console.error` in
+  `src/api/receipt-endpoint.example.ts` under A-008; broader PII-in-
+  logs sweep is a Wave C item.)*
 - [ ] Remove or rewrite legacy seeders, tests, or fixtures tied to old features.
+  *(Follow-up: `archive/xxxchatnow-seed/` is already removed;
+  re-verify no seeders reference retired concepts during Wave C.)*
 
 ---
 

@@ -16,8 +16,9 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write \"src/**/*.{ts,tsx,js,json}\"",
     "format:check": "prettier --check \"src/**/*.{ts,tsx,js,json}\"",
-    "validate:schema": "node validate-schema.js",
-    "type-check": "tsc --noEmit"
+    "validate:schema": "node scripts/validate-schema.js",
+    "type-check": "tsc --noEmit",
+    "prepare": "husky"
   },
   "keywords": [
     "loyalty",
@@ -43,7 +44,9 @@
     "ajv": "^8.18.0",
     "ajv-formats": "^3.0.1",
     "eslint": "^10.2.0",
+    "husky": "^9.1.7",
     "jest": "^30.3.0",
+    "lint-staged": "^16.4.0",
     "prettier": "^3.8.3",
     "ts-jest": "^29.4.9",
     "ts-node": "^10.9.2",
@@ -51,5 +54,11 @@
   },
   "engines": {
     "node": ">=22.0.0"
+  },
+  "lint-staged": {
+    "*.ts": [
+      "eslint --fix",
+      "prettier --write"
+    ]
   }
 }
