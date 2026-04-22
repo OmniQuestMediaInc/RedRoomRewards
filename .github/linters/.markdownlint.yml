@@ -1,38 +1,82 @@
 ---
+# markdownlint config — RedRoomRewards
+#
+# Rules are calibrated to the existing doc corpus (governance notes, charters,
+# spec docs, long-form tables). Rules disabled here are ones the repo's docs
+# do not consistently follow; enforcing them generates chronic false positives
+# on nearly every PR. Rules kept on are low-noise and catch real mistakes.
+
 default: true
 
-# Common repo-wide pragmatic defaults
-# MD013: Line length - allow long lines but prefer reasonable limits
-MD013:
-  line_length: 120
-  code_blocks: false
-  tables: false
+# MD004: Unordered list marker style (dash vs asterisk). Mixed across corpus.
+MD004: false
 
-# MD033: Inline HTML - allow specific safe elements
-MD033:
-  allowed_elements: ["br", "details", "summary"]
+# MD007: Unordered list indentation. Corpus uses mixed 2/4 indent.
+MD007: false
 
-# MD041: First line heading - not required for all markdown files
-MD041: false
+# MD013: Line length. Governance docs, spec tables, and long prose paragraphs
+# legitimately exceed any reasonable column cap.
+MD013: false
 
-# MD024: Multiple headings with same content - allow if nesting differs
-MD024:
-  allow_different_nesting: true
-
-# MD022: Allow headings without surrounding blank lines (governance docs use compact style)
+# MD022: Headings don't require surrounding blank lines (compact governance
+# style uses consecutive `#`-prefixed lines).
 MD022: false
 
-# MD025: Allow multiple top-level headings (governance/agent instruction docs use them)
+# MD024: Multiple headings with the same text are allowed when siblings only.
+MD024:
+  siblings_only: true
+
+# MD025: Multiple top-level headings permitted (agent-instruction files).
 MD025: false
 
-# MD026: Allow trailing punctuation in headings (e.g. "OmniQuest Media Inc.")
+# MD026: Trailing punctuation in headings permitted ("OmniQuest Media Inc.").
 MD026: false
 
-# MD032: Allow lists without surrounding blank lines (governance docs use compact style)
+# MD029: Ordered-list prefix style (1/1/1 vs 1/2/3). Corpus mixes both.
+MD029: false
+
+# MD031: Fenced code blocks are not required to have surrounding blank lines.
+MD031: false
+
+# MD032: Lists don't require surrounding blank lines (compact governance).
 MD032: false
 
-# MD036: Allow emphasis as heading (governance docs use *END ...* pattern)
+# MD033: Inline HTML — allow specific safe elements used across the docs.
+MD033:
+  allowed_elements:
+    - br
+    - details
+    - summary
+    - sub
+    - sup
+
+# MD034: Bare URLs. markdownlint 0.48 flags bare email addresses here, which
+# is noisy and not actionable (emails are not URLs in the rendered output).
+MD034: false
+
+# MD036: Emphasis-as-heading is tolerated (governance `*END ...*` markers).
 MD036: false
 
-# MD060: Disable table column alignment enforcement
+# MD040: Fenced code blocks don't require a language hint.
+MD040: false
+
+# MD041: Files don't need to start with a top-level heading.
+MD041: false
+
+# MD049: Emphasis style (underscore vs asterisk). Corpus mixes both.
+MD049: false
+
+# MD058: Blanks around tables. Corpus has many inline tables without blank
+# lines.
+MD058: false
+
+# MD060: Table column style. Corpus mixes compact and aligned styles.
 MD060: false
+
+# — Rules kept enabled (low-noise, catch real mistakes) —
+
+# MD009: Trailing spaces. Default allows 0 or 2 (markdown line-break syntax).
+MD009: true
+
+# MD047: Require a single trailing newline — keeps diffs clean.
+MD047: true

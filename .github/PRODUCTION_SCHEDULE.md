@@ -6,7 +6,7 @@
 
 # Owner: Kevin B. Hartley, CEO
 
-# 
+#
 
 # AGENT RULES (read first, always):
 

@@ -215,8 +215,9 @@ Wave A must close before Wave B FIZ work begins.
 #### Task A-002 — Charter ratification + RRR-GOV-002 retirement
 
 - **Status:** DONE
-- **Merge SHA:** *<set on merge — backfilled by A-003 PR or the first Wave A parallel task PR before A-003's charter-integrity CI goes live>*
+- **Merge SHA:** 660d0553cfd895e9cf6f0c0ba5dee29ab7485100
 - **DONE record:** RRR-WORK-001-A002-DONE.md
+- **PR:** #245
 - **Agent:** claude-code
 - **Type:** GOV
 - **FIZ:** NO
