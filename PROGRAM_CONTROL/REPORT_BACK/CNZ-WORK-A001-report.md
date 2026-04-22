@@ -118,9 +118,9 @@ All six items require CEO decision; surfacing only.
 
 ## Files touched (this PR)
 
-- `PROGRAM_CONTROL/REPORT_BACK/CNZ-WORK-001-A001-report.md` (new)
-- `PROGRAM_CONTROL/DIRECTIVES/QUEUE/CNZ_WORK-001` (charter §6 A001 `Status:` line amended)
-- `PROGRAM_CONTROL/DIRECTIVES/QUEUE/OQMI_SYSTEM_STATE.md` (§4 WIP row added for A001)
+- `PROGRAM_CONTROL/REPORT_BACK/CNZ-WORK-001-A001-report.md` (new — this file)
+- `PROGRAM_CONTROL/DIRECTIVES/QUEUE/CNZ_WORK-001` (charter §6 A001 `Status:` line amended — see Appendix A.1)
+- `PROGRAM_CONTROL/DIRECTIVES/QUEUE/OQMI_SYSTEM_STATE.md` (§4 WIP row added for A001 — see Appendix A.2)
 
 ## Tests added / modified
 
@@ -131,4 +131,76 @@ None. A001 is read-only audit; no test surface.
 - §3 DONE: no (A001 not merged yet; will add on merge)
 - §5 OUTSTANDING: no (charter §6 is the OUTSTANDING list for CNZ-WORK-001 tasks; see charter)
 - §6 BLOCKERS: no
-- §4 WIP: **yes** — new row added for A001 IN-REVIEW on this branch
+- §4 WIP: **yes** — new row added for A001 IN-REVIEW on this branch (see Appendix A.2)
+
+---
+
+## Appendix A — Companion file edits applied in this PR
+
+The following two edits are applied to the other files touched by this PR. Recorded verbatim so the edits are auditable from the REPORT_BACK itself.
+
+### A.1 — `PROGRAM_CONTROL/DIRECTIVES/QUEUE/CNZ_WORK-001` (charter)
+
+In the `CNZ-WORK-001-A001` task block (§6, Wave A), the `Status:` line is amended.
+
+**Before:**
+
+```
+CNZ-WORK-001-A001: Q-000-PRE-READ-AUDIT
+Wave: A
+Priority: P0
+Scope: M
+Agent: copilot
+Depends-on: none
+CEO_GATE: NO
+FIZ: NO
+Source: Deficit doc §1.3
+Status: QUEUED
+Directive: Enumerate full subdirectory contents (recursive, depth >=3) for: services/, governance/, safety/, finance/, docs/, PROGRAM_CONTROL/, issues/, scripts/, infra/, tests/, ui/. Read and report contents of: prisma/schema.prisma, .github/copilot-instructions.md, docs/DOMAIN_GLOSSARY.md (if present). List all branches and flag stale candidates (no commits in 60+ days). File output as REPORT_BACK. This is the foundational audit that unblocks every VERIFY row in the deficit doc.
+```
+
+**After:**
+
+```
+CNZ-WORK-001-A001: Q-000-PRE-READ-AUDIT
+Wave: A
+Priority: P0
+Scope: M
+Agent: copilot
+Depends-on: none
+CEO_GATE: NO
+FIZ: NO
+Source: Deficit doc §1.3
+Status: IN-REVIEW — claude-code (Agent hint "copilot" overridden per §2; see REPORT_BACK CNZ-WORK-001-A001-report.md)
+Directive: Enumerate full subdirectory contents (recursive, depth >=3) for: services/, governance/, safety/, finance/, docs/, PROGRAM_CONTROL/, issues/, scripts/, infra/, tests/, ui/. Read and report contents of: prisma/schema.prisma, .github/copilot-instructions.md, docs/DOMAIN_GLOSSARY.md (if present). List all branches and flag stale candidates (no commits in 60+ days). File output as REPORT_BACK. This is the foundational audit that unblocks every VERIFY row in the deficit doc.
+```
+
+Only the `Status:` line changes. Every other line in the A001 block is unchanged. No other task's `Status:` line is touched.
+
+On merge, per charter §11, this line will be amended again to:
+
+```
+Status: DONE — #<PR> — CNZ-WORK-001-A001-DONE.md
+```
+
+### A.2 — `PROGRAM_CONTROL/DIRECTIVES/QUEUE/OQMI_SYSTEM_STATE.md` (state doc)
+
+In §4 WIP, the placeholder example row is replaced with a live row for A001.
+
+**Before:**
+
+```
+| Branch | Item | Started | Agent | Blocker | Next Action |
+|---|---|---|---|---|---|
+| `feature/[name]` | [What is being built] | YYYY-MM-DD | [agent] | [none / description] | [next concrete step] |
+```
+
+**After:**
+
+```
+| Branch | Item | Started | Agent | Blocker | Next Action |
+|---|---|---|---|---|---|
+| `claude/intake-work-charter-4k9zf` | CNZ-WORK-001-A001 Q-000-PRE-READ-AUDIT | 2026-04-22 | claude-code | none | PR review + merge; then move to §3 DONE |
+```
+
+**Note on the broader state of this document:** the rest of `OQMI_SYSTEM_STATE.md` remains as the v1.0 template (unpopulated placeholders in §1, §2, §3, §5, §6, §7, §8, §9). Populating the full template is out of scope for A001 and is surfaced above as recommended new task **A015 — Populate OQMI_SYSTEM_STATE.md from template**. Only §4 is touched in this PR.
