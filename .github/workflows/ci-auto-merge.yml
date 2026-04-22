@@ -1,0 +1,76 @@
+name: CI + Auto-Merge
+
+on:
+  push:
+    branches: [main, 'work/**']
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '0 */6 * * *'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  ci:
+    name: Build, Lint, Type-check, Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Type check
+        run: npx tsc --noEmit
+
+      - name: Build
+        run: npm run build
+
+      - name: Test with coverage
+        run: npm run test:ci
+
+      - name: Charter integrity check
+        run: node scripts/ci/charter-integrity-check.js
+        continue-on-error: false
+
+  auto-merge:
+    name: Auto-merge on CI pass
+    needs: ci
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && needs.ci.result == 'success'
+    steps:
+      - name: Auto-merge PR
+        uses: pascalgn/automerge-action@v0.16.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MERGE_LABELS: ""
+          MERGE_METHOD: squash
+          MERGE_COMMIT_MESSAGE: "{pullRequest.title}"
+          MERGE_RETRIES: "6"
+          MERGE_RETRY_SLEEP: "10000"
+
+  scheduled-check:
+    name: Scheduled production check
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check for QUEUED tasks
+        run: |
+          QUEUED=$(grep -c "| QUEUED |" PRODUCTION_SCHEDULE.md || true)
+          echo "Tasks currently QUEUED: $QUEUED"
+          if [ "$QUEUED" -gt "0" ]; then
+            echo "::notice::$QUEUED tasks queued — Claude Code session needed"
+          fi
