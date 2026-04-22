@@ -8,9 +8,9 @@
 
 **Merged:** 2026-04-21
 
-**Merge commit:** *<set on merge — backfilled by the next Wave A task's PR before A-003's charter-integrity CI is live>*
+**Merge commit:** 660d0553cfd895e9cf6f0c0ba5dee29ab7485100
 
-**PR:** *<set on open>*
+**PR:** #245
 
 **Agent executed:** claude-code
 

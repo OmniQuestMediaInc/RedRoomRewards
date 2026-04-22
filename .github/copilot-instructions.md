@@ -165,4 +165,30 @@ for future use but is NOT a prerequisite for execution.
 
 ---
 
+## Agent Lifecycle (no workflow automation)
+
+Per CEO Decision W1, the directive lifecycle is **agent-owned end-to-end**.
+The previous `directive-intake.yml` / `directive-dispatch.yml` workflows have
+been retired (RRR-WORK-001-A005); no GitHub Actions workflow moves charter
+state on the agent's behalf.
+
+The owning agent performs every transition inline, in the merge PR:
+
+1. **Claim** — drop a `<task-id>.claim` file under
+   `PROGRAM_CONTROL/DIRECTIVES/IN_PROGRESS/` to advertise ownership.
+2. **Execute** — implement the task scope on a branch.
+3. **Close out (in the same merge PR):**
+   - Delete the `.claim` file from `IN_PROGRESS/`.
+   - Write the DONE record at
+     `PROGRAM_CONTROL/DIRECTIVES/DONE/<charter>-<task-id>-DONE.md`,
+     including a real `Merge commit:` SHA (backfilled by the next PR if
+     unknown at open time — see the rolling-backfill pattern in the charter).
+   - Amend the charter `Status:` line for the task to `DONE` and add a
+     `Merge SHA:` field.
+4. **Verify** — `scripts/ci/charter-integrity-check.js` runs in CI and fails
+   the build if any `Status: DONE` task lacks a DONE record with a reachable
+   merge SHA.
+
+---
+
 *END PROGRAM CONTROL AGENT INSTRUCTIONS*

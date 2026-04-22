@@ -42,8 +42,8 @@ jobs:
           IGNORE_GITIGNORED_FILES: true
 
           # INCLUDE: workflows, .github, docs, and root-level md/yml/yaml/json.
-          # Require a lintable extension on every file so extensionless files
-          # (e.g. `.github/KICKOFF`, `.github/AGENT INSTRUCTIONS`) are skipped.
+          # Require a lintable extension on every file so any future
+          # extensionless governance file in `.github/` is skipped automatically.
           FILTER_REGEX_INCLUDE: ^(\.github/[^/]+\.(md|ya?ml|json)$|\.github/(workflows|linters)/.+\.(md|ya?ml|json)$|docs/.+\.(md|ya?ml|json)$|[^/]+\.(md|ya?ml|json)$)
 
           # EXCLUDE: governance archives, legacy configs, reference libraries,
