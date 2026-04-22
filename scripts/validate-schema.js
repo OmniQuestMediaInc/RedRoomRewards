@@ -9,8 +9,10 @@ const addFormats = require('ajv-formats');
 const fs = require('fs');
 const path = require('path');
 
+const REPO_ROOT = path.resolve(__dirname, '..');
+
 // Load schema
-const schemaPath = path.join(__dirname, 'docs/contracts/xxx-events.schema.json');
+const schemaPath = path.join(REPO_ROOT, 'docs/contracts/xxx-events.schema.json');
 const schema = JSON.parse(fs.readFileSync(schemaPath, 'utf8'));
 
 // Initialize AJV with strict mode
@@ -37,7 +39,7 @@ let allValid = true;
 console.log('=== JSON Schema Validation ===\n');
 
 examples.forEach(examplePath => {
-  const fullPath = path.join(__dirname, examplePath);
+  const fullPath = path.join(REPO_ROOT, examplePath);
   const example = JSON.parse(fs.readFileSync(fullPath, 'utf8'));
   const valid = validate(example);
   

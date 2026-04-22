@@ -1,9 +1,9 @@
 /**
  * Receipt Endpoint Integration Example
- * 
+ *
  * Example showing how to integrate the receipt lookup endpoint
  * with HTTP framework (Express, Fastify, etc.) using the auth guard.
- * 
+ *
  * This is a reference implementation - adapt to your HTTP framework.
  */
 
@@ -41,19 +41,19 @@ interface ReceiptEndpointConfig {
 
 /**
  * Receipt Endpoint Handler
- * 
+ *
  * GET /v1/events/receipt?merchantId=...&idempotencyKey=...
- * 
+ *
  * Protected by admin/support auth guard.
  * Returns event receipt with only approved fields.
- * 
+ *
  * Example Usage with Express:
  * ```
  * app.get('/v1/events/receipt', async (req, res) => {
  *   await handleReceiptRequest(req, res, config);
  * });
  * ```
- * 
+ *
  * Example Usage with Fastify:
  * ```
  * fastify.get('/v1/events/receipt', async (request, reply) => {
@@ -64,7 +64,7 @@ interface ReceiptEndpointConfig {
 export async function handleReceiptRequest(
   req: HTTPRequest,
   res: HTTPResponse,
-  config: ReceiptEndpointConfig
+  config: ReceiptEndpointConfig,
 ): Promise<void> {
   // Validate query parameters
   const merchantId = req.query.merchantId;
@@ -79,10 +79,7 @@ export async function handleReceiptRequest(
   }
 
   // Check authentication and authorization
-  const authResult = checkAdminSupportAuth(
-    req.headers.authorization,
-    config.authConfig
-  );
+  const authResult = checkAdminSupportAuth(req.headers.authorization, config.authConfig);
 
   if (!authResult.authorized) {
     res.status(401).json({
@@ -94,10 +91,7 @@ export async function handleReceiptRequest(
 
   try {
     // Lookup receipt
-    const receipt = await config.controller.getEventReceipt(
-      merchantId,
-      idempotencyKey
-    );
+    const receipt = await config.controller.getEventReceipt(merchantId, idempotencyKey);
 
     if (!receipt) {
       res.status(404).json({
@@ -109,13 +103,7 @@ export async function handleReceiptRequest(
 
     // Return receipt (only approved fields)
     res.status(200).json(receipt);
-  } catch (error) {
-    // Log error (but don't expose internal details)
-    console.error('Receipt lookup error:', {
-      errorType: error instanceof Error ? error.name : 'Unknown',
-      // DO NOT log error message or stack trace to client
-    });
-
+  } catch {
     res.status(500).json({
       error: 'INTERNAL_SERVER_ERROR',
       message: 'Failed to retrieve receipt',
@@ -129,7 +117,7 @@ export async function handleReceiptRequest(
 export async function handleReceiptRequestFunctional(
   req: HTTPRequest,
   res: HTTPResponse,
-  config: ReceiptEndpointConfig
+  config: ReceiptEndpointConfig,
 ): Promise<void> {
   // Validate query parameters
   const merchantId = req.query.merchantId;
@@ -147,7 +135,7 @@ export async function handleReceiptRequestFunctional(
   const result = await withAdminSupportAuth(
     req.headers.authorization,
     config.authConfig,
-    async () => config.controller.getEventReceipt(merchantId, idempotencyKey)
+    async () => config.controller.getEventReceipt(merchantId, idempotencyKey),
   );
 
   if (!result.authorized) {
@@ -171,12 +159,12 @@ export async function handleReceiptRequestFunctional(
 
 /**
  * Example Express integration
- * 
+ *
  * ```typescript
  * import express from 'express';
  * import { createEventsController } from './events.controller';
  * import { handleReceiptRequest } from './receipt-endpoint.example';
- * 
+ *
  * const app = express();
  * const controller = createEventsController();
  * const config = {
@@ -186,7 +174,7 @@ export async function handleReceiptRequestFunctional(
  *   },
  *   controller,
  * };
- * 
+ *
  * // Internal support endpoint - protected by admin auth
  * app.get('/internal/v1/events/receipt', async (req, res) => {
  *   await handleReceiptRequest(req, res, config);
@@ -196,12 +184,12 @@ export async function handleReceiptRequestFunctional(
 
 /**
  * Example Fastify integration
- * 
+ *
  * ```typescript
  * import Fastify from 'fastify';
  * import { createEventsController } from './events.controller';
  * import { handleReceiptRequest } from './receipt-endpoint.example';
- * 
+ *
  * const fastify = Fastify();
  * const controller = createEventsController();
  * const config = {
@@ -211,7 +199,7 @@ export async function handleReceiptRequestFunctional(
  *   },
  *   controller,
  * };
- * 
+ *
  * // Internal support endpoint - protected by admin auth
  * fastify.get('/internal/v1/events/receipt', async (request, reply) => {
  *   await handleReceiptRequest(request, reply, config);
@@ -221,7 +209,7 @@ export async function handleReceiptRequestFunctional(
 
 /**
  * Security Notes:
- * 
+ *
  * 1. Always use HTTPS in production
  * 2. Rate limit this endpoint to prevent abuse
  * 3. Log all access attempts with admin user ID for audit trail

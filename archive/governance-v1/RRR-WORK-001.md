@@ -327,15 +327,15 @@ Wave A must close before Wave B FIZ work begins.
 - **Depends-on:** A-002
 - **Scope:**
   - **Keep and update:** `.github/copilot-instructions.md` — updated in A-002 to reference RRR-WORK-001; this task collapses the other four into it where non-redundant
-  - **Collapse:** merge non-redundant content from `COPILOT_INSTRUCTIONS.md` (root, 616 lines) and `docs/governance/COPILOT_GOVERNANCE.md` (139 lines) into `.github/copilot-instructions.md`; archive originals to `docs/history/`
-  - **Rename + relocate:** `docs/governance/COPILOT_EXECUTION_RULES.md` → `docs/governance/AGENT_EXECUTION_RULES.md`
-  - **Relocate:** `docs/copilot/COPILOT.md` → `docs/specs/CHIP_MENU_TOKEN_SYSTEMS_v1.0.md` (product-feature spec, not governance); delete empty `docs/copilot/` directory
+  - **Collapse:** merge non-redundant content from the legacy root copilot-instructions doc (616 lines) and the legacy `docs/governance/` copilot-governance doc (139 lines) into `.github/copilot-instructions.md`; archive originals to `docs/history/`
+  - **Rename + relocate:** legacy `docs/governance/` copilot-execution-rules doc → `docs/governance/AGENT_EXECUTION_RULES.md`
+  - **Relocate:** legacy `docs/copilot/` chip-menu spec → `docs/specs/CHIP_MENU_TOKEN_SYSTEMS_v1.0.md` (product-feature spec, not governance); delete empty `docs/copilot/` directory
   - **Scan and fix cross-references:** grep for all inbound references to renamed/relocated files; patch in the same PR
   - **Low-severity folds:** check `docs/DECISIONS.md` — if single-entry, add pointer to this charter’s §4; remove `"nextjs"` from `package.json` keywords
 - **Out of scope:** authoring new governance doctrine; touching `src/`
 - **Acceptance:**
   - One canonical agent-instructions file: `.github/copilot-instructions.md` (references RRR-WORK-001 and `OQMI_SYSTEM_STATE_RRR.md`)
-  - `COPILOT_INSTRUCTIONS.md` absent from repo root
+  - Legacy root copilot-instructions file absent from repo root
   - `docs/copilot/` directory absent
   - `docs/governance/AGENT_EXECUTION_RULES.md` present
   - `docs/specs/CHIP_MENU_TOKEN_SYSTEMS_v1.0.md` present

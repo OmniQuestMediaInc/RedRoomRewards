@@ -28,4 +28,4 @@ When implementing code in this directory:
 - Use idempotency keys for all financial operations
 - Implement optimistic locking for concurrent wallet updates
 
-See `/docs/governance/COPILOT_GOVERNANCE.md` for detailed development rules.
+See `/.github/copilot-instructions.md` §9 "Coding Doctrine" for detailed development rules.

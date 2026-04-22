@@ -184,7 +184,7 @@ RedRoomRewards follows this **mandatory** structure:
   - Balance calculation updates
   - Transaction recording modifications
   - Security-sensitive code
-- See `/docs/governance/COPILOT_GOVERNANCE.md` Section 2.1
+- See `.github/copilot-instructions.md` §9 (Coding Doctrine)
 
 ---
 
@@ -257,7 +257,7 @@ RedRoomRewards integrates with external systems (e.g., consuming applications) v
 
 All developers must read and comply with:
 - This document (`UNIVERSAL_ARCHITECTURE.md`)
-- `/docs/governance/COPILOT_GOVERNANCE.md` - AI development rules
+- `.github/copilot-instructions.md` - AI development rules (see §9 Coding Doctrine)
 - `/SECURITY.md` - Security policy and procedures
 - `/docs/DECISIONS.md` - Historical decisions and rationale
 - `/api/openapi.yaml` - API contract specification
@@ -278,7 +278,7 @@ All developers must read and comply with:
 
 For questions about this architecture:
 1. Review the specification documents in `/docs/`
-2. Consult `/docs/governance/COPILOT_GOVERNANCE.md` for development rules
+2. Consult `.github/copilot-instructions.md` §9 for development rules
 3. Discuss in PR reviews for specific cases
 4. Update this document via PR for clarifications
 

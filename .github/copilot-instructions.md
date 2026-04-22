@@ -17,7 +17,10 @@ prior reports.
 root governance document (archived at archive/governance/CLAUDE_2026-04-21.md).
 **Repo State Tracker:** PROGRAM_CONTROL/DIRECTIVES/QUEUE/OQMI_SYSTEM_STATE_RRR.md
 — living RRR-scoped state (DONE / WIP / OUTSTANDING / BLOCKERS / RETIRED).
-**Coding Doctrine:** COPILOT_INSTRUCTIONS.md (root) — always read before executing
+**Coding Doctrine:** consolidated into this file (see §9 below) — authoritative
+for all AI-assisted code generation. The legacy root `COPILOT_INSTRUCTIONS.md`
+and `docs/governance/COPILOT_GOVERNANCE.md` have been archived to
+`docs/history/`.
 **Domain Glossary:** docs/DOMAIN_GLOSSARY.md (naming authority)
 **Requirements:** docs/REQUIREMENTS_MASTER.md (live build state)
 **CEO Decisions:** docs/RRR_CEO_DECISIONS_FINAL_2026-04-17.md
@@ -95,6 +98,8 @@ Report must include:
 
 FIZ-scoped commits require REASON:, IMPACT:, CORRELATION_ID: in the commit body.
 
+Do NOT use `feat:` / `fix:` / `docs:` / `refactor:` — not valid RRR prefixes.
+
 ---
 
 ## 3) Package Manager Policy
@@ -165,7 +170,123 @@ for future use but is NOT a prerequisite for execution.
 
 ---
 
-## Agent Lifecycle (no workflow automation)
+## 9) Coding Doctrine (consolidated)
+
+Originally maintained in root `COPILOT_INSTRUCTIONS.md` and
+`docs/governance/COPILOT_GOVERNANCE.md`. Those files are archived to
+`docs/history/` for historical reference. This section is now authoritative.
+
+### 9.1 Repository as Source of Truth
+- Read existing code and docs before generating new code.
+- Follow established patterns and architecture decisions
+  (`docs/DECISIONS.md`, `docs/UNIVERSAL_ARCHITECTURE.md`).
+- Never invent behaviors not documented in the repository.
+- If uncertain, ask — do not assume patterns from other projects apply.
+
+### 9.2 No Backdoors or Bypasses
+- No code that skips authentication or authorization checks.
+- No debug endpoints in production code, no commented-out security
+  validations, no temporary bypass flags.
+- No hardcoded credentials, API keys, or secrets. Use env vars.
+- All endpoints require authentication per `api/openapi.yaml`.
+- All inputs validated server-side; all financial operations require
+  idempotency keys; all transactions logged to audit trail.
+
+### 9.3 Ledger-First Logic
+- Every point award or redemption creates a ledger transaction.
+- Ledger entries are immutable (write-once). Corrections are new
+  compensating transactions.
+- No direct wallet balance updates without a ledger entry.
+- No skipping idempotency checks for "performance".
+
+### 9.4 No Invented Behavior
+- Implement only what specs in `docs/specs/` and `api/openapi.yaml`
+  describe. No "helpful" extras, no creative interpretation.
+- Gaps in the spec → propose a spec change first, do not improvise.
+
+### 9.5 Minimal Changes
+- Change only the files and lines necessary for the task.
+- No unrelated refactors, reformatting, or "while I'm here" edits.
+- Preserve existing patterns and style.
+
+### 9.6 Type Safety
+- TypeScript strict mode. No `any` — use `unknown` + narrowing if needed.
+- No `@ts-ignore` / `@ts-expect-error` to paper over real type errors.
+- Explicit types for all public function params and returns.
+- Validate all external inputs; never trust client-supplied data.
+
+### 9.7 Testing Requirements
+All code needs tests. Financial logic (ledger / wallet / earn / redeem)
+requires comprehensive coverage:
+- Unit tests for all code paths.
+- Integration tests for transaction flows.
+- Edge cases: zero, negative, boundary values, concurrent ops,
+  idempotent replay, insufficient balance.
+- Human review required on any ledger / balance / transaction-recording
+  change (see §9.11).
+
+### 9.8 Audit Logging
+Every point movement writes an immutable audit record with:
+timestamp, user/model id, amount + direction, source / reason,
+request id, previous balance, new balance.
+Logs MUST NOT contain API keys, secrets, session tokens, or PII beyond
+user IDs. Retention ≥ 7 years or per applicable regulation.
+Logs are write-only with tamper-evident integrity.
+
+### 9.9 API Boundary with External Platforms
+- All externally-called endpoints: documented path + method,
+  request / response schema, error codes, SLA (<300ms target with
+  timeout + fallback), auth requirements.
+- RedRoomRewards APIs accept **facts** (user X earned Y points),
+  never **logic** (decide whether user should earn).
+- No game logic, no RNG, no UI concerns, no business rules belonging
+  to external platforms.
+- External platforms must degrade gracefully if loyalty is unavailable.
+- API changes are versioned and backward compatible.
+
+### 9.10 Scope Restrictions
+RedRoomRewards is a loyalty platform only. Prohibited in this repo:
+frontend UI components, chat / messaging, broadcasting / streaming,
+tipping / payment processing, game logic / RNG, media handling.
+Allowed: wallet + balance, ledger + transactions, earn / redeem APIs,
+audit trail, admin ops for point management, webhook handlers.
+
+No code from `archive/xxxchatnow-seed/` may be copied, adapted, or
+referenced — archive is historical reference only.
+
+### 9.11 Mandatory Human Review
+Human review required before merge on:
+- Ledger logic changes.
+- Balance calculation updates.
+- Transaction recording modifications.
+- Security-sensitive code (auth, authz).
+- Database schema migrations.
+
+### 9.12 PR + Commit Discipline
+- PR description: summary, changes, testing performed, security
+  considerations, breaking changes, references (spec / issue).
+- Commit format: `<PREFIX>: <description>` using the enum in §2E.
+- FIZ commits include REASON:, IMPACT:, CORRELATION_ID: in the body.
+
+### 9.13 Execution Rules (strict-literal mode)
+See `docs/governance/AGENT_EXECUTION_RULES.md` for the full text.
+Summary:
+1. Follow instructions verbatim — no spelling, casing, pluralization,
+   enum, literal, path, or field changes outside the stated scope.
+2. Do not invent or substitute file paths.
+3. Do not guess missing details — locate them or ask.
+4. No silent scope expansion — no unrelated refactors, no
+   "nice-to-have" additions.
+5. Evidence-first reporting — exact files, key excerpts, deviations.
+6. If blocked: ask early, precisely, with file/line context.
+7. Treat every work order as an implementation checklist, not a
+   design prompt.
+8. Conflict rule: work order wins over these rules; inline pasted
+   rules win over referenced rules.
+
+---
+
+## 10) Agent Lifecycle (no workflow automation)
 
 Per CEO Decision W1, the directive lifecycle is **agent-owned end-to-end**.
 The previous `directive-intake.yml` / `directive-dispatch.yml` workflows have

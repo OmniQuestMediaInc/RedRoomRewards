@@ -25,7 +25,7 @@ docs/REQUIREMENTS_MASTER.md
 docs/TECH_DEBT_ASSESSMENT.md
 docs/TESTING_STRATEGY.md
 docs/WALLET_ESCROW_ARCHITECTURE.md
-docs/copilot/COPILOT.md
+docs/specs/CHIP_MENU_TOKEN_SYSTEMS_v1.0.md
 docs/governance/ENGINEERING_STANDARDS.md
 src/services/README.md
 src/services/point-redemption.service.spec.ts
@@ -81,7 +81,7 @@ No matches found in src/ and api/
 Remaining references are documentation/historical only:
 ```
 docs/REQUIREMENTS_MASTER.md:48          # Tracks this directive as IN_PROGRESS
-docs/copilot/COPILOT.md:69              # Version history note
+docs/specs/CHIP_MENU_TOKEN_SYSTEMS_v1.0.md:69              # Version history note
 docs/governance/ENGINEERING_STANDARDS.md:26  # Version history note
 docs/RRR_CEO_DECISIONS_FINAL_2026-04-17.md  # CEO Decision D1 (authoritative)
 docs/history/BOOTSTRAP_INSTRUCTIONS.md      # Historical archive
