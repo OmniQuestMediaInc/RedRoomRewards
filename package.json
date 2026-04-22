@@ -16,7 +16,7 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write \"src/**/*.{ts,tsx,js,json}\"",
     "format:check": "prettier --check \"src/**/*.{ts,tsx,js,json}\"",
-    "validate:schema": "node validate-schema.js",
+    "validate:schema": "node scripts/validate-schema.js",
     "type-check": "tsc --noEmit"
   },
   "keywords": [
