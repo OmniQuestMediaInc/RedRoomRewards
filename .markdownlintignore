@@ -1,13 +1,14 @@
 # .markdownlintignore — RedRoomRewards
-# Updated: 2026-04-19 (config refresh — legacy copy in LEGACY_CONFIGS/)
-# TODO: Remove entries that no longer apply as the project structure changes.
+# Paths markdownlint should skip entirely. These are also excluded by the
+# Super-Linter FILTER_REGEX_EXCLUDE in .github/workflows/lint.yml, but listing
+# them here means local `npx markdownlint` runs behave the same as CI.
 
-# Exclude application code directories from markdown linting
+# Application code directories — no markdown enforced here.
 src/
 api/
 infra/
 
-# Exclude build artifacts and dependencies
+# Build artifacts and dependencies.
 node_modules/
 dist/
 build/
@@ -17,14 +18,12 @@ coverage/
 .venv/
 vendor/
 
-# Exclude archived configs (may contain non-standard markdown)
+# Governance archives / legacy / reference libraries (preserved as-authored).
 LEGACY_CONFIGS/
-
-# Exclude archived / historical documents — lint rules in force when they were
-# authored may not match current config; archives are preserved as-is and not
-# live-edited. Matches the LEGACY_CONFIGS/ pattern above.
-docs/history/
 archive/
+docs/history/
+PROGRAM_CONTROL/
+REFERENCE_LIBRARY/
 
-# Exclude Super-Linter output
+# Super-Linter output (generated).
 super-linter-output/

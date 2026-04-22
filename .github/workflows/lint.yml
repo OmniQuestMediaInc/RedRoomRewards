@@ -32,25 +32,36 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-          # Only run what this repo is currently using in CI
+          # Only validators we actually want enforced. Everything else is off.
           VALIDATE_YAML: true
           VALIDATE_JSON: true
           VALIDATE_MARKDOWN: true
 
-          # Reduce noise/churn and prevent scanning build artifacts
+          # Lint only the diff on PRs, not the whole repo.
           VALIDATE_ALL_CODEBASE: false
           IGNORE_GITIGNORED_FILES: true
 
-          # Restrict linting to root files, .github, and docs/ only
-          # Matches: .github/**, docs/**, and root-level *.md, *.yml, *.yaml, *.json files
-          # Excludes: src/, api/, infra/, archive/, and all their subdirectories
-          FILTER_REGEX_INCLUDE: ^(\.github/|docs/|[^/]+\.(md|yml|yaml|json)$)
+          # INCLUDE: workflows, .github, docs, and root-level md/yml/yaml/json.
+          # Require a lintable extension on every file so extensionless files
+          # (e.g. `.github/KICKOFF`, `.github/AGENT INSTRUCTIONS`) are skipped.
+          FILTER_REGEX_INCLUDE: ^(\.github/[^/]+\.(md|ya?ml|json)$|\.github/(workflows|linters)/.+\.(md|ya?ml|json)$|docs/.+\.(md|ya?ml|json)$|[^/]+\.(md|ya?ml|json)$)
 
-          # Config directory for super-linter template discovery
+          # EXCLUDE: governance archives, legacy configs, reference libraries,
+          # historical docs, vendored trees, and any path containing a space
+          # (Super-Linter's path handling is fragile with spaces in filenames).
+          FILTER_REGEX_EXCLUDE: (^|/)(archive|LEGACY_CONFIGS|REFERENCE_LIBRARY|PROGRAM_CONTROL|node_modules|dist|build|out|coverage|\.next|super-linter-output)/|(^|/)docs/history/|.* .*
+
+          # Point validators at the repo's pinned configs explicitly.
           LINTER_RULES_PATH: .github/linters
+          YAML_CONFIG_FILE: .yaml-lint.yml
+          MARKDOWN_CONFIG_FILE: .markdownlint.yml
 
-          # Ensure regexes apply to repo-relative paths if used later
+          # tsconfig.json is JSONC (comments allowed). Super-Linter's JSON
+          # validator is strict and would fail on every PR that touches it.
+          JSON_FILTER_REGEX_EXCLUDE: (^|/)tsconfig(\.[^/]+)?\.json$
+
+          # Regex filters apply to repo-relative paths.
           STRIP_DEFAULT_WORKSPACE_FOR_REGEX: true
 
-          # Enable verbose output for actionable diagnostics
+          # Actionable diagnostics if something does fail.
           LOG_LEVEL: VERBOSE

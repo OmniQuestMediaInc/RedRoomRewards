@@ -1,24 +1,24 @@
 # Risky Name Change Tags
 
-This document lists patterns and locations that require special scrutiny or approval before renaming in codebases during branding migrations. 
+This document lists patterns and locations that require special scrutiny or approval before renaming in codebases during branding migrations.
 
 ## Definition: Risky Name Change Locations
 
 Any instance of a legacy name MUST be flagged as risky if found in the following contexts:
 
-- **API Endpoints & Routes**  
+- **API Endpoints & Routes**
   * Examples: `/api/legacy/*`, `/v1/legacyAuth/login`
-- **Environment Variables & Config Keys**  
+- **Environment Variables & Config Keys**
   * Examples: `LEGACY_API_KEY`, `LEGACY_SECRET`, `.env`, `config.js`
-- **Database Collections/Tables & Migration Scripts**  
+- **Database Collections/Tables & Migration Scripts**
   * Examples: `db.legacy_users`, `"table": "legacy_transactions"`
-- **External Vendor/Integration IDs or Keys**  
+- **External Vendor/Integration IDs or Keys**
   * API tokens, client IDs, OAuth configurations referencing external systems.
-- **Persistent Storage Keys, Event Names, or Bus Topics**  
+- **Persistent Storage Keys, Event Names, or Bus Topics**
   * Examples: `localStorage['legacyUser']`, `topic: legacy.events.userLogin`
-- **3rd-Party URLs or Domains (Do Not Change!)**  
+- **3rd-Party URLs or Domains (Do Not Change!)**
   * Examples: `https://vendor.example.com/api`
-- **Authentication, Licensing, or Other Security-Critical Identifiers**  
+- **Authentication, Licensing, or Other Security-Critical Identifiers**
   * Examples: JWT claims like `iss: "LegacySystem"`, SSO provider IDs
 
 ---
