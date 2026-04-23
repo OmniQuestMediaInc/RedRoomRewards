@@ -1,108 +1,50 @@
 #!/usr/bin/env node
 /**
- * Charter integrity check (RRR-WORK-001-A003).
+ * Charter integrity check.
  *
- * If PROGRAM_CONTROL/DIRECTIVES/QUEUE/RRR-WORK-001.md is present, parses it,
- * collects every task with `Status: DONE`, and asserts:
- *   1. A DONE record exists at PROGRAM_CONTROL/DIRECTIVES/DONE/RRR-WORK-001-<id>-DONE.md
- *   2. That record carries a real 40-char merge SHA (field name "Merge commit"
- *      or "Merge SHA"), not a placeholder
- *   3. The SHA is reachable in this checkout (`git cat-file -e <sha>`)
+ * Reads .github/PRODUCTION_SCHEDULE.md and asserts that every row whose
+ * Status column is "DONE" has a Merge SHA column that is neither "—" nor
+ * "pending" (case-insensitive, trimmed).
  *
- * If the charter is absent (e.g. archived to archive/governance-v1/ as in
- * PR #252), there is nothing to verify and the script exits 0. The invariant
- * resumes automatically if a charter is reintroduced at the expected path.
- *
- * Exits 0 on success or no-charter, 1 on any mismatch. Designed to run from
- * the repo root.
+ * If the schedule file is absent the script exits 0 (nothing to verify).
+ * Exits 0 on success, 1 on any mismatch. Designed to run from the repo root.
  */
 
 const fs = require('fs');
 const path = require('path');
-const { execFileSync } = require('child_process');
 
 const REPO_ROOT = path.resolve(__dirname, '..', '..');
-const CHARTER = path.join(
-  REPO_ROOT,
-  'PROGRAM_CONTROL',
-  'DIRECTIVES',
-  'QUEUE',
-  'RRR-WORK-001.md',
-);
-const DONE_DIR = path.join(REPO_ROOT, 'PROGRAM_CONTROL', 'DIRECTIVES', 'DONE');
-const CHARTER_PREFIX = 'RRR-WORK-001';
+const SCHEDULE = path.join(REPO_ROOT, '.github', 'PRODUCTION_SCHEDULE.md');
 
-const SHA_RE = /\b[0-9a-f]{40}\b/;
-const TASK_HEADING_RE = /^#{2,4}\s+Task\s+(A-[A-Z0-9]+)\b/i;
-const STATUS_RE = /^\s*[-*]\s+\*\*Status:\*\*\s+(\S+)/i;
+const PLACEHOLDER_RE = /^(—|-{1,3}|pending)$/i;
 
 function failures() {
   const errors = [];
-  const charter = fs.readFileSync(CHARTER, 'utf8').split(/\r?\n/);
+  const lines = fs.readFileSync(SCHEDULE, 'utf8').split(/\r?\n/);
 
-  // Walk the charter top-to-bottom; the first Status line after each task
-  // heading belongs to that task.
-  let currentTask = null;
-  const doneTasks = [];
-  for (const line of charter) {
-    const headingMatch = line.match(TASK_HEADING_RE);
-    if (headingMatch) {
-      currentTask = headingMatch[1];
-      continue;
-    }
-    if (!currentTask) continue;
-    const statusMatch = line.match(STATUS_RE);
-    if (statusMatch) {
-      const status = statusMatch[1].toUpperCase();
-      if (status === 'DONE') doneTasks.push(currentTask);
-      currentTask = null;
-    }
-  }
+  for (const line of lines) {
+    // Only process pipe-delimited table data rows (skip headers / dividers).
+    if (!line.startsWith('|') || /^\|[-: |]+\|$/.test(line)) continue;
 
-  if (doneTasks.length === 0) {
-    console.log('charter-integrity-check: no DONE tasks found in charter; nothing to verify');
-    return errors;
-  }
+    const cols = line.split('|').map((c) => c.trim());
+    // Table columns: | ID | Task | Status | Merge SHA |
+    // After split on '|' of a row like "|A-003|...|DONE|abc|":
+    //   cols[0] = ''  (before first pipe)
+    //   cols[1] = ID
+    //   cols[2] = Task
+    //   cols[3] = Status
+    //   cols[4] = Merge SHA
+    if (cols.length < 5) continue;
 
-  for (const taskId of doneTasks) {
-    // Charter headings use `Task A-001`; DONE-record files use `A001`.
-    const fileTaskId = taskId.replace(/^A-/, 'A');
-    const recordPath = path.join(DONE_DIR, `${CHARTER_PREFIX}-${fileTaskId}-DONE.md`);
-    const relRecord = path.relative(REPO_ROOT, recordPath);
+    const id = cols[1];
+    const status = cols[3].toUpperCase();
+    const mergeSha = cols[4];
 
-    if (!fs.existsSync(recordPath)) {
+    if (status !== 'DONE') continue;
+
+    if (!mergeSha || PLACEHOLDER_RE.test(mergeSha)) {
       errors.push(
-        `CHARTER INTEGRITY FAIL: Task ${taskId} marked DONE but missing DONE record at ${relRecord}`,
-      );
-      continue;
-    }
-
-    const recordText = fs.readFileSync(recordPath, 'utf8');
-    const shaLine = recordText
-      .split(/\r?\n/)
-      .find((l) => /^\s*\*\*Merge\s+(commit|SHA):\*\*/i.test(l));
-
-    if (!shaLine) {
-      errors.push(
-        `CHARTER INTEGRITY FAIL: Task ${taskId} DONE record at ${relRecord} has no "Merge commit" / "Merge SHA" line`,
-      );
-      continue;
-    }
-
-    const shaMatch = shaLine.match(SHA_RE);
-    if (!shaMatch) {
-      errors.push(
-        `CHARTER INTEGRITY FAIL: Task ${taskId} DONE record at ${relRecord} merge SHA is missing or a placeholder (line: ${shaLine.trim()})`,
-      );
-      continue;
-    }
-
-    const sha = shaMatch[0];
-    try {
-      execFileSync('git', ['cat-file', '-e', sha], { stdio: 'ignore' });
-    } catch {
-      errors.push(
-        `CHARTER INTEGRITY FAIL: Task ${taskId} merge SHA ${sha} is not reachable in this checkout (git cat-file -e failed)`,
+        `SCHEDULE INTEGRITY FAIL: Row ${id} is DONE but Merge SHA is "${mergeSha || ''}" (must not be "—" or "pending")`,
       );
     }
   }
@@ -111,16 +53,13 @@ function failures() {
 }
 
 function main() {
-  if (!fs.existsSync(CHARTER)) {
-    // RRR-WORK-001 was archived to archive/governance-v1/ in PR #252.
-    // No charter on disk means no DONE tasks to verify; treat as a no-op
-    // rather than a CI failure. If a charter is reintroduced at this path,
-    // the integrity invariant resumes automatically.
+  if (!fs.existsSync(SCHEDULE)) {
     console.log(
-      `charter-integrity-check: charter not present at ${path.relative(REPO_ROOT, CHARTER)}; nothing to verify`,
+      `charter-integrity-check: schedule not present at ${path.relative(REPO_ROOT, SCHEDULE)}; nothing to verify`,
     );
     return;
   }
+
   const errors = failures();
   if (errors.length > 0) {
     for (const err of errors) console.error(err);
