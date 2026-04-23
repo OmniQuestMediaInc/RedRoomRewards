@@ -111,7 +111,7 @@
 |----|-------------|--------|-----------|
 | PIPE-001 | PROGRAM_CONTROL directory structure | DONE | RRR-BOOTSTRAP-001 |
 | PIPE-002 | .github/copilot-instructions.md | DONE | RRR-BOOTSTRAP-001 |
-| PIPE-003 | CLAUDE.md | DONE | RRR-BOOTSTRAP-001 |
+| PIPE-003 | RRR-GOV-002 charter at `PROGRAM_CONTROL/DIRECTIVES/QUEUE/RRR-GOV-002.md` (replaces the prior root governance file archived under A-001) | DONE | RRR-BOOTSTRAP-001 / RRR-GOV-002-A001 |
 | PIPE-004 | directive-intake.yml | DONE | RRR-BOOTSTRAP-001 |
 | PIPE-005 | directive-dispatch.yml | DONE | RRR-BOOTSTRAP-001 |
 | PIPE-006 | auto-merge.yml | DONE | RRR-BOOTSTRAP-001 |
