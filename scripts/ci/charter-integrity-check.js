@@ -2,14 +2,19 @@
 /**
  * Charter integrity check (RRR-WORK-001-A003).
  *
- * Parses PROGRAM_CONTROL/DIRECTIVES/QUEUE/RRR-WORK-001.md, collects every task
- * with `Status: DONE`, and asserts:
+ * If PROGRAM_CONTROL/DIRECTIVES/QUEUE/RRR-WORK-001.md is present, parses it,
+ * collects every task with `Status: DONE`, and asserts:
  *   1. A DONE record exists at PROGRAM_CONTROL/DIRECTIVES/DONE/RRR-WORK-001-<id>-DONE.md
  *   2. That record carries a real 40-char merge SHA (field name "Merge commit"
  *      or "Merge SHA"), not a placeholder
  *   3. The SHA is reachable in this checkout (`git cat-file -e <sha>`)
  *
- * Exits 0 on success, 1 on any mismatch. Designed to run from the repo root.
+ * If the charter is absent (e.g. archived to archive/governance-v1/ as in
+ * PR #252), there is nothing to verify and the script exits 0. The invariant
+ * resumes automatically if a charter is reintroduced at the expected path.
+ *
+ * Exits 0 on success or no-charter, 1 on any mismatch. Designed to run from
+ * the repo root.
  */
 
 const fs = require('fs');
@@ -107,8 +112,14 @@ function failures() {
 
 function main() {
   if (!fs.existsSync(CHARTER)) {
-    console.error(`charter-integrity-check: charter not found at ${CHARTER}`);
-    process.exit(1);
+    // RRR-WORK-001 was archived to archive/governance-v1/ in PR #252.
+    // No charter on disk means no DONE tasks to verify; treat as a no-op
+    // rather than a CI failure. If a charter is reintroduced at this path,
+    // the integrity invariant resumes automatically.
+    console.log(
+      `charter-integrity-check: charter not present at ${path.relative(REPO_ROOT, CHARTER)}; nothing to verify`,
+    );
+    return;
   }
   const errors = failures();
   if (errors.length > 0) {
