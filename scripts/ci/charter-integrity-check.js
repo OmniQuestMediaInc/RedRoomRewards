@@ -23,8 +23,8 @@ function failures() {
   const lines = fs.readFileSync(SCHEDULE, 'utf8').split(/\r?\n/);
 
   for (const line of lines) {
-    // Only process pipe-delimited table data rows (skip headers / dividers).
-    if (!line.startsWith('|') || /^\|[-: |]+\|$/.test(line)) continue;
+    // Only process pipe-delimited table data rows.
+    if (!line.startsWith('|')) continue;
 
     const cols = line.split('|').map((c) => c.trim());
     // Table columns: | ID | Task | Status | Merge SHA |
@@ -37,6 +37,10 @@ function failures() {
     if (cols.length < 5) continue;
 
     const id = cols[1];
+    // Skip header rows and separator rows (alignment rows like |:---|:---|).
+    // A real data row always has an alphanumeric ID (e.g. "A-003", "B-001").
+    if (!/[A-Za-z0-9]/.test(id)) continue;
+
     const status = cols[3].toUpperCase();
     const mergeSha = cols[4];
 
