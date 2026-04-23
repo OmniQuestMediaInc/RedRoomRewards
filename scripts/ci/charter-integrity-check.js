@@ -107,8 +107,14 @@ function failures() {
 
 function main() {
   if (!fs.existsSync(CHARTER)) {
-    console.error(`charter-integrity-check: charter not found at ${CHARTER}`);
-    process.exit(1);
+    // RRR-WORK-001 was archived to archive/governance-v1/ in PR #252.
+    // No charter on disk means no DONE tasks to verify; treat as a no-op
+    // rather than a CI failure. If a charter is reintroduced at this path,
+    // the integrity invariant resumes automatically.
+    console.log(
+      `charter-integrity-check: charter not present at ${path.relative(REPO_ROOT, CHARTER)}; nothing to verify`,
+    );
+    return;
   }
   const errors = failures();
   if (errors.length > 0) {
