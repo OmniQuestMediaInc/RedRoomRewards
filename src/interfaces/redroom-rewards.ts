@@ -57,6 +57,20 @@ export interface WgsScoreResponse {
   action: WgsAction;
 }
 
+export interface MemberSignupRequest {
+  email: string;
+  password?: string;
+  billingAddress?: unknown;
+}
+
+export interface MemberProfile {
+  memberId: string;
+  tier: RedRoomTier;
+  totalPoints: number;
+  promotionalBalance: number;
+  verifiedAt: Date;
+}
+
 export interface WhiteLabelConfig {
   merchantId: string;
   brandName: string;
