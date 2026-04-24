@@ -1,18 +1,18 @@
 /**
  * Activity Feed Service (Placeholder)
- * 
+ *
  * This module will track user and model activity for reporting purposes.
  * Monitoring hooks are prepared for M1, implementation deferred to M2+.
- * 
+ *
  * Planned Features:
  * - User transaction timeline
  * - Model earnings feed
  * - Performance history
  * - Point balance changes
- * 
+ *
  * Metrics:
  * - ACTIVITY_FEED_EVENT: Track when feed events are generated
- * 
+ *
  * When implementing this service:
  * 1. Import MetricsLogger from '../metrics'
  * 2. Use MetricEventType.ACTIVITY_FEED_EVENT for all feed generation

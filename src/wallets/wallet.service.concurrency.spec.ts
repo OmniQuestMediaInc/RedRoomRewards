@@ -93,11 +93,21 @@ class InMemoryLedgerService {
     return { ...entry, entryId: `entry-${this.idempotencyKeys.size}` };
   }
 
-  async queryEntries(): Promise<unknown> { return { entries: [], totalCount: 0, offset: 0, limit: 0, hasMore: false }; }
-  async getEntry(): Promise<null> { return null; }
-  async getBalanceSnapshot(): Promise<unknown> { return {}; }
-  async generateReconciliationReport(): Promise<unknown> { return {}; }
-  async getAuditTrail(): Promise<unknown[]> { return []; }
+  async queryEntries(): Promise<unknown> {
+    return { entries: [], totalCount: 0, offset: 0, limit: 0, hasMore: false };
+  }
+  async getEntry(): Promise<null> {
+    return null;
+  }
+  async getBalanceSnapshot(): Promise<unknown> {
+    return {};
+  }
+  async generateReconciliationReport(): Promise<unknown> {
+    return {};
+  }
+  async getAuditTrail(): Promise<unknown[]> {
+    return [];
+  }
   async storeIdempotencyResult(): Promise<void> {}
 }
 
@@ -181,7 +191,7 @@ function installInMemoryDb() {
       }
       wallets.set(userId, next);
       return { ...next };
-    }
+    },
   );
 
   mockModelWalletModel.findOne.mockImplementation(async (filter: unknown) => {
@@ -216,7 +226,7 @@ function installInMemoryDb() {
       }
       modelWallets.set(modelId, next);
       return { ...next };
-    }
+    },
   );
 
   mockEscrowItemModel.create.mockImplementation(async (doc: EscrowDoc) => {
@@ -246,7 +256,7 @@ function installInMemoryDb() {
       }
       escrows.set(escrowId, next);
       return before; // service uses { new: false }
-    }
+    },
   );
   mockEscrowItemModel.updateOne.mockImplementation(
     async (filter: unknown, update: Record<string, Record<string, unknown>>) => {
@@ -261,7 +271,7 @@ function installInMemoryDb() {
       }
       escrows.set(escrowId, next);
       return { acknowledged: true, modifiedCount: 1 };
-    }
+    },
   );
   mockEscrowItemModel.deleteOne.mockImplementation(async (filter: unknown) => {
     const escrowId = eqValue(filter, 'escrowId') as string;
@@ -281,7 +291,9 @@ describe('Wallet Service - Concurrency and Race Conditions', () => {
     jest.clearAllMocks();
     db = installInMemoryDb();
     ledgerService = new InMemoryLedgerService();
-    walletService = new WalletService(ledgerService as unknown as import('../ledger/types').ILedgerService);
+    walletService = new WalletService(
+      ledgerService as unknown as import('../ledger/types').ILedgerService,
+    );
   });
 
   describe('Optimistic Locking', () => {
@@ -314,7 +326,7 @@ describe('Wallet Service - Concurrency and Race Conditions', () => {
         simulateConcurrentUpdate(300, 'idem-3'),
       ]);
 
-      const successCount = results.filter(r => r.status === 'fulfilled').length;
+      const successCount = results.filter((r) => r.status === 'fulfilled').length;
       expect(successCount).toBeGreaterThan(0);
 
       const wallet = db.wallets.get(userId);
@@ -375,8 +387,8 @@ describe('Wallet Service - Concurrency and Race Conditions', () => {
         walletService.holdInEscrow(request),
       ]);
 
-      const fulfilled = results.filter(r => r.status === 'fulfilled');
-      const rejected = results.filter(r => r.status === 'rejected');
+      const fulfilled = results.filter((r) => r.status === 'fulfilled');
+      const rejected = results.filter((r) => r.status === 'rejected');
 
       expect(fulfilled.length).toBe(1);
       expect(rejected.length).toBe(2);
@@ -411,13 +423,13 @@ describe('Wallet Service - Concurrency and Race Conditions', () => {
       }));
 
       const results = await Promise.allSettled(
-        operations.map(op => walletService.holdInEscrow(op))
+        operations.map((op) => walletService.holdInEscrow(op)),
       );
 
-      const successCount = results.filter(r => r.status === 'fulfilled').length;
+      const successCount = results.filter((r) => r.status === 'fulfilled').length;
 
       const wallet = db.wallets.get(userId);
-      const expectedAvailable = initialBalance - (successCount * 100);
+      const expectedAvailable = initialBalance - successCount * 100;
       const expectedEscrow = successCount * 100;
 
       expect(wallet!.availableBalance).toBe(expectedAvailable);
@@ -479,7 +491,7 @@ describe('Wallet Service - Concurrency and Race Conditions', () => {
           reason: TransactionReason.PERFORMANCE_COMPLETED,
           issuedAt: new Date(),
           expiresAt: new Date(Date.now() + 60000),
-        }
+        },
       );
 
       await walletService.refundEscrow(
@@ -502,7 +514,7 @@ describe('Wallet Service - Concurrency and Race Conditions', () => {
           reason: TransactionReason.PERFORMANCE_ABANDONED,
           issuedAt: new Date(),
           expiresAt: new Date(Date.now() + 60000),
-        }
+        },
       );
 
       const userWallet = db.wallets.get(userId);
@@ -532,7 +544,7 @@ describe('Wallet Service - Concurrency and Race Conditions', () => {
           featureType: 'test',
           idempotencyKey: 'idem-insufficient',
           requestId: 'req-insufficient',
-        })
+        }),
       ).rejects.toThrow();
 
       const wallet = db.wallets.get(userId);
@@ -570,11 +582,11 @@ describe('Wallet Service - Concurrency and Race Conditions', () => {
       const startTime = Date.now();
 
       const results = await Promise.allSettled(
-        operations.map(op => walletService.holdInEscrow(op))
+        operations.map((op) => walletService.holdInEscrow(op)),
       );
 
       const duration = Date.now() - startTime;
-      const successCount = results.filter(r => r.status === 'fulfilled').length;
+      const successCount = results.filter((r) => r.status === 'fulfilled').length;
 
       expect(duration).toBeLessThan(30000);
       expect(successCount).toBeGreaterThan(0);

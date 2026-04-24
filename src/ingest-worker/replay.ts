@@ -1,6 +1,6 @@
 /**
  * DLQ Replay Controller
- * 
+ *
  * Provides replay functionality for DLQ events with safety checks
  */
 
@@ -19,14 +19,14 @@ export class ReplayController {
    */
   async replay(options: ReplayOptions): Promise<ReplayResult> {
     const startTime = Date.now();
-    
+
     const result: ReplayResult = {
       totalReplayed: 0,
       successful: 0,
       failed: 0,
       skipped: 0,
     };
-    
+
     // Log replay start
     MetricsLogger.incrementCounter(MetricEventType.DLQ_REPLAY_STARTED, {
       options,
@@ -69,13 +69,13 @@ export class ReplayController {
         const isProcessed = await this.checkIdempotency(dlqEvent.eventId);
         if (isProcessed) {
           result.skipped++;
-          
+
           // Log double-processing prevention
           MetricsLogger.incrementCounter(MetricEventType.DLQ_DOUBLE_PROCESS_PREVENTED, {
             eventId: dlqEvent.eventId,
             eventType: dlqEvent.eventType,
           });
-          
+
           // Log alert for double-processing attempt (operational safety)
           MetricsLogger.logAlert({
             severity: AlertSeverity.INFO,
@@ -87,7 +87,7 @@ export class ReplayController {
               eventType: dlqEvent.eventType,
             },
           });
-          
+
           continue;
         }
 
@@ -107,7 +107,7 @@ export class ReplayController {
                 nextAttemptAt: new Date(),
               },
               $unset: { lastErrorCode: '', lastErrorAt: '' },
-            }
+            },
           );
         } else {
           // Create new ingest event
@@ -124,7 +124,7 @@ export class ReplayController {
 
         result.successful++;
         result.totalReplayed++;
-        
+
         // Log successful replay
         MetricsLogger.incrementCounter(MetricEventType.DLQ_REPLAY_SUCCESS, {
           eventId: dlqEvent.eventId,
@@ -133,7 +133,7 @@ export class ReplayController {
       } catch (error) {
         result.failed++;
         result.totalReplayed++;
-        
+
         // Log failed replay with structured logging
         MetricsLogger.logAlert({
           severity: AlertSeverity.ERROR,
@@ -149,14 +149,14 @@ export class ReplayController {
         });
       }
     }
-    
+
     // Log skipped events
     if (result.skipped > 0) {
       MetricsLogger.incrementCounter(MetricEventType.DLQ_REPLAY_SKIPPED, {
         count: result.skipped,
       });
     }
-    
+
     // Record duration metric
     const duration = Date.now() - startTime;
     MetricsLogger.recordDuration(MetricEventType.DLQ_REPLAY_STARTED, duration, {
@@ -190,7 +190,7 @@ export class ReplayController {
   async replayByDateRange(
     startDate: Date,
     endDate: Date,
-    maxEvents?: number
+    maxEvents?: number,
   ): Promise<ReplayResult> {
     return this.replay({ startDate, endDate, maxEvents });
   }

@@ -1,15 +1,13 @@
 /**
  * Comprehensive Wallet Service Tests
- * 
+ *
  * Tests all escrow operations, edge cases, and business logic
  * as specified in TEST_STRATEGY.md
  */
 
 import { WalletService } from '../wallet.service';
 import { TransactionType, TransactionReason } from '../types';
-import {
-  InsufficientBalanceError,
-} from '../../services/types';
+import { InsufficientBalanceError } from '../../services/types';
 import { WalletModel } from '../../db/models/wallet.model';
 import { EscrowItemModel } from '../../db/models/escrow-item.model';
 
@@ -112,7 +110,7 @@ describe('WalletService - Comprehensive Tests', () => {
           featureType: 'chip_menu',
           idempotencyKey: 'idem-2',
           requestId: 'req-2',
-        })
+        }),
       ).rejects.toThrow(InsufficientBalanceError);
     });
 
@@ -133,7 +131,7 @@ describe('WalletService - Comprehensive Tests', () => {
           featureType: 'chip_menu',
           idempotencyKey,
           requestId: 'req-3',
-        })
+        }),
       ).rejects.toThrow('Idempotency key already used');
     });
 
@@ -151,7 +149,7 @@ describe('WalletService - Comprehensive Tests', () => {
           featureType: 'chip_menu',
           idempotencyKey: 'idem-4',
           requestId: 'req-4',
-        })
+        }),
       ).rejects.toThrow();
 
       // Negative amount
@@ -164,7 +162,7 @@ describe('WalletService - Comprehensive Tests', () => {
           featureType: 'chip_menu',
           idempotencyKey: 'idem-5',
           requestId: 'req-5',
-        })
+        }),
       ).rejects.toThrow();
     });
 
@@ -208,7 +206,7 @@ describe('WalletService - Comprehensive Tests', () => {
           type: TransactionType.DEBIT,
           balanceState: 'available',
           stateTransition: 'available→escrow',
-        })
+        }),
       );
     });
   });
@@ -231,7 +229,7 @@ describe('WalletService - Comprehensive Tests', () => {
           featureType: 'chip_menu',
           idempotencyKey: 'idem-zero',
           requestId: 'req-zero',
-        })
+        }),
       ).rejects.toThrow(InsufficientBalanceError);
     });
 
@@ -305,4 +303,3 @@ describe('WalletService - Comprehensive Tests', () => {
     });
   });
 });
-

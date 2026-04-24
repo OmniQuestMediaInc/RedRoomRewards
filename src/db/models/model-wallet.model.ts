@@ -1,6 +1,6 @@
 /**
  * Model Wallet Model
- * 
+ *
  * Represents model wallet for earnings tracking.
  * Separate from user wallets for clear separation of concerns.
  * Collection: model_wallets
@@ -56,7 +56,7 @@ const ModelWalletSchema = new Schema<IModelWallet>(
   {
     timestamps: true,
     collection: 'model_wallets',
-  }
+  },
 );
 
 // Unique index on modelId

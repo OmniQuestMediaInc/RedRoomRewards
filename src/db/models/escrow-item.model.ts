@@ -1,6 +1,6 @@
 /**
  * Escrow Item Model
- * 
+ *
  * Tracks individual escrow holds for performance queue items.
  * Links user funds held in escrow to specific queue items.
  * Collection: escrow_items
@@ -95,7 +95,7 @@ const EscrowItemSchema = new Schema<IEscrowItem>(
   {
     timestamps: false, // We manage createdAt manually
     collection: 'escrow_items',
-  }
+  },
 );
 
 // Unique index on escrowId

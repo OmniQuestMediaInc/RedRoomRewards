@@ -1,16 +1,16 @@
 /**
  * Wallet Controller
- * 
+ *
  * REST API controller for wallet operations based on OpenAPI specification.
  * Provides endpoints for wallet queries and balance modifications (credit/deduct).
- * 
+ *
  * NOTE: This is a placeholder implementation. For production use:
  * 1. Integrate with PointAccrualService for credit operations
  * 2. Integrate with PointRedemptionService for deduct operations
  * 3. Implement proper idempotency checking via ILedgerService
  * 4. Add proper error handling and HTTP status codes
  * 5. Add authorization and authentication middleware
- * 
+ *
  * @see /api/openapi.yaml for API contract
  */
 
@@ -100,7 +100,7 @@ export class WalletController {
   /**
    * GET /wallets/:userId
    * Fetch detailed wallet information for the user
-   * 
+   *
    * @param userId - User identifier
    * @returns Promise<WalletResponse>
    */
@@ -125,14 +125,14 @@ export class WalletController {
   /**
    * POST /wallets/:userId/deduct
    * Deduct points for a specified user
-   * 
+   *
    * IMPORTANT: This is a placeholder implementation without proper service integration.
    * For production:
    * - Use PointRedemptionService for actual deductions
    * - Check idempotency before processing
    * - Validate authorization tokens
    * - Return cached results for duplicate requests
-   * 
+   *
    * @param userId - User identifier
    * @param request - Deduct request parameters
    * @returns Promise<TransactionResponse>
@@ -152,7 +152,7 @@ export class WalletController {
     const cached = await this.idempotencyService.checkKey(
       request.idempotencyKey,
       userId,
-      'wallet_deduct'
+      'wallet_deduct',
     );
     if (cached !== null) {
       return cached as unknown as TransactionResponse;
@@ -188,7 +188,7 @@ export class WalletController {
       request.idempotencyKey,
       userId,
       'wallet_deduct',
-      result as unknown as Record<string, unknown>
+      result as unknown as Record<string, unknown>,
     );
 
     return result;
@@ -197,14 +197,14 @@ export class WalletController {
   /**
    * POST /wallets/:userId/credit
    * Credit points to a specified user
-   * 
+   *
    * IMPORTANT: This is a placeholder implementation without proper service integration.
    * For production:
    * - Use PointAccrualService for actual credits
    * - Check idempotency before processing
    * - Validate authorization tokens
    * - Return cached results for duplicate requests
-   * 
+   *
    * @param userId - User identifier
    * @param request - Credit request parameters
    * @returns Promise<TransactionResponse>
@@ -224,7 +224,7 @@ export class WalletController {
     const cached = await this.idempotencyService.checkKey(
       request.idempotencyKey,
       userId,
-      'wallet_credit'
+      'wallet_credit',
     );
     if (cached !== null) {
       return cached as unknown as TransactionResponse;
@@ -260,7 +260,7 @@ export class WalletController {
       request.idempotencyKey,
       userId,
       'wallet_credit',
-      result as unknown as Record<string, unknown>
+      result as unknown as Record<string, unknown>,
     );
 
     return result;
@@ -280,7 +280,7 @@ export class WalletController {
  */
 export function createWalletController(
   walletService: IWalletService,
-  idempotencyService: IIdempotencyService
+  idempotencyService: IIdempotencyService,
 ): WalletController {
   return new WalletController(walletService, idempotencyService);
 }

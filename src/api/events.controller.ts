@@ -1,9 +1,9 @@
 /**
  * Events Controller
- * 
+ *
  * REST API controller for event ingestion based on OpenAPI specification.
  * Provides endpoints for external systems to submit events for async processing.
- * 
+ *
  * @see /api/openapi.yaml for API contract
  */
 
@@ -71,21 +71,22 @@ export class EventsController {
   /**
    * POST /events
    * Ingest an event for asynchronous processing
-   * 
+   *
    * Implements idempotency to prevent duplicate event processing.
    * Events are queued for processing by the ingest worker.
-   * 
+   *
    * @param request - Event data with idempotency key
    * @returns Promise<EventResponse>
    * @throws Error if validation fails
    */
   async postEvent(request: PostEventRequest): Promise<EventResponse> {
     // Generate or accept correlationId from upstream (existing repo convention)
-    const correlationId = request.correlationId || request.requestId || this.generateCorrelationId();
-    
+    const correlationId =
+      request.correlationId || request.requestId || this.generateCorrelationId();
+
     // Extract merchantId from payload if present
     const merchantId = request.payload?.merchantId as string | undefined;
-    
+
     // Validate required fields
     this.validateRequest(request);
 
@@ -100,7 +101,7 @@ export class EventsController {
 
     // Check idempotency - has this exact request been processed before?
     const isDuplicate = await this.checkIdempotency(request.idempotencyKey);
-    
+
     if (isDuplicate) {
       // Return cached response for duplicate request
       MetricsLogger.incrementCounter(MetricEventType.INGEST_IDEMPOTENCY_HIT, {
@@ -182,7 +183,7 @@ export class EventsController {
     } catch (error) {
       // Log rejection
       const errorCode = error instanceof Error ? error.name : 'UNKNOWN_ERROR';
-      
+
       MetricsLogger.incrementCounter(MetricEventType.INGEST_REJECTED, {
         eventType: request.eventType,
         errorCode,
@@ -207,17 +208,17 @@ export class EventsController {
   /**
    * GET /v1/events/receipt
    * Lookup event receipt by merchantId and idempotencyKey (support endpoint)
-   * 
+   *
    * Returns only approved fields for support operations.
    * Must be protected by admin/support auth guard.
-   * 
+   *
    * @param merchantId - Merchant identifier
    * @param idempotencyKey - Idempotency key
    * @returns Promise<EventReceiptResponse | null>
    */
   async getEventReceipt(
     merchantId: string,
-    idempotencyKey: string
+    idempotencyKey: string,
   ): Promise<EventReceiptResponse | null> {
     // Query for the event by merchantId and idempotencyKey
     const event = await IngestEventModel.findOne({
@@ -364,7 +365,7 @@ export class EventsController {
         pointsIdempotencyKey: idempotencyKey,
         eventScope: 'event_ingestion',
         resultHash: eventId,
-        storedResult: { 
+        storedResult: {
           eventId,
           queued: true,
           timestamp: new Date(),

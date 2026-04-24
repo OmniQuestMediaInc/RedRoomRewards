@@ -98,7 +98,7 @@ export const ValuationConfigSchema = new Schema<IValuationConfig>(
   {
     timestamps: true,
     collection: 'valuation_configs',
-  }
+  },
 );
 
 // Compound index for active-config lookup (tenant + merchant, newest first)
@@ -106,5 +106,5 @@ ValuationConfigSchema.index({ tenant_id: 1, merchant_id: 1, effective_at: -1 });
 
 export const ValuationConfigModel = mongoose.model<IValuationConfig>(
   'ValuationConfig',
-  ValuationConfigSchema
+  ValuationConfigSchema,
 );

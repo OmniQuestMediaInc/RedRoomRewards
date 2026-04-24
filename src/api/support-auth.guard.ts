@@ -1,6 +1,6 @@
 /**
  * Authentication Guard for Support Endpoints
- * 
+ *
  * Provides admin/support role verification for internal support endpoints.
  * Used to protect sensitive endpoints like receipt lookup.
  */
@@ -27,14 +27,14 @@ export interface AuthGuardConfig {
 
 /**
  * Check if request has valid admin/support authorization
- * 
+ *
  * @param authHeader - Authorization header value (e.g., "Bearer token...")
  * @param config - Auth configuration
  * @returns AuthCheckResult
  */
 export function checkAdminSupportAuth(
   authHeader: string | undefined,
-  config: AuthGuardConfig
+  config: AuthGuardConfig,
 ): AuthCheckResult {
   if (!authHeader) {
     return {
@@ -61,9 +61,7 @@ export function checkAdminSupportAuth(
     }) as JWTPayload;
 
     // Check for admin or support roles
-    const hasRequiredRole = 
-      payload.role === UserRole.ADMIN || 
-      payload.role === UserRole.SYSTEM;
+    const hasRequiredRole = payload.role === UserRole.ADMIN || payload.role === UserRole.SYSTEM;
 
     if (!hasRequiredRole) {
       return {
@@ -92,7 +90,7 @@ export function checkAdminSupportAuth(
 export async function withAdminSupportAuth<T>(
   authHeader: string | undefined,
   config: AuthGuardConfig,
-  handler: () => Promise<T>
+  handler: () => Promise<T>,
 ): Promise<{ authorized: true; data: T } | { authorized: false; error: string }> {
   const authCheck = checkAdminSupportAuth(authHeader, config);
 

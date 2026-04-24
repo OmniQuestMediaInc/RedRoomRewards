@@ -1,6 +1,6 @@
 /**
  * Reservation Service
- * 
+ *
  * Manages point reservations with operational monitoring
  */
 
@@ -52,7 +52,7 @@ export class ReservationService {
           updatedAt: new Date(),
         },
       },
-      { new: true }
+      { new: true },
     );
 
     if (reservation) {
@@ -82,7 +82,7 @@ export class ReservationService {
           updatedAt: new Date(),
         },
       },
-      { new: true }
+      { new: true },
     );
 
     if (reservation) {
@@ -115,7 +115,7 @@ export class ReservationService {
           status: ReservationStatus.EXPIRED,
           updatedAt: now,
         },
-      }
+      },
     ).limit(batchSize);
 
     const expiredCount = result.modifiedCount;

@@ -86,7 +86,7 @@ describe('PointExpirationService - Comprehensive Tests', () => {
         expect.objectContaining({
           type: TransactionType.DEBIT,
           reason: TransactionReason.POINT_EXPIRY,
-        })
+        }),
       );
     });
 
@@ -101,7 +101,7 @@ describe('PointExpirationService - Comprehensive Tests', () => {
 
       const result = await expirationService.processUserExpiration(
         'user-no-expired',
-        'req-no-expire'
+        'req-no-expire',
       );
 
       // Service returns null when no points are expired
@@ -112,7 +112,7 @@ describe('PointExpirationService - Comprehensive Tests', () => {
     it('should respect grace period', async () => {
       const gracePeriodDays = 3;
 
-      expirationService = new PointExpirationService(mockLedgerService as any, { // eslint-disable-line @typescript-eslint/no-explicit-any
+      expirationService = new PointExpirationService(mockLedgerService as any, {
         gracePeriodDays,
       });
 
@@ -134,10 +134,7 @@ describe('PointExpirationService - Comprehensive Tests', () => {
         hasMore: false,
       });
 
-      const result = await expirationService.processUserExpiration(
-        'user-123',
-        'req-grace'
-      );
+      const result = await expirationService.processUserExpiration('user-123', 'req-grace');
 
       // Should not expire yet — still within grace period
       expect(result).toBeNull();
@@ -185,7 +182,7 @@ describe('PointExpirationService - Comprehensive Tests', () => {
       expect(mockLedgerService.createEntry).toHaveBeenCalledWith(
         expect.objectContaining({
           idempotencyKey: expect.stringContaining(userId),
-        })
+        }),
       );
     });
   });
@@ -215,7 +212,7 @@ describe('PointExpirationService - Comprehensive Tests', () => {
       // Act — new API: (userIds, requestId)
       const result = await expirationService.processBatchExpiration(
         ['user-1', 'user-2', 'user-3'],
-        'req-batch-1'
+        'req-batch-1',
       );
 
       // Assert
@@ -249,7 +246,7 @@ describe('PointExpirationService - Comprehensive Tests', () => {
 
       const result = await expirationService.processBatchExpiration(
         ['user-1', 'user-2', 'user-3'],
-        'req-batch-2'
+        'req-batch-2',
       );
 
       expect(result.usersProcessed).toBe(2); // only successful ones counted
@@ -267,10 +264,7 @@ describe('PointExpirationService - Comprehensive Tests', () => {
         timestamp: new Date(),
       });
 
-      await expirationService.processBatchExpiration(
-        ['user-1', 'user-2', 'user-3'],
-        'req-batch-3'
-      );
+      await expirationService.processBatchExpiration(['user-1', 'user-2', 'user-3'], 'req-batch-3');
 
       // All 3 userIds should have been processed
       expect(expirationService.processUserExpiration).toHaveBeenCalledTimes(3);
@@ -393,10 +387,7 @@ describe('PointExpirationService - Comprehensive Tests', () => {
         entryId: 'exp-entry',
       });
 
-      const result = await expirationService.processUserExpiration(
-        'user-123',
-        'req-partial'
-      );
+      const result = await expirationService.processUserExpiration('user-123', 'req-partial');
 
       // Only expired points should be processed
       expect(result).not.toBeNull();
@@ -436,10 +427,7 @@ describe('PointExpirationService - Comprehensive Tests', () => {
         entryId: 'exp-entry',
       });
 
-      const result = await expirationService.processUserExpiration(
-        'user-123',
-        'req-no-negative'
-      );
+      const result = await expirationService.processUserExpiration('user-123', 'req-no-negative');
 
       // Should only expire what's available
       expect(result).not.toBeNull();

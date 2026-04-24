@@ -1,6 +1,6 @@
 /**
  * Idempotency Records Model
- * 
+ *
  * Stores idempotency keys to prevent duplicate processing
  * Collection: idempotency_records
  */
@@ -52,23 +52,17 @@ const IdempotencyRecordSchema = new Schema<IIdempotencyRecord>(
   {
     timestamps: true,
     collection: 'idempotency_records',
-  }
+  },
 );
 
 // Composite unique index on idempotency key + scope
-IdempotencyRecordSchema.index(
-  { pointsIdempotencyKey: 1, eventScope: 1 },
-  { unique: true }
-);
+IdempotencyRecordSchema.index({ pointsIdempotencyKey: 1, eventScope: 1 }, { unique: true });
 
 // TTL index with 90 days default retention
 // expireAfterSeconds: 7776000 = 90 days
-IdempotencyRecordSchema.index(
-  { createdAt: 1 },
-  { expireAfterSeconds: 7776000 }
-);
+IdempotencyRecordSchema.index({ createdAt: 1 }, { expireAfterSeconds: 7776000 });
 
 export const IdempotencyRecordModel = mongoose.model<IIdempotencyRecord>(
   'IdempotencyRecord',
-  IdempotencyRecordSchema
+  IdempotencyRecordSchema,
 );

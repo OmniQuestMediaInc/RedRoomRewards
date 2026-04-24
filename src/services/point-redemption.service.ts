@@ -1,20 +1,17 @@
 /**
  * Point Redemption Service
- * 
+ *
  * Handles point redemption operations by orchestrating escrow holds
  * through the wallet service. This service provides business logic
  * for different types of redemptions (chip menu, etc.).
- * 
+ *
  * Settlement and refund are handled by the queue service, not here.
- * 
+ *
  * @module services/point-redemption
  */
 
 import { IWalletService } from './types';
-import { 
-  EscrowHoldRequest, 
-  TransactionReason 
-} from '../wallets/types';
+import { EscrowHoldRequest, TransactionReason } from '../wallets/types';
 
 /**
  * Request to redeem points for a feature
@@ -22,25 +19,25 @@ import {
 export interface RedeemPointsRequest {
   /** User making the redemption */
   userId: string;
-  
+
   /** Amount to redeem */
   amount: number;
-  
+
   /** Type of redemption (chip_menu, etc.) */
   featureType: string;
-  
+
   /** Model involved (if applicable) */
   modelId?: string;
-  
+
   /** Queue item ID for tracking */
   queueItemId: string;
-  
+
   /** Reason for redemption */
   reason: TransactionReason;
-  
+
   /** Request ID for tracing */
   requestId: string;
-  
+
   /** Additional metadata */
   metadata?: Record<string, unknown>;
 }
@@ -51,22 +48,22 @@ export interface RedeemPointsRequest {
 export interface RedeemPointsResponse {
   /** Transaction ID */
   transactionId: string;
-  
+
   /** Escrow ID holding the funds */
   escrowId: string;
-  
+
   /** Amount redeemed and held in escrow */
   amountRedeemed: number;
-  
+
   /** User's new available balance */
   newAvailableBalance: number;
-  
+
   /** User's escrow balance */
   escrowBalance: number;
-  
+
   /** Queue item ID for tracking */
   queueItemId: string;
-  
+
   /** Redemption timestamp */
   timestamp: Date;
 }
@@ -77,10 +74,10 @@ export interface RedeemPointsResponse {
 export interface PointRedemptionConfig {
   /** Maximum redemption amount per transaction */
   maxRedemptionAmount: number;
-  
+
   /** Minimum redemption amount */
   minRedemptionAmount: number;
-  
+
   /** Enable balance validation */
   validateBalance: boolean;
 }
@@ -93,7 +90,7 @@ const DEFAULT_CONFIG: PointRedemptionConfig = {
 
 /**
  * Point Redemption Service Implementation
- * 
+ *
  * Orchestrates point redemptions by holding funds in escrow.
  * Does NOT handle settlement or refund - that's the queue service's responsibility.
  */
@@ -101,22 +98,19 @@ export class PointRedemptionService {
   private config: PointRedemptionConfig;
   private walletService: IWalletService;
 
-  constructor(
-    walletService: IWalletService,
-    config: Partial<PointRedemptionConfig> = {}
-  ) {
+  constructor(walletService: IWalletService, config: Partial<PointRedemptionConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
     this.walletService = walletService;
   }
 
   /**
    * Redeem points by placing them in escrow
-   * 
+   *
    * This method validates the redemption and holds funds in escrow.
    * The funds remain in escrow until the queue service either:
    * - Settles them to a model (performance completed)
    * - Refunds them to the user (performance abandoned)
-   * 
+   *
    * @param request Redemption request details
    * @returns Redemption response with escrow details
    * @throws InsufficientBalanceError if user doesn't have enough points
@@ -125,27 +119,27 @@ export class PointRedemptionService {
   async redeemPoints(request: RedeemPointsRequest): Promise<RedeemPointsResponse> {
     // Validate amount
     this.validateAmount(request.amount);
-    
+
     // Validate reason is a redemption reason
     this.validateRedemptionReason(request.reason);
-    
+
     // Validate feature type
     this.validateFeatureType(request.featureType);
-    
+
     // Check balance if enabled
     if (this.config.validateBalance) {
       const balance = await this.walletService.getUserBalance(request.userId);
       if (balance.available < request.amount) {
         throw new Error(
-          `Insufficient balance. Required: ${request.amount}, Available: ${balance.available}`
+          `Insufficient balance. Required: ${request.amount}, Available: ${balance.available}`,
         );
       }
     }
-    
+
     // Hold in escrow via wallet service
     // Use request-specific idempotency key for proper duplicate detection
     const idempotencyKey = `redemption-${request.userId}-${request.queueItemId}`;
-    
+
     const escrowRequest: EscrowHoldRequest = {
       userId: request.userId,
       amount: request.amount,
@@ -159,9 +153,9 @@ export class PointRedemptionService {
         modelId: request.modelId,
       },
     };
-    
+
     const escrowResponse = await this.walletService.holdInEscrow(escrowRequest);
-    
+
     return {
       transactionId: escrowResponse.transactionId,
       escrowId: escrowResponse.escrowId,
@@ -172,10 +166,10 @@ export class PointRedemptionService {
       timestamp: escrowResponse.timestamp,
     };
   }
-  
+
   /**
    * Redeem points for chip menu action
-   * 
+   *
    * @param userId User ID
    * @param modelId Model ID
    * @param amount Amount to redeem
@@ -190,7 +184,7 @@ export class PointRedemptionService {
     amount: number,
     actionType: string,
     queueItemId: string,
-    requestId: string
+    requestId: string,
   ): Promise<RedeemPointsResponse> {
     return this.redeemPoints({
       userId,
@@ -208,7 +202,7 @@ export class PointRedemptionService {
 
   /**
    * Redeem points for spin wheel play
-   * 
+   *
    * @param userId User ID
    * @param amount Amount to redeem
    * @param queueItemId Queue item ID
@@ -219,7 +213,7 @@ export class PointRedemptionService {
     userId: string,
     amount: number,
     queueItemId: string,
-    requestId: string
+    requestId: string,
   ): Promise<RedeemPointsResponse> {
     return this.redeemPoints({
       userId,
@@ -230,10 +224,10 @@ export class PointRedemptionService {
       requestId,
     });
   }
-  
+
   /**
    * Redeem points for performance request
-   * 
+   *
    * @param userId User ID
    * @param modelId Model ID
    * @param amount Amount to redeem
@@ -248,7 +242,7 @@ export class PointRedemptionService {
     amount: number,
     performanceType: string,
     queueItemId: string,
-    requestId: string
+    requestId: string,
   ): Promise<RedeemPointsResponse> {
     return this.redeemPoints({
       userId,
@@ -263,7 +257,7 @@ export class PointRedemptionService {
       },
     });
   }
-  
+
   /**
    * Validate redemption amount
    */
@@ -271,16 +265,16 @@ export class PointRedemptionService {
     if (amount < this.config.minRedemptionAmount) {
       throw new Error(`Amount must be at least ${this.config.minRedemptionAmount}`);
     }
-    
+
     if (amount > this.config.maxRedemptionAmount) {
       throw new Error(`Amount cannot exceed ${this.config.maxRedemptionAmount}`);
     }
-    
+
     if (!Number.isFinite(amount) || amount <= 0) {
       throw new Error('Amount must be a positive finite number');
     }
   }
-  
+
   /**
    * Validate redemption reason
    */
@@ -290,22 +284,18 @@ export class PointRedemptionService {
       TransactionReason.SPIN_WHEEL_PLAY,
       TransactionReason.PERFORMANCE_REQUEST,
     ];
-    
+
     if (!redemptionReasons.includes(reason)) {
       throw new Error(`Invalid redemption reason: ${reason}`);
     }
   }
-  
+
   /**
    * Validate feature type
    */
   private validateFeatureType(featureType: string): void {
-    const validFeatures = [
-      'chip_menu',
-      'spin_wheel',
-      'performance',
-    ];
-    
+    const validFeatures = ['chip_menu', 'spin_wheel', 'performance'];
+
     if (!validFeatures.includes(featureType)) {
       throw new Error(`Invalid feature type: ${featureType}`);
     }
@@ -317,7 +307,7 @@ export class PointRedemptionService {
  */
 export function createPointRedemptionService(
   walletService: IWalletService,
-  config?: Partial<PointRedemptionConfig>
+  config?: Partial<PointRedemptionConfig>,
 ): PointRedemptionService {
   return new PointRedemptionService(walletService, config);
 }

@@ -1,6 +1,6 @@
 /**
  * Security and Authorization Tests
- * 
+ *
  * Tests authorization validation, input validation, and security controls
  * as specified in TEST_STRATEGY.md Section 5
  */
@@ -29,14 +29,12 @@ describe('Security Tests', () => {
           'escrow-123',
           'model-456',
           100,
-          TransactionReason.CHIP_MENU_PURCHASE
+          TransactionReason.CHIP_MENU_PURCHASE,
         );
 
         const tamperedToken = authObj.token.slice(0, -5) + 'XXXXX';
 
-        expect(() =>
-          authService.verifyAuthorizationToken(tamperedToken)
-        ).toThrow();
+        expect(() => authService.verifyAuthorizationToken(tamperedToken)).toThrow();
       });
 
       it('should reject tokens with wrong operation type', () => {
@@ -45,7 +43,7 @@ describe('Security Tests', () => {
           'escrow-123',
           'user-123',
           50,
-          TransactionReason.ADMIN_REFUND
+          TransactionReason.ADMIN_REFUND,
         );
 
         // Wrap refund token inside a fake settlement-shaped object
@@ -63,11 +61,7 @@ describe('Security Tests', () => {
 
         // Try to use refund token for settlement — should throw
         expect(() =>
-          authService.validateSettlementAuthorization(
-            fakeSettlement,
-            'queue-123',
-            'escrow-123'
-          )
+          authService.validateSettlementAuthorization(fakeSettlement, 'queue-123', 'escrow-123'),
         ).toThrow();
       });
     });
@@ -161,7 +155,7 @@ describe('Security Tests', () => {
 });
 
 // Helper validation functions
-function validateUserId(userId: any): void { // eslint-disable-line @typescript-eslint/no-explicit-any
+function validateUserId(userId: any): void {
   if (typeof userId !== 'string') {
     throw new Error('Invalid user ID format');
   }
@@ -185,7 +179,7 @@ function sanitizeMetadata(metadata: Record<string, unknown>): Record<string, unk
   return sanitized;
 }
 
-function validateAmount(amount: any): void { // eslint-disable-line @typescript-eslint/no-explicit-any
+function validateAmount(amount: any): void {
   if (typeof amount !== 'number') {
     throw new Error('Amount must be a number');
   }
@@ -197,7 +191,7 @@ function validateAmount(amount: any): void { // eslint-disable-line @typescript-
   }
 }
 
-function redactSensitiveData(data: any): any { // eslint-disable-line @typescript-eslint/no-explicit-any
+function redactSensitiveData(data: any): any {
   const redacted = { ...data };
   const sensitiveFields = ['password', 'creditCard', 'ssn', 'apiKey', 'token'];
   sensitiveFields.forEach((field) => {
@@ -210,4 +204,3 @@ function redactSensitiveData(data: any): any { // eslint-disable-line @typescrip
   }
   return redacted;
 }
-

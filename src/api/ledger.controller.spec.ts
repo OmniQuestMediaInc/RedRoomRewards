@@ -76,7 +76,7 @@ describe('LedgerController', () => {
           accountId: 'user-123',
           limit: 10,
           offset: 0,
-        })
+        }),
       );
     });
 
@@ -104,7 +104,7 @@ describe('LedgerController', () => {
         expect.objectContaining({
           accountId: 'user-123',
           type: 'credit',
-        })
+        }),
       );
     });
 
@@ -132,7 +132,7 @@ describe('LedgerController', () => {
         expect.objectContaining({
           startDate: new Date('2024-01-01T00:00:00Z'),
           endDate: new Date('2024-12-31T23:59:59Z'),
-        })
+        }),
       );
     });
 
@@ -157,7 +157,7 @@ describe('LedgerController', () => {
       expect(mockLedgerService.queryEntries).toHaveBeenCalledWith(
         expect.objectContaining({
           limit: 1000, // Capped at maximum
-        })
+        }),
       );
     });
   });
@@ -182,10 +182,7 @@ describe('LedgerController', () => {
       expect(response.escrow).toBe(100);
       expect(response.total).toBe(600);
       expect(response.asOf).toBe('2024-01-01T00:00:00.000Z');
-      expect(mockLedgerService.getBalanceSnapshot).toHaveBeenCalledWith(
-        'user-123',
-        'user'
-      );
+      expect(mockLedgerService.getBalanceSnapshot).toHaveBeenCalledWith('user-123', 'user');
     });
 
     it('should handle balance without escrow', async () => {

@@ -1,9 +1,9 @@
 /**
  * Wallet and Escrow Type Definitions
- * 
+ *
  * These types define the core wallet and escrow structures for RedRoomRewards.
  * Based on established patterns from ChatNow.Zone integration requirements.
- * 
+ *
  * @see /docs/WALLET_ESCROW_ARCHITECTURE.md for detailed specifications
  */
 
@@ -14,13 +14,13 @@
 export enum WalletState {
   /** Points that a user can freely spend */
   AVAILABLE = 'available',
-  
+
   /** Points deducted from user but not yet credited to recipient */
   ESCROW = 'escrow',
-  
+
   /** Points credited to a model's account after performance completion */
   EARNED = 'earned',
-  
+
   /** Points returned to user from escrow */
   REFUNDED = 'refunded',
 }
@@ -31,7 +31,7 @@ export enum WalletState {
 export enum TransactionType {
   /** Adding points to a balance */
   CREDIT = 'credit',
-  
+
   /** Removing points from a balance */
   DEBIT = 'debit',
 }
@@ -42,10 +42,10 @@ export enum TransactionType {
 export enum EscrowStatus {
   /** Funds are held in escrow, awaiting settlement or refund */
   HELD = 'held',
-  
+
   /** Funds have been settled to model earned balance */
   SETTLED = 'settled',
-  
+
   /** Funds have been refunded to user available balance */
   REFUNDED = 'refunded',
 }
@@ -69,14 +69,14 @@ export enum TransactionReason {
   // Settlement reasons
   PERFORMANCE_COMPLETED = 'performance_completed',
   PARTIAL_PERFORMANCE = 'partial_performance',
-  
+
   // Refund reasons
   PERFORMANCE_ABANDONED = 'performance_abandoned',
   USER_DISCONNECTED = 'user_disconnected',
   MODEL_INITIATED_REFUND = 'model_initiated_refund',
   ROPE_DROP_TIMEOUT = 'rope_drop_timeout',
   ADMIN_REFUND = 'admin_refund',
-  
+
   // Debit reasons
   POINT_EXPIRY = 'point_expiry',
   ADMIN_DEBIT = 'admin_debit',
@@ -89,22 +89,22 @@ export enum TransactionReason {
 export interface Wallet {
   /** User identifier */
   userId: string;
-  
+
   /** Points available for spending */
   availableBalance: number;
-  
+
   /** Points held in escrow */
   escrowBalance: number;
-  
+
   /** Currency type (default: 'points') */
   currency: string;
-  
+
   /** Optimistic locking version */
   version: number;
-  
+
   /** Wallet creation timestamp */
   createdAt: Date;
-  
+
   /** Last update timestamp */
   updatedAt: Date;
 }
@@ -115,22 +115,22 @@ export interface Wallet {
 export interface ModelWallet {
   /** Model identifier */
   modelId: string;
-  
+
   /** Points earned and available for withdrawal */
   earnedBalance: number;
-  
+
   /** Currency type (default: 'points') */
   currency: string;
-  
+
   /** Wallet type */
   type: 'promotional' | 'earnings';
-  
+
   /** Optimistic locking version */
   version: number;
-  
+
   /** Wallet creation timestamp */
   createdAt: Date;
-  
+
   /** Last update timestamp */
   updatedAt: Date;
 }
@@ -141,34 +141,34 @@ export interface ModelWallet {
 export interface EscrowItem {
   /** Unique escrow identifier */
   escrowId: string;
-  
+
   /** User who initiated the transaction */
   userId: string;
-  
+
   /** Amount held in escrow */
   amount: number;
-  
+
   /** Current status of escrow */
   status: EscrowStatus;
-  
+
   /** Performance queue item ID */
   queueItemId: string;
-  
+
   /** Feature that created this escrow */
   featureType: string;
-  
+
   /** Reason for holding */
   reason: TransactionReason;
-  
+
   /** Metadata for audit trail */
   metadata?: Record<string, unknown>;
-  
+
   /** When escrow was created */
   createdAt: Date;
-  
+
   /** When escrow was settled or refunded (null if still held) */
   processedAt: Date | null;
-  
+
   /** Model ID if settled */
   modelId?: string;
 }
@@ -179,46 +179,46 @@ export interface EscrowItem {
 export interface Transaction {
   /** Unique transaction identifier */
   transactionId: string;
-  
+
   /** User or model identifier */
   accountId: string;
-  
+
   /** Account type */
   accountType: 'user' | 'model';
-  
+
   /** Transaction amount (positive for credit, negative for debit) */
   amount: number;
-  
+
   /** Transaction type */
   type: TransactionType;
-  
+
   /** State transition (e.g., 'available→escrow', 'escrow→earned') */
   stateTransition: string;
-  
+
   /** Structured reason code */
   reason: TransactionReason;
-  
+
   /** Idempotency key for duplicate prevention */
   idempotencyKey: string;
-  
+
   /** Request ID for tracing */
   requestId: string;
-  
+
   /** Balance before transaction */
   previousBalance: number;
-  
+
   /** Balance after transaction */
   newBalance: number;
-  
+
   /** Transaction timestamp */
   timestamp: Date;
-  
+
   /** Additional context data */
   metadata?: Record<string, unknown>;
-  
+
   /** Related escrow ID if applicable */
   escrowId?: string;
-  
+
   /** Related queue item ID if applicable */
   queueItemId?: string;
 }
@@ -229,25 +229,25 @@ export interface Transaction {
 export interface EscrowHoldRequest {
   /** User identifier */
   userId: string;
-  
+
   /** Amount to hold */
   amount: number;
-  
+
   /** Reason for holding */
   reason: TransactionReason;
-  
+
   /** Performance queue item ID */
   queueItemId: string;
-  
+
   /** Feature initiating the hold */
   featureType: string;
-  
+
   /** Idempotency key */
   idempotencyKey: string;
-  
+
   /** Request ID for tracing */
   requestId: string;
-  
+
   /** Additional metadata */
   metadata?: Record<string, unknown>;
 }
@@ -258,19 +258,19 @@ export interface EscrowHoldRequest {
 export interface EscrowHoldResponse {
   /** Created transaction ID */
   transactionId: string;
-  
+
   /** Created escrow ID */
   escrowId: string;
-  
+
   /** User's previous available balance */
   previousBalance: number;
-  
+
   /** User's new available balance */
   newAvailableBalance: number;
-  
+
   /** Amount now in escrow */
   escrowBalance: number;
-  
+
   /** Operation timestamp */
   timestamp: Date;
 }
@@ -281,28 +281,28 @@ export interface EscrowHoldResponse {
 export interface EscrowSettleRequest {
   /** Escrow ID to settle */
   escrowId: string;
-  
+
   /** Model to credit */
   modelId: string;
-  
+
   /** Amount to settle (must match escrow amount) */
   amount: number;
-  
+
   /** Queue item ID */
   queueItemId: string;
-  
+
   /** Reason for settlement */
   reason: TransactionReason;
-  
+
   /** Queue authorization token */
   authorizationToken: string;
-  
+
   /** Idempotency key */
   idempotencyKey: string;
-  
+
   /** Request ID for tracing */
   requestId: string;
-  
+
   /** Additional metadata */
   metadata?: Record<string, unknown>;
 }
@@ -313,13 +313,13 @@ export interface EscrowSettleRequest {
 export interface EscrowSettleResponse {
   /** Transaction ID for settlement */
   transactionId: string;
-  
+
   /** Amount settled */
   settledAmount: number;
-  
+
   /** Model's new earned balance */
   modelEarnedBalance: number;
-  
+
   /** Operation timestamp */
   timestamp: Date;
 }
@@ -330,28 +330,28 @@ export interface EscrowSettleResponse {
 export interface EscrowRefundRequest {
   /** Escrow ID to refund */
   escrowId: string;
-  
+
   /** User to refund */
   userId: string;
-  
+
   /** Amount to refund (must match escrow amount) */
   amount: number;
-  
+
   /** Queue item ID */
   queueItemId: string;
-  
+
   /** Reason for refund */
   reason: TransactionReason;
-  
+
   /** Queue authorization token */
   authorizationToken: string;
-  
+
   /** Idempotency key */
   idempotencyKey: string;
-  
+
   /** Request ID for tracing */
   requestId: string;
-  
+
   /** Additional metadata */
   metadata?: Record<string, unknown>;
 }
@@ -362,13 +362,13 @@ export interface EscrowRefundRequest {
 export interface EscrowRefundResponse {
   /** Transaction ID for refund */
   transactionId: string;
-  
+
   /** Amount refunded */
   refundedAmount: number;
-  
+
   /** User's new available balance */
   userAvailableBalance: number;
-  
+
   /** Operation timestamp */
   timestamp: Date;
 }
@@ -379,34 +379,34 @@ export interface EscrowRefundResponse {
 export interface EscrowPartialSettleRequest {
   /** Escrow ID to process */
   escrowId: string;
-  
+
   /** User to refund partial amount */
   userId: string;
-  
+
   /** Model to settle remaining amount */
   modelId: string;
-  
+
   /** Amount to refund to user */
   refundAmount: number;
-  
+
   /** Amount to settle to model */
   settleAmount: number;
-  
+
   /** Queue item ID */
   queueItemId: string;
-  
+
   /** Reason for partial settlement */
   reason: TransactionReason;
-  
+
   /** Queue authorization token */
   authorizationToken: string;
-  
+
   /** Idempotency key */
   idempotencyKey: string;
-  
+
   /** Request ID for tracing */
   requestId: string;
-  
+
   /** Additional metadata */
   metadata?: Record<string, unknown>;
 }
@@ -417,19 +417,19 @@ export interface EscrowPartialSettleRequest {
 export interface EscrowPartialSettleResponse {
   /** Transaction ID */
   transactionId: string;
-  
+
   /** Amount refunded to user */
   refundedAmount: number;
-  
+
   /** Amount settled to model */
   settledAmount: number;
-  
+
   /** User's new available balance */
   userAvailableBalance: number;
-  
+
   /** Model's new earned balance */
   modelEarnedBalance: number;
-  
+
   /** Operation timestamp */
   timestamp: Date;
 }
@@ -440,16 +440,16 @@ export interface EscrowPartialSettleResponse {
 export interface BalanceResponse {
   /** User identifier */
   userId: string;
-  
+
   /** Available balance */
   available: number;
-  
+
   /** Escrow balance */
   escrow: number;
-  
+
   /** Total balance (available + escrow) */
   total: number;
-  
+
   /** Balance as of timestamp */
   asOf: Date;
 }
@@ -460,10 +460,10 @@ export interface BalanceResponse {
 export interface EscrowDetailsResponse {
   /** User identifier */
   userId: string;
-  
+
   /** List of escrow items */
   escrowItems: EscrowItem[];
-  
+
   /** Total amount in escrow */
   totalEscrow: number;
 }
@@ -474,22 +474,22 @@ export interface EscrowDetailsResponse {
 export interface QueueIntakeEvent {
   /** Queue item ID */
   queueItemId: string;
-  
+
   /** User who initiated */
   userId: string;
-  
+
   /** Feature type */
   featureType: string;
-  
+
   /** Associated escrow ID */
   escrowId: string;
-  
+
   /** Amount held in escrow */
   amount: number;
-  
+
   /** Event timestamp */
   timestamp: Date;
-  
+
   /** Additional context */
   metadata?: Record<string, unknown>;
 }
@@ -499,20 +499,25 @@ export interface QueueIntakeEvent {
  */
 export interface FinancialEvent {
   /** Event type */
-  eventType: 'escrow_held' | 'escrow_settled' | 'escrow_refunded' | 'points_awarded' | 'points_redeemed';
-  
+  eventType:
+    | 'escrow_held'
+    | 'escrow_settled'
+    | 'escrow_refunded'
+    | 'points_awarded'
+    | 'points_redeemed';
+
   /** Message template ID */
   templateId: string;
-  
+
   /** Template variables */
   variables: Record<string, unknown>;
-  
+
   /** User or model to notify */
   recipientId: string;
-  
+
   /** Recipient type */
   recipientType: 'user' | 'model';
-  
+
   /** Event timestamp */
   timestamp: Date;
 }
@@ -523,22 +528,26 @@ export interface FinancialEvent {
 export interface IdempotencyRecord {
   /** Idempotency key */
   key: string;
-  
+
   /** Operation type */
   operationType: 'hold' | 'settle' | 'refund' | 'partial_settle';
-  
+
   /** Request hash for validation */
   requestHash: string;
-  
+
   /** Result of the operation (stored response) */
-  result: EscrowHoldResponse | EscrowSettleResponse | EscrowRefundResponse | EscrowPartialSettleResponse;
-  
+  result:
+    | EscrowHoldResponse
+    | EscrowSettleResponse
+    | EscrowRefundResponse
+    | EscrowPartialSettleResponse;
+
   /** HTTP status code */
   statusCode: number;
-  
+
   /** Created timestamp */
   createdAt: Date;
-  
+
   /** Expiry timestamp (24+ hours) */
   expiresAt: Date;
 }
@@ -549,19 +558,19 @@ export interface IdempotencyRecord {
 export interface WalletServiceConfig {
   /** Enable idempotency checking */
   enableIdempotency: boolean;
-  
+
   /** Idempotency TTL in seconds */
   idempotencyTtl: number;
-  
+
   /** Maximum retry attempts for optimistic lock conflicts */
   maxRetryAttempts: number;
-  
+
   /** Retry backoff base in milliseconds */
   retryBackoffMs: number;
-  
+
   /** Enable audit logging */
   enableAuditLogging: boolean;
-  
+
   /** Minimum balance (can be negative for overdraft) */
   minimumBalance: number;
 }

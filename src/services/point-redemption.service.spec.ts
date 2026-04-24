@@ -38,7 +38,7 @@ describe('PointRedemptionService', () => {
       // Arrange
       const userId = 'user-123';
       const amount = 100;
-      
+
       mockWalletService.getUserBalance.mockResolvedValue({
         available: 500,
         escrow: 0,
@@ -76,7 +76,7 @@ describe('PointRedemptionService', () => {
           amount,
           reason: TransactionReason.CHIP_MENU_PURCHASE,
           featureType: 'chip_menu',
-        })
+        }),
       );
     });
 
@@ -97,7 +97,7 @@ describe('PointRedemptionService', () => {
           queueItemId: 'queue-1',
           reason: TransactionReason.CHIP_MENU_PURCHASE,
           requestId: 'req-2',
-        })
+        }),
       ).rejects.toThrow('Insufficient balance');
     });
 
@@ -111,7 +111,7 @@ describe('PointRedemptionService', () => {
           queueItemId: 'queue-1',
           reason: TransactionReason.CHIP_MENU_PURCHASE,
           requestId: 'req-3',
-        })
+        }),
       ).rejects.toThrow('Amount must be at least');
     });
 
@@ -125,7 +125,7 @@ describe('PointRedemptionService', () => {
           queueItemId: 'queue-1',
           reason: TransactionReason.CHIP_MENU_PURCHASE,
           requestId: 'req-4',
-        })
+        }),
       ).rejects.toThrow('Amount cannot exceed');
     });
 
@@ -139,7 +139,7 @@ describe('PointRedemptionService', () => {
           queueItemId: 'queue-1',
           reason: TransactionReason.USER_SIGNUP_BONUS,
           requestId: 'req-5',
-        })
+        }),
       ).rejects.toThrow('Invalid redemption reason');
     });
 
@@ -153,7 +153,7 @@ describe('PointRedemptionService', () => {
           queueItemId: 'queue-1',
           reason: TransactionReason.CHIP_MENU_PURCHASE,
           requestId: 'req-6',
-        })
+        }),
       ).rejects.toThrow('Invalid feature type');
     });
   });
@@ -183,7 +183,7 @@ describe('PointRedemptionService', () => {
         100,
         'dance',
         'queue-chip',
-        'req-chip'
+        'req-chip',
       );
 
       // Assert
@@ -195,7 +195,7 @@ describe('PointRedemptionService', () => {
           metadata: expect.objectContaining({
             actionType: 'dance',
           }),
-        })
+        }),
       );
     });
   });
@@ -219,12 +219,7 @@ describe('PointRedemptionService', () => {
       });
 
       // Act
-      const result = await service.redeemForSpinWheel(
-        'user-123',
-        25,
-        'queue-spin',
-        'req-spin'
-      );
+      const result = await service.redeemForSpinWheel('user-123', 25, 'queue-spin', 'req-spin');
 
       // Assert
       expect(result.amountRedeemed).toBe(25);
@@ -232,7 +227,7 @@ describe('PointRedemptionService', () => {
         expect.objectContaining({
           featureType: 'spin_wheel',
           reason: TransactionReason.SPIN_WHEEL_PLAY,
-        })
+        }),
       );
     });
   });
@@ -262,7 +257,7 @@ describe('PointRedemptionService', () => {
         200,
         'private_show',
         'queue-perf',
-        'req-perf'
+        'req-perf',
       );
 
       // Assert
@@ -274,7 +269,7 @@ describe('PointRedemptionService', () => {
           metadata: expect.objectContaining({
             performanceType: 'private_show',
           }),
-        })
+        }),
       );
     });
   });

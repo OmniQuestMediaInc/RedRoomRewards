@@ -1,10 +1,10 @@
 /**
  * Point Accrual Service
- * 
+ *
  * Handles all point earning operations including signups, referrals,
  * promotions, and admin credits. This is domain business logic that
  * orchestrates wallet and ledger operations.
- * 
+ *
  * @module services/point-accrual
  */
 
@@ -19,22 +19,22 @@ import { TransactionType, TransactionReason } from '../wallets/types';
 export interface AwardPointsRequest {
   /** User to credit */
   userId: string;
-  
+
   /** Amount to award */
   amount: number;
-  
+
   /** Reason for award */
   reason: TransactionReason;
-  
+
   /** Idempotency key */
   idempotencyKey: string;
-  
+
   /** Request ID for tracing */
   requestId: string;
-  
+
   /** Additional metadata (no PII) */
   metadata?: Record<string, unknown>;
-  
+
   /** Optional expiration date for points */
   expiresAt?: Date;
 }
@@ -45,13 +45,13 @@ export interface AwardPointsRequest {
 export interface AwardPointsResponse {
   /** Transaction ID */
   transactionId: string;
-  
+
   /** Amount awarded */
   amountAwarded: number;
-  
+
   /** User's new available balance */
   newBalance: number;
-  
+
   /** Award timestamp */
   timestamp: Date;
 }
@@ -62,22 +62,22 @@ export interface AwardPointsResponse {
 export interface PointAccrualConfig {
   /** Default currency */
   defaultCurrency: string;
-  
+
   /** Maximum award amount per transaction */
   maxAwardAmount: number;
-  
+
   /** Minimum award amount */
   minAwardAmount: number;
-  
+
   /** Enable point expiration tracking */
   enableExpiration: boolean;
-  
+
   /** Default expiration days (if not specified) */
   defaultExpirationDays: number;
-  
+
   /** Maximum retry attempts for optimistic lock conflicts */
   maxRetryAttempts: number;
-  
+
   /** Retry backoff base in milliseconds */
   retryBackoffMs: number;
 }
@@ -94,7 +94,7 @@ const DEFAULT_CONFIG: PointAccrualConfig = {
 
 /**
  * Point Accrual Service Implementation
- * 
+ *
  * Provides business logic for earning points through various mechanisms.
  * All operations are atomic and create immutable ledger entries.
  */
@@ -102,23 +102,20 @@ export class PointAccrualService {
   private config: PointAccrualConfig;
   private ledgerService: ILedgerService;
 
-  constructor(
-    ledgerService: ILedgerService,
-    config: Partial<PointAccrualConfig> = {}
-  ) {
+  constructor(ledgerService: ILedgerService, config: Partial<PointAccrualConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
     this.ledgerService = ledgerService;
   }
 
   /**
    * Award points to a user
-   * 
+   *
    * This method handles all point earning scenarios:
    * - Signup bonuses
    * - Referral rewards
    * - Promotional awards
    * - Admin credits
-   * 
+   *
    * @param request Award request details
    * @param retryCount Internal retry counter for optimistic locking
    * @returns Award response with new balance
@@ -126,30 +123,35 @@ export class PointAccrualService {
    * @throws IdempotencyConflictError if key already used
    * @throws OptimisticLockError if max retries exceeded
    */
-  async awardPoints(request: AwardPointsRequest, retryCount: number = 0): Promise<AwardPointsResponse> {
+  async awardPoints(
+    request: AwardPointsRequest,
+    retryCount: number = 0,
+  ): Promise<AwardPointsResponse> {
     // Check retry limit
     if (retryCount >= this.config.maxRetryAttempts) {
-      throw new Error(`Optimistic lock conflict after ${this.config.maxRetryAttempts} attempts for user ${request.userId}`);
+      throw new Error(
+        `Optimistic lock conflict after ${this.config.maxRetryAttempts} attempts for user ${request.userId}`,
+      );
     }
-    
+
     // Validate amount
     this.validateAmount(request.amount);
-    
+
     // Validate reason is an earning reason
     this.validateEarningReason(request.reason);
-    
+
     // Check idempotency (only on first attempt)
     if (retryCount === 0) {
       const exists = await this.ledgerService.checkIdempotency(
         request.idempotencyKey,
-        'award_points'
+        'award_points',
       );
-      
+
       if (exists) {
         throw new Error('Idempotency key already used');
       }
     }
-    
+
     // Get or create wallet
     let wallet = await WalletModel.findOne({ userId: { $eq: request.userId } });
     if (!wallet) {
@@ -161,11 +163,11 @@ export class PointAccrualService {
         version: 0,
       });
     }
-    
+
     const previousBalance = wallet.availableBalance;
     const newBalance = wallet.availableBalance + request.amount;
     const currentVersion = wallet.version;
-    
+
     // Update wallet with optimistic locking
     const updated = await WalletModel.findOneAndUpdate(
       {
@@ -178,19 +180,19 @@ export class PointAccrualService {
           version: 1,
         },
       },
-      { new: true }
+      { new: true },
     );
-    
+
     if (!updated) {
       // Retry with exponential backoff
       await this.sleep(this.config.retryBackoffMs * Math.pow(2, retryCount));
       return this.awardPoints(request, retryCount + 1);
     }
-    
+
     // Create ledger entry
     const transactionId = uuidv4();
     const timestamp = new Date();
-    
+
     await this.ledgerService.createEntry({
       transactionId,
       accountId: request.userId,
@@ -210,7 +212,7 @@ export class PointAccrualService {
         expiresAt: request.expiresAt?.toISOString(),
       },
     });
-    
+
     return {
       transactionId,
       amountAwarded: request.amount,
@@ -218,10 +220,10 @@ export class PointAccrualService {
       timestamp,
     };
   }
-  
+
   /**
    * Award signup bonus to a new user
-   * 
+   *
    * @param userId User ID
    * @param bonusAmount Bonus amount
    * @param requestId Request ID
@@ -230,7 +232,7 @@ export class PointAccrualService {
   async awardSignupBonus(
     userId: string,
     bonusAmount: number,
-    requestId: string
+    requestId: string,
   ): Promise<AwardPointsResponse> {
     return this.awardPoints({
       userId,
@@ -243,10 +245,10 @@ export class PointAccrualService {
       },
     });
   }
-  
+
   /**
    * Award referral bonus
-   * 
+   *
    * @param referrerId User who made the referral
    * @param referredUserId User who was referred
    * @param bonusAmount Bonus amount
@@ -257,7 +259,7 @@ export class PointAccrualService {
     referrerId: string,
     referredUserId: string,
     bonusAmount: number,
-    requestId: string
+    requestId: string,
   ): Promise<AwardPointsResponse> {
     return this.awardPoints({
       userId: referrerId,
@@ -271,10 +273,10 @@ export class PointAccrualService {
       },
     });
   }
-  
+
   /**
    * Award promotional points
-   * 
+   *
    * @param userId User ID
    * @param amount Amount to award
    * @param promotionId Promotion identifier
@@ -287,7 +289,7 @@ export class PointAccrualService {
     amount: number,
     promotionId: string,
     requestId: string,
-    expiresAt?: Date
+    expiresAt?: Date,
   ): Promise<AwardPointsResponse> {
     return this.awardPoints({
       userId,
@@ -302,10 +304,10 @@ export class PointAccrualService {
       },
     });
   }
-  
+
   /**
    * Admin credit points (for corrections or special cases)
-   * 
+   *
    * @param userId User ID
    * @param amount Amount to credit
    * @param adminId Admin performing the action
@@ -318,11 +320,11 @@ export class PointAccrualService {
     amount: number,
     adminId: string,
     reason: string,
-    requestId: string
+    requestId: string,
   ): Promise<AwardPointsResponse> {
     // Use deterministic idempotency key based on admin, user, and request
     const idempotencyKey = `admin-credit-${adminId}-${userId}-${requestId}`;
-    
+
     return this.awardPoints({
       userId,
       amount,
@@ -336,7 +338,7 @@ export class PointAccrualService {
       },
     });
   }
-  
+
   /**
    * Validate award amount is within acceptable range
    */
@@ -344,16 +346,16 @@ export class PointAccrualService {
     if (amount < this.config.minAwardAmount) {
       throw new Error(`Amount must be at least ${this.config.minAwardAmount}`);
     }
-    
+
     if (amount > this.config.maxAwardAmount) {
       throw new Error(`Amount cannot exceed ${this.config.maxAwardAmount}`);
     }
-    
+
     if (!Number.isFinite(amount) || amount <= 0) {
       throw new Error('Amount must be a positive finite number');
     }
   }
-  
+
   /**
    * Validate that the reason is an earning reason (not redemption/debit)
    */
@@ -364,17 +366,17 @@ export class PointAccrualService {
       TransactionReason.PROMOTIONAL_AWARD,
       TransactionReason.ADMIN_CREDIT,
     ];
-    
+
     if (!earningReasons.includes(reason)) {
       throw new Error(`Invalid earning reason: ${reason}`);
     }
   }
-  
+
   /**
    * Sleep utility for retry backoff
    */
   private sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
 
@@ -383,7 +385,7 @@ export class PointAccrualService {
  */
 export function createPointAccrualService(
   ledgerService: ILedgerService,
-  config?: Partial<PointAccrualConfig>
+  config?: Partial<PointAccrualConfig>,
 ): PointAccrualService {
   return new PointAccrualService(ledgerService, config);
 }

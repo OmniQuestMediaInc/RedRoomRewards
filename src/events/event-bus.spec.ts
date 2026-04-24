@@ -1,16 +1,11 @@
 /**
  * Event Bus Tests
- * 
+ *
  * Tests for event publishing, subscription, idempotency, and concurrency handling.
  */
 
 import { EventBus, resetEventBus } from './event-bus';
-import {
-  WalletEventType,
-  EscrowHeldEvent,
-  EventHandler,
-  BaseRewardEvent,
-} from './types';
+import { WalletEventType, EscrowHeldEvent, EventHandler, BaseRewardEvent } from './types';
 
 describe('EventBus', () => {
   let eventBus: EventBus;
@@ -33,7 +28,7 @@ describe('EventBus', () => {
   describe('Event Publishing and Subscription', () => {
     it('should publish event to subscribers', async () => {
       const handledEvents: BaseRewardEvent[] = [];
-      
+
       const handler: EventHandler = async (event) => {
         handledEvents.push(event);
       };
@@ -165,7 +160,7 @@ describe('EventBus', () => {
       eventBus.subscribe({
         subscriberId: 'temp-subscriber',
         eventTypes: [WalletEventType.ESCROW_HELD],
-        handler: async (event) => { 
+        handler: async (event) => {
           handledEvents.push(event);
         },
       });
@@ -204,7 +199,9 @@ describe('EventBus', () => {
       eventBus.subscribe({
         subscriberId: 'test-subscriber',
         eventTypes: [WalletEventType.ESCROW_HELD],
-        handler: async (event) => { handledEvents.push(event); },
+        handler: async (event) => {
+          handledEvents.push(event);
+        },
       });
 
       const event: EscrowHeldEvent = {
@@ -239,7 +236,9 @@ describe('EventBus', () => {
       eventBus.subscribe({
         subscriberId: 'test-subscriber',
         eventTypes: [WalletEventType.ESCROW_HELD],
-        handler: async (event) => { handledEvents.push(event); },
+        handler: async (event) => {
+          handledEvents.push(event);
+        },
       });
 
       const event1: EscrowHeldEvent = {
@@ -367,7 +366,7 @@ describe('EventBus', () => {
       eventBus.subscribe({
         subscriberId: 'working-handler',
         eventTypes: [WalletEventType.ESCROW_HELD],
-        handler: async (event) => { 
+        handler: async (event) => {
           successfulEvents.push(event);
         },
       });

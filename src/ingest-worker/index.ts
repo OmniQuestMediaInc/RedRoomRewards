@@ -1,6 +1,6 @@
 /**
  * Ingest Worker Module Exports
- * 
+ *
  * Central export point for ingest worker functionality
  */
 

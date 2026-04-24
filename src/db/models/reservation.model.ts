@@ -1,6 +1,6 @@
 /**
  * Points Reservation Model
- * 
+ *
  * Manages reservation of points for pending transactions
  * Collection: points_reservations
  */
@@ -65,7 +65,7 @@ const ReservationSchema = new Schema<IReservation>(
   {
     timestamps: true,
     collection: 'points_reservations',
-  }
+  },
 );
 
 // Indexes
