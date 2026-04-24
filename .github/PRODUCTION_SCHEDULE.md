@@ -2,7 +2,7 @@
 
 # OmniQuestMediaInc/RedRoomRewards
 
-# Updated: 2026-04-24
+# Updated: 2026-04-24 (A-CLEAN — Wave A closed, Wave B open)
 
 # Owner: Kevin B. Hartley, CEO
 
@@ -32,7 +32,7 @@
 
 | ID      | Task                                                                                                                                                                                                                                                                                                                                                                                              | Status | Merge SHA |
 | :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :----- | :-------- |
-| A-003   | Charter-integrity CI check — `scripts/ci/charter-integrity-check.js` parses RRR-WORK-001.md, asserts every DONE task has a matching DONE record with valid Merge SHA; wired into `ci.yml`                                                                                                                                                                                                         | DONE   | 90bcdab   |
+| A-003   | Charter-integrity CI check — `scripts/ci/charter-integrity-check.js` parses `.github/PRODUCTION_SCHEDULE.md`, asserts every row whose Status is DONE has a non-placeholder Merge SHA; wired into `ci.yml`                                                                                                                                                                                          | DONE   | 90bcdab   |
 | A-004   | Delete `api/src/modules/` dead NestJS tree — `git rm -r api/src/modules/`; grep `src/` for any cross-references and remove them                                                                                                                                                                                                                                                                   | DONE   | 778df64   |
 | A-005   | Delete `.github/workflows/directive-intake.yml` and `.github/workflows/directive-dispatch.yml`; confirm no other workflow references them                                                                                                                                                                                                                                                         | DONE   | 90bcdab   |
 | A-006   | Consolidate Copilot-governance docs — collapse `COPILOT_INSTRUCTIONS.md` (root) + `docs/governance/COPILOT_GOVERNANCE.md` into `.github/copilot-instructions.md`; rename `COPILOT_EXECUTION_RULES.md` → `docs/governance/AGENT_EXECUTION_RULES.md`; move `docs/copilot/COPILOT.md` → `docs/specs/CHIP_MENU_TOKEN_SYSTEMS_v1.0.md`; archive originals to `docs/history/`; fix all cross-references | DONE   | 778df64   |
@@ -41,7 +41,7 @@
 | A-010   | Add husky + lint-staged — pre-commit runs `eslint --fix` + `prettier --write` on staged `.ts`; add `prepare` script to `package.json`                                                                                                                                                                                                                                                             | DONE   | 778df64   |
 | A-011   | Switch `ci.yml` “Test” step from `npm test` → `npm run test:ci` (includes `--coverage`); set Jest 80% coverage threshold in `jest.config.js`; if currently below 80% document the gap and set floor                                                                                                                                                                                               | DONE   | 778df64   |
 | A-007   | CLEANUP.md audit — grep `src/` for residual legacy imports (Media, Social, Commerce, Discovery sections); tick verified-clean boxes; file follow-ups for anything remaining. **Depends on A-004.**                                                                                                                                                                                                | DONE   | 778df64   |
-| A-CLEAN | Wave A cleanup — lint pass, doc consistency sweep, update `OQMI_SYSTEM_STATE_RRR.md`, refresh production schedule, declare Wave B open                                                                                                                                                                                                                                                            | QUEUED | —         |
+| A-CLEAN | Wave A cleanup — lint pass, doc consistency sweep, update `OQMI_SYSTEM_STATE_RRR.md`, refresh production schedule, declare Wave B open                                                                                                                                                                                                                                                            | WIP    | —         |
 
 ---
 

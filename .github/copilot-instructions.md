@@ -11,11 +11,16 @@ prior reports.
 **Repository:** RedRoomRewards
 **Owner:** OmniQuest Media Inc.
 **Source of Truth:** This repository
-**Active Charter:** PROGRAM_CONTROL/DIRECTIVES/QUEUE/RRR-WORK-001.md
-— persistent governance + active work stream. Supersedes RRR-GOV-002
-(archived at archive/governance/RRR-GOV-002_2026-04-21.md) and the retired
-root governance document (archived at archive/governance/CLAUDE_2026-04-21.md).
-**Repo State Tracker:** PROGRAM_CONTROL/DIRECTIVES/QUEUE/OQMI_SYSTEM_STATE_RRR.md
+**Active Charter:** `.github/PRODUCTION_SCHEDULE.md`
+— canonical waveform schedule (status + merge SHA per task) parsed by
+`scripts/ci/charter-integrity-check.js` in CI. The narrative governance
+companion lives at `PROGRAM_CONTROL/DIRECTIVES/QUEUE/RRR-GOV-002.md`
+(restored 2026-04-23; the placeholder `RRR-WORK-001.md` was retired —
+the briefly-restored 2026-04-21 archive copy at
+`archive/governance/RRR-GOV-002_2026-04-21.md` is historical only).
+The retired root governance document is at
+`archive/governance/CLAUDE_2026-04-21.md`.
+**Repo State Tracker:** `PROGRAM_CONTROL/DIRECTIVES/QUEUE/OQMI_SYSTEM_STATE_RRR.md`
 — living RRR-scoped state (DONE / WIP / OUTSTANDING / BLOCKERS / RETIRED).
 **Coding Doctrine:** consolidated into this file (see §9 below) — authoritative
 for all AI-assisted code generation. The legacy root `COPILOT_INSTRUCTIONS.md`
@@ -290,7 +295,7 @@ Summary:
 
 Per CEO Decision W1, the directive lifecycle is **agent-owned end-to-end**.
 The previous `directive-intake.yml` / `directive-dispatch.yml` workflows have
-been retired (RRR-WORK-001-A005); no GitHub Actions workflow moves charter
+been retired (Wave A — A-005); no GitHub Actions workflow moves charter
 state on the agent's behalf.
 
 The owning agent performs every transition inline, in the merge PR:
@@ -303,12 +308,14 @@ The owning agent performs every transition inline, in the merge PR:
    - Write the DONE record at
      `PROGRAM_CONTROL/DIRECTIVES/DONE/<charter>-<task-id>-DONE.md`,
      including a real `Merge commit:` SHA (backfilled by the next PR if
-     unknown at open time — see the rolling-backfill pattern in the charter).
-   - Amend the charter `Status:` line for the task to `DONE` and add a
-     `Merge SHA:` field.
-4. **Verify** — `scripts/ci/charter-integrity-check.js` runs in CI and fails
-   the build if any `Status: DONE` task lacks a DONE record with a reachable
-   merge SHA.
+     unknown at open time — rolling-backfill pattern).
+   - Amend `.github/PRODUCTION_SCHEDULE.md`: set the task row's `Status`
+     column to `DONE` and the `Merge SHA` column to the merge commit SHA
+     (or leave the row at `WIP` for the next PR to backfill).
+4. **Verify** — `scripts/ci/charter-integrity-check.js` runs in CI on every
+   PR and on every push to `main`. It parses `.github/PRODUCTION_SCHEDULE.md`
+   and fails the build if any row whose `Status` is `DONE` carries a
+   placeholder `Merge SHA` (`—`, `---`, `pending`).
 
 ---
 
