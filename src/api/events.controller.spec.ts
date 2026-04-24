@@ -1,6 +1,6 @@
 /**
  * Events Controller Tests
- * 
+ *
  * Unit tests for the events controller
  */
 
@@ -66,7 +66,7 @@ describe('EventsController', () => {
           status: IngestEventStatus.QUEUED,
           payloadSnapshot: validRequest.payload,
           replayable: true,
-        })
+        }),
       );
     });
 
@@ -92,7 +92,7 @@ describe('EventsController', () => {
         expect.anything(),
         expect.objectContaining({
           idempotencyKey: validRequest.idempotencyKey,
-        })
+        }),
       );
     });
 
@@ -149,7 +149,7 @@ describe('EventsController', () => {
       expect(IngestEventModel.create).toHaveBeenCalledWith(
         expect.objectContaining({
           replayable: true,
-        })
+        }),
       );
     });
   });
@@ -292,13 +292,13 @@ describe('EventsController', () => {
         expect.objectContaining({
           pointsIdempotencyKey: validRequest.idempotencyKey,
           eventScope: 'event_ingestion',
-        })
+        }),
       );
     });
 
     it('should handle idempotency record race condition', async () => {
       (IdempotencyRecordModel.findOne as jest.Mock).mockResolvedValue(null);
-      
+
       // Simulate duplicate key error (race condition)
       const duplicateKeyError = new Error('Duplicate key');
       (duplicateKeyError as any).code = 11000;
@@ -335,7 +335,7 @@ describe('EventsController', () => {
         expect.objectContaining({
           idempotencyKey: validRequest.idempotencyKey,
           eventType: validRequest.eventType,
-        })
+        }),
       );
     });
   });
@@ -369,7 +369,7 @@ describe('EventsController', () => {
       expect(IngestEventModel.create).toHaveBeenCalledWith(
         expect.objectContaining({
           correlationId: 'upstream-correlation-id',
-        })
+        }),
       );
     });
 
@@ -385,7 +385,7 @@ describe('EventsController', () => {
       expect(IngestEventModel.create).toHaveBeenCalledWith(
         expect.objectContaining({
           correlationId: 'request-id-789',
-        })
+        }),
       );
     });
 
@@ -397,7 +397,7 @@ describe('EventsController', () => {
       expect(IngestEventModel.create).toHaveBeenCalledWith(
         expect.objectContaining({
           correlationId: expect.any(String),
-        })
+        }),
       );
     });
 
@@ -423,7 +423,7 @@ describe('EventsController', () => {
       expect(IngestEventModel.create).toHaveBeenCalledWith(
         expect.objectContaining({
           merchantId: 'merchant-456',
-        })
+        }),
       );
     });
   });
@@ -487,22 +487,24 @@ describe('EventsController', () => {
       await controller.postEvent(validRequest);
 
       const logCall = (logIngestEvent as jest.Mock).mock.calls[0][0];
-      
+
       // Verify no secret fields are logged
       expect(logCall).not.toHaveProperty('payload');
       expect(logCall).not.toHaveProperty('secretToken');
       expect(logCall).not.toHaveProperty('email');
-      
+
       // Verify only approved fields are present
-      expect(Object.keys(logCall).sort()).toEqual([
-        'correlationId',
-        'eventId',
-        'eventType',
-        'httpStatus',
-        'idempotencyKey',
-        'merchantId',
-        'outcome',
-      ].sort());
+      expect(Object.keys(logCall).sort()).toEqual(
+        [
+          'correlationId',
+          'eventId',
+          'eventType',
+          'httpStatus',
+          'idempotencyKey',
+          'merchantId',
+          'outcome',
+        ].sort(),
+      );
     });
   });
 
@@ -530,7 +532,7 @@ describe('EventsController', () => {
         expect.stringContaining('ingest.received'),
         expect.objectContaining({
           eventType: 'user.signup',
-        })
+        }),
       );
     });
 
@@ -541,14 +543,12 @@ describe('EventsController', () => {
         expect.stringContaining('ingest.accepted'),
         expect.objectContaining({
           eventType: 'user.signup',
-        })
+        }),
       );
     });
 
     it('should increment INGEST_REJECTED metric on error', async () => {
-      (IngestEventModel.create as jest.Mock).mockRejectedValue(
-        new Error('Database error')
-      );
+      (IngestEventModel.create as jest.Mock).mockRejectedValue(new Error('Database error'));
 
       await expect(controller.postEvent(validRequest)).rejects.toThrow();
 
@@ -557,7 +557,7 @@ describe('EventsController', () => {
         expect.objectContaining({
           eventType: 'user.signup',
           errorCode: 'Error',
-        })
+        }),
       );
     });
   });

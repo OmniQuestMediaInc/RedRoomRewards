@@ -1,6 +1,6 @@
 /**
  * Ledger Service Implementation
- * 
+ *
  * Provides immutable transaction logging and audit trail functionality.
  * All ledger entries are write-once and never modified.
  */
@@ -57,7 +57,14 @@ export class LedgerService implements ILedgerService {
     // Validate metadata does not contain PII
     if (request.metadata) {
       // Use exact key names to avoid false positives on legitimate fields like emailCount
-      const piiFieldNames = new Set(['email', 'password', 'ssn', 'creditcard', 'phonenumber', 'phone']);
+      const piiFieldNames = new Set([
+        'email',
+        'password',
+        'ssn',
+        'creditcard',
+        'phonenumber',
+        'phone',
+      ]);
       const emailPattern = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b/;
       for (const key of Object.keys(request.metadata)) {
         if (piiFieldNames.has(key.toLowerCase())) {
@@ -107,11 +114,20 @@ export class LedgerService implements ILedgerService {
       return this.mapToDomain(created);
     } catch (error: unknown) {
       // Handle duplicate idempotency key
-      if (error && typeof error === 'object' && 'code' in error && error.code === 11000 && 'keyPattern' in error && (error.keyPattern as Record<string, unknown>)?.idempotencyKey) {
+      if (
+        error &&
+        typeof error === 'object' &&
+        'code' in error &&
+        error.code === 11000 &&
+        'keyPattern' in error &&
+        (error.keyPattern as Record<string, unknown>)?.idempotencyKey
+      ) {
         // Find and return existing entry
         const existing = await LedgerEntryModel.findOne({
-          idempotencyKey: { $eq: request.idempotencyKey }
-        }).lean().exec();
+          idempotencyKey: { $eq: request.idempotencyKey },
+        })
+          .lean()
+          .exec();
         if (existing) {
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           return this.mapToDomain(existing as any);
@@ -184,19 +200,14 @@ export class LedgerService implements ILedgerService {
 
     // Execute query
     const [entries, totalCount] = await Promise.all([
-      LedgerEntryModel.find(query)
-        .sort(sort)
-        .skip(offset)
-        .limit(limit)
-        .lean()
-        .exec(),
+      LedgerEntryModel.find(query).sort(sort).skip(offset).limit(limit).lean().exec(),
       LedgerEntryModel.countDocuments(query),
     ]);
 
     // Map results
     return {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      entries: entries.map(e => this.mapToDomain(e as any)),
+      entries: entries.map((e) => this.mapToDomain(e as any)),
       totalCount,
       offset,
       limit,
@@ -209,8 +220,10 @@ export class LedgerService implements ILedgerService {
    */
   async getEntry(entryId: string): Promise<LedgerEntry | null> {
     const entry = await LedgerEntryModel.findOne({
-      entryId: { $eq: entryId }
-    }).lean().exec();
+      entryId: { $eq: entryId },
+    })
+      .lean()
+      .exec();
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return entry ? this.mapToDomain(entry as any) : null;
@@ -222,7 +235,7 @@ export class LedgerService implements ILedgerService {
   async getBalanceSnapshot(
     accountId: string,
     accountType: 'user' | 'model',
-    asOf?: Date
+    asOf?: Date,
   ): Promise<BalanceSnapshot> {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const query: any = {
@@ -235,10 +248,7 @@ export class LedgerService implements ILedgerService {
     }
 
     // Get all entries up to the specified time
-    const entries = await LedgerEntryModel.find(query)
-      .sort({ timestamp: 1 })
-      .lean()
-      .exec();
+    const entries = await LedgerEntryModel.find(query).sort({ timestamp: 1 }).lean().exec();
 
     // Calculate balances by state
     const balances: { [key: string]: number } = {
@@ -249,9 +259,11 @@ export class LedgerService implements ILedgerService {
 
     for (const entry of entries) {
       // Use the balanceAfter from the entry for the specific state
-      if (entry.balanceState === 'available' || 
-          entry.balanceState === 'escrow' || 
-          entry.balanceState === 'earned') {
+      if (
+        entry.balanceState === 'available' ||
+        entry.balanceState === 'escrow' ||
+        entry.balanceState === 'earned'
+      ) {
         balances[entry.balanceState] = entry.balanceAfter;
       }
     }
@@ -280,14 +292,10 @@ export class LedgerService implements ILedgerService {
   async generateReconciliationReport(
     accountId: string,
     accountType: 'user' | 'model',
-    dateRange: { start: Date; end: Date }
+    dateRange: { start: Date; end: Date },
   ): Promise<ReconciliationReport> {
     // Get starting balance (before start date)
-    const startSnapshot = await this.getBalanceSnapshot(
-      accountId,
-      accountType,
-      dateRange.start
-    );
+    const startSnapshot = await this.getBalanceSnapshot(accountId, accountType, dateRange.start);
 
     // Get entries in date range. Sort by timestamp ascending with entryId as
     // a deterministic tie-breaker so the reconciliation output is stable and
@@ -314,20 +322,18 @@ export class LedgerService implements ILedgerService {
     }
 
     // Get ending balance
-    const endSnapshot = await this.getBalanceSnapshot(
-      accountId,
-      accountType,
-      dateRange.end
-    );
+    const endSnapshot = await this.getBalanceSnapshot(accountId, accountType, dateRange.end);
 
     // Calculate expected balance
-    const startingBalance = startSnapshot.availableBalance +
+    const startingBalance =
+      startSnapshot.availableBalance +
       (startSnapshot.escrowBalance || 0) +
       (startSnapshot.earnedBalance || 0);
 
     const calculatedBalance = startingBalance + totalCredits - totalDebits;
 
-    const actualBalance = endSnapshot.availableBalance +
+    const actualBalance =
+      endSnapshot.availableBalance +
       (endSnapshot.escrowBalance || 0) +
       (endSnapshot.earnedBalance || 0);
 
@@ -360,7 +366,7 @@ export class LedgerService implements ILedgerService {
       .lean()
       .exec();
 
-    return entries.map(entry => ({
+    return entries.map((entry) => ({
       auditId: entry.entryId,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ledgerEntry: this.mapToDomain(entry as any),
@@ -375,7 +381,9 @@ export class LedgerService implements ILedgerService {
     const existing = await IdempotencyRecordModel.findOne({
       pointsIdempotencyKey: { $eq: key },
       eventScope: { $eq: operationType },
-    }).lean().exec();
+    })
+      .lean()
+      .exec();
 
     return existing !== null;
   }
@@ -420,7 +428,7 @@ export class LedgerService implements ILedgerService {
     operationType: string,
     result: unknown,
     _statusCode: number,
-    ttlSeconds: number
+    ttlSeconds: number,
   ): Promise<void> {
     const expiresAt = new Date(Date.now() + ttlSeconds * 1000);
     const retentionUntil = new Date(Date.now() + ttlSeconds * 1000);
@@ -433,6 +441,31 @@ export class LedgerService implements ILedgerService {
       expiresAt,
       retentionUntil,
     });
+  }
+
+  async awardPromotionalPoints(
+    creatorId: string,
+    points: number,
+    _source: string,
+    _reason: string,
+    _expiryDays?: number,
+  ) {
+    // STUB: real implementation in next payload
+    console.log(`[Ledger] Awarded ${points} promotional points to ${creatorId}`);
+    return true;
+  }
+
+  async createGiftingPromotion(
+    creatorId: string,
+    _points: number,
+    _title: string,
+    _condition: string,
+    _maxRecipients?: number,
+    _expiryDays?: number,
+  ) {
+    // STUB: real implementation in next payload
+    console.log(`[Ledger] Created gifting promotion for ${creatorId}`);
+    return true;
   }
 
   /**

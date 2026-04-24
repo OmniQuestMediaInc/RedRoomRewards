@@ -1,6 +1,6 @@
 /**
  * Wallet Model
- * 
+ *
  * Represents user wallet with available and escrow balances.
  * Uses optimistic locking (version field) to prevent race conditions.
  * Collection: wallets
@@ -56,7 +56,7 @@ const WalletSchema = new Schema<IWallet>(
   {
     timestamps: true,
     collection: 'wallets',
-  }
+  },
 );
 
 // Unique index on userId

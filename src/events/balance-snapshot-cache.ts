@@ -1,6 +1,6 @@
 /**
  * Balance Snapshot Cache
- * 
+ *
  * Maintains real-time cached balance snapshots by subscribing to wallet events.
  * Provides fast balance lookups without querying the database or ledger.
  */
@@ -36,10 +36,10 @@ export interface CachedBalance {
 export interface BalanceCacheConfig {
   /** Enable cache */
   enabled: boolean;
-  
+
   /** Maximum cache size (LRU eviction) */
   maxSize: number;
-  
+
   /** Cache TTL in milliseconds */
   ttlMs: number;
 }
@@ -60,7 +60,7 @@ export class BalanceSnapshotCache {
 
   constructor(config: Partial<BalanceCacheConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
-    
+
     if (this.config.enabled) {
       this.subscribeToEvents();
     }
@@ -92,7 +92,7 @@ export class BalanceSnapshotCache {
     });
 
     this.subscribed = true;
-    
+
     MetricsLogger.incrementCounter(MetricEventType.EVENT_SUBSCRIBER_REGISTERED, {
       subscriberId: 'balance-snapshot-cache',
     });
@@ -101,9 +101,7 @@ export class BalanceSnapshotCache {
   /**
    * Handle wallet events and update cache
    */
-  private async handleEvent(
-    event: RewardEvent
-  ): Promise<void> {
+  private async handleEvent(event: RewardEvent): Promise<void> {
     // Only process wallet balance events, not ledger entry events
     if (event.eventType === WalletEventType.LEDGER_ENTRY_CREATED) {
       return;
@@ -150,9 +148,14 @@ export class BalanceSnapshotCache {
       const newEntry: CachedBalance = {
         accountId: event.accountId,
         accountType: event.accountType,
-        availableBalance: event.accountType === 'user' && event.balanceState === 'available' ? event.balanceAfter : 0,
-        escrowBalance: event.accountType === 'user' && event.balanceState === 'escrow' ? event.balanceAfter : 0,
-        earnedBalance: event.accountType === 'model' && event.balanceState === 'earned' ? event.balanceAfter : 0,
+        availableBalance:
+          event.accountType === 'user' && event.balanceState === 'available'
+            ? event.balanceAfter
+            : 0,
+        escrowBalance:
+          event.accountType === 'user' && event.balanceState === 'escrow' ? event.balanceAfter : 0,
+        earnedBalance:
+          event.accountType === 'model' && event.balanceState === 'earned' ? event.balanceAfter : 0,
         lastUpdated: event.timestamp,
         version: 1,
       };

@@ -1,6 +1,6 @@
 /**
  * Comprehensive Ledger Service Tests
- * 
+ *
  * Tests immutability, idempotency, audit trails, and reconciliation
  * as specified in TEST_STRATEGY.md
  */
@@ -122,7 +122,7 @@ describe('LedgerService - Comprehensive Tests', () => {
           requestId: 'req-invalid-1',
           balanceBefore: 100,
           balanceAfter: 0,
-        })
+        }),
       ).rejects.toThrow('Invalid state transition');
     });
 
@@ -142,7 +142,7 @@ describe('LedgerService - Comprehensive Tests', () => {
           requestId: 'req-invalid-2',
           balanceBefore: 100,
           balanceAfter: 0,
-        })
+        }),
       ).rejects.toThrow('Invalid state transition');
     });
 
@@ -164,7 +164,7 @@ describe('LedgerService - Comprehensive Tests', () => {
             email: 'user@example.com', // PII!
             campaignId: 'campaign-123',
           },
-        })
+        }),
       ).rejects.toThrow('PII detected');
     });
   });
@@ -224,7 +224,7 @@ describe('LedgerService - Comprehensive Tests', () => {
       expect(result.entries).toHaveLength(2);
       expect(result.entries[0].accountId).toBe(accountId);
       expect(LedgerEntryModel.find).toHaveBeenCalledWith(
-        expect.objectContaining({ accountId: { $eq: accountId } })
+        expect.objectContaining({ accountId: { $eq: accountId } }),
       );
     });
 
@@ -255,7 +255,7 @@ describe('LedgerService - Comprehensive Tests', () => {
             $gte: startDate,
             $lte: endDate,
           },
-        })
+        }),
       );
     });
 
@@ -302,7 +302,7 @@ describe('LedgerService - Comprehensive Tests', () => {
       expect(LedgerEntryModel.find).toHaveBeenCalledWith(
         expect.objectContaining({
           type: { $eq: TransactionType.CREDIT },
-        })
+        }),
       );
     });
   });
@@ -356,7 +356,7 @@ describe('LedgerService - Comprehensive Tests', () => {
       expect(LedgerEntryModel.find).toHaveBeenCalledWith(
         expect.objectContaining({
           timestamp: { $lte: asOfDate },
-        })
+        }),
       );
     });
   });
@@ -387,17 +387,11 @@ describe('LedgerService - Comprehensive Tests', () => {
         .mockReturnValueOnce({
           sort: jest.fn().mockReturnThis(),
           lean: jest.fn().mockReturnThis(),
-          exec: jest.fn().mockResolvedValue([
-            { balanceState: 'available', balanceAfter: 100 },
-          ]),
+          exec: jest.fn().mockResolvedValue([{ balanceState: 'available', balanceAfter: 100 }]),
         });
 
       // Act — positional args: (accountId, accountType, dateRange)
-      const report = await ledgerService.generateReconciliationReport(
-        accountId,
-        'user',
-        dateRange
-      );
+      const report = await ledgerService.generateReconciliationReport(accountId, 'user', dateRange);
 
       // Assert — ReconciliationReport fields: totalCredits, totalDebits, reconciled, difference
       expect(report.totalCredits).toBe(100);
@@ -430,17 +424,14 @@ describe('LedgerService - Comprehensive Tests', () => {
         .mockReturnValueOnce({
           sort: jest.fn().mockReturnThis(),
           lean: jest.fn().mockReturnThis(),
-          exec: jest.fn().mockResolvedValue([
-            { balanceState: 'available', balanceAfter: 70 },
-          ]),
+          exec: jest.fn().mockResolvedValue([{ balanceState: 'available', balanceAfter: 70 }]),
         });
 
       // Act
-      const report = await ledgerService.generateReconciliationReport(
-        'user-123',
-        'user',
-        { start: startDate, end: endDate }
-      );
+      const report = await ledgerService.generateReconciliationReport('user-123', 'user', {
+        start: startDate,
+        end: endDate,
+      });
 
       // Assert
       expect(report.totalCredits).toBe(100);
@@ -499,7 +490,7 @@ describe('LedgerService - Comprehensive Tests', () => {
             sourceIp: '192.168.1.1',
             userAgent: 'Mozilla/5.0',
           }),
-        })
+        }),
       );
     });
 
@@ -540,7 +531,7 @@ describe('LedgerService - Comprehensive Tests', () => {
           timestamp: expect.objectContaining({
             $gte: sevenYearsAgo,
           }),
-        })
+        }),
       );
     });
   });

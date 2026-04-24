@@ -1,6 +1,6 @@
 /**
  * Account Link Model
- * 
+ *
  * Manages account linking between RRR and external systems (e.g., ChatNow.Zone)
  * Collection: account_links
  */
@@ -69,7 +69,7 @@ const AccountLinkSchema = new Schema<IAccountLink>(
   {
     timestamps: true,
     collection: 'account_links',
-  }
+  },
 );
 
 // Indexes

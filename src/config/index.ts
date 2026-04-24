@@ -1,6 +1,6 @@
 /**
  * Configuration Module
- * 
+ *
  * Provides configuration utilities and environment validation.
  */
 

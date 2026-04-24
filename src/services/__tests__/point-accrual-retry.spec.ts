@@ -1,6 +1,6 @@
 /**
  * Point Accrual Retry Logic Tests
- * 
+ *
  * Tests to verify bounded retry with exponential backoff for optimistic locking conflicts.
  */
 
@@ -36,7 +36,7 @@ describe('Point Accrual Retry Logic', () => {
 
       // Mock wallet findOne
       (WalletModel.findOne as jest.Mock).mockResolvedValue(mockWallet);
-      
+
       // First two attempts fail (return null), third succeeds
       (WalletModel.findOneAndUpdate as jest.Mock)
         .mockResolvedValueOnce(null)
@@ -67,7 +67,7 @@ describe('Point Accrual Retry Logic', () => {
 
       expect(result.amountAwarded).toBe(100);
       expect(result.newBalance).toBe(200);
-      
+
       // Should have been called 3 times (2 failures + 1 success)
       expect(WalletModel.findOneAndUpdate).toHaveBeenCalledTimes(3);
     });
@@ -80,10 +80,10 @@ describe('Point Accrual Retry Logic', () => {
       };
 
       (WalletModel.findOne as jest.Mock).mockResolvedValue(mockWallet);
-      
+
       // All attempts fail
       (WalletModel.findOneAndUpdate as jest.Mock).mockResolvedValue(null);
-      
+
       (ledgerService.checkIdempotency as jest.Mock).mockResolvedValue(false);
 
       const request = {
@@ -96,7 +96,7 @@ describe('Point Accrual Retry Logic', () => {
 
       // Should throw after max attempts
       await expect(accrualService.awardPoints(request)).rejects.toThrow(
-        /Optimistic lock conflict after 3 attempts/
+        /Optimistic lock conflict after 3 attempts/,
       );
 
       // Should have tried exactly maxRetryAttempts times
@@ -111,7 +111,7 @@ describe('Point Accrual Retry Logic', () => {
       };
 
       (WalletModel.findOne as jest.Mock).mockResolvedValue(mockWallet);
-      
+
       // First attempt fails, second succeeds
       (WalletModel.findOneAndUpdate as jest.Mock)
         .mockResolvedValueOnce(null)
@@ -157,7 +157,7 @@ describe('Point Accrual Retry Logic', () => {
     it('should pass retry count to recursive calls', () => {
       // Verify that retryCount parameter exists and is incremented
       // This test validates the retry count logic without making actual calls
-      
+
       // First call: retryCount = 0 (default)
       // Second call: retryCount = 1
       // Third call: retryCount = 2
@@ -171,7 +171,7 @@ describe('Point Accrual Retry Logic', () => {
 
     it('should include retry count in error message', async () => {
       const error = new Error('Optimistic lock conflict after 3 attempts for user user-123');
-      
+
       expect(error.message).toContain('3 attempts');
       expect(error.message).toContain('user-123');
     });
@@ -196,7 +196,7 @@ describe('Point Accrual Retry Logic', () => {
 
     it('should use default config if not provided', () => {
       const defaultService = new PointAccrualService(ledgerService);
-      
+
       // Default maxRetryAttempts should be 3
       // Default retryBackoffMs should be 100
       expect(defaultService).toBeDefined();
@@ -226,14 +226,12 @@ describe('Point Accrual Retry Logic', () => {
       await expect(accrualService.awardPoints(request)).rejects.toThrow(
         expect.objectContaining({
           message: expect.stringContaining('Optimistic lock conflict'),
-        })
+        }),
       );
     });
 
     it('should propagate non-retry errors immediately', async () => {
-      (WalletModel.findOne as jest.Mock).mockRejectedValue(
-        new Error('Database connection lost')
-      );
+      (WalletModel.findOne as jest.Mock).mockRejectedValue(new Error('Database connection lost'));
       (ledgerService.checkIdempotency as jest.Mock).mockResolvedValue(false);
 
       const request = {
@@ -244,9 +242,7 @@ describe('Point Accrual Retry Logic', () => {
         requestId: 'req-error-2',
       };
 
-      await expect(accrualService.awardPoints(request)).rejects.toThrow(
-        'Database connection lost'
-      );
+      await expect(accrualService.awardPoints(request)).rejects.toThrow('Database connection lost');
 
       // Should not retry on non-lock errors
       expect(WalletModel.findOne).toHaveBeenCalledTimes(1);
@@ -293,7 +289,7 @@ describe('Point Accrual Retry Logic', () => {
           amount: 100,
           type: TransactionType.CREDIT,
           balanceState: 'available',
-        })
+        }),
       );
     });
 

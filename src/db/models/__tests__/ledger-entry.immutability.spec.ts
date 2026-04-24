@@ -1,6 +1,6 @@
 /**
  * Ledger Entry Immutability Tests
- * 
+ *
  * Tests to verify that ledger entries cannot be modified after creation,
  * enforcing the append-only principle at the database level.
  */
@@ -21,8 +21,10 @@ describe('Ledger Entry Immutability', () => {
     it('should throw error when attempting to update existing entry', () => {
       // Simulate save on existing document
       // In actual implementation, the pre-save hook would throw
-      const error = new Error('Ledger entries are immutable and cannot be modified. Create a new offsetting entry instead.');
-      
+      const error = new Error(
+        'Ledger entries are immutable and cannot be modified. Create a new offsetting entry instead.',
+      );
+
       expect(error.message).toContain('immutable');
       expect(error.message).toContain('offsetting entry');
     });
@@ -44,8 +46,10 @@ describe('Ledger Entry Immutability', () => {
     it('should prevent findOneAndUpdate operations', () => {
       // Verify that updateOne, updateMany, findOneAndUpdate are blocked
       const updateOperations = ['updateOne', 'updateMany', 'findOneAndUpdate', 'findByIdAndUpdate'];
-      
-      const error = new Error('Ledger entries are immutable and cannot be updated. Create a new offsetting entry instead.');
+
+      const error = new Error(
+        'Ledger entries are immutable and cannot be updated. Create a new offsetting entry instead.',
+      );
       expect(error.message).toContain('immutable');
       expect(updateOperations.length).toBe(4);
     });
@@ -143,15 +147,19 @@ describe('Ledger Entry Immutability', () => {
 
   describe('Error Messages', () => {
     it('should provide clear error message for update attempts', () => {
-      const error = new Error('Ledger entries are immutable and cannot be updated. Create a new offsetting entry instead.');
-      
+      const error = new Error(
+        'Ledger entries are immutable and cannot be updated. Create a new offsetting entry instead.',
+      );
+
       expect(error.message).toContain('immutable');
       expect(error.message).toContain('Create a new offsetting entry');
     });
 
     it('should provide clear error message for modification attempts', () => {
-      const error = new Error('Ledger entries are immutable and cannot be modified. Create a new offsetting entry instead.');
-      
+      const error = new Error(
+        'Ledger entries are immutable and cannot be modified. Create a new offsetting entry instead.',
+      );
+
       expect(error.message).toContain('immutable');
       expect(error.message).toContain('cannot be modified');
     });

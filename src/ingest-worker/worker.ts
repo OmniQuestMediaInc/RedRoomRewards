@@ -1,6 +1,6 @@
 /**
  * Ingest Worker Implementation
- * 
+ *
  * Processes queued events asynchronously with retry logic and DLQ support
  */
 
@@ -10,12 +10,7 @@ import {
   DLQEventModel,
   IdempotencyRecordModel,
 } from '../db/models';
-import {
-  WorkerConfig,
-  EventHandler,
-  ProcessingResult,
-  EventProcessingContext,
-} from './types';
+import { WorkerConfig, EventHandler, ProcessingResult, EventProcessingContext } from './types';
 import { MetricsLogger, MetricEventType, AlertSeverity } from '../metrics';
 
 export class IngestWorker {
@@ -145,7 +140,7 @@ export class IngestWorker {
           $set: { status: IngestEventStatus.PROCESSING },
           $inc: { attempts: 1 },
         },
-        { new: true }
+        { new: true },
       );
 
       if (!event) {
@@ -165,7 +160,7 @@ export class IngestWorker {
         // Already processed, mark as PROCESSED
         await IngestEventModel.updateOne(
           { _id: event._id },
-          { $set: { status: IngestEventStatus.PROCESSED } }
+          { $set: { status: IngestEventStatus.PROCESSED } },
         );
         return;
       }
@@ -198,7 +193,7 @@ export class IngestWorker {
           errorMessage: error instanceof Error ? error.message : String(error),
         },
       });
-      
+
       // Fetch event again to handle error
       const errorEvent = await IngestEventModel.findById(eventMongoId);
       if (errorEvent) {
@@ -228,7 +223,7 @@ export class IngestWorker {
    * Default handler (placeholder)
    */
   private async defaultHandler(
-    context: EventProcessingContext
+    context: EventProcessingContext,
   ): Promise<{ result: ProcessingResult }> {
     MetricsLogger.logAlert({
       severity: AlertSeverity.INFO,
@@ -240,7 +235,7 @@ export class IngestWorker {
         eventType: context.eventType,
       },
     });
-    
+
     // For now, just mark as success
     // In real implementation, this would validate and route to appropriate logic
     return { result: ProcessingResult.SUCCESS };
@@ -251,18 +246,18 @@ export class IngestWorker {
    */
   private async handleProcessingResult(
     event: any, // eslint-disable-line @typescript-eslint/no-explicit-any
-    response: { result: ProcessingResult; errorCode?: string; errorMessage?: string }
+    response: { result: ProcessingResult; errorCode?: string; errorMessage?: string },
   ): Promise<void> {
     switch (response.result) {
       case ProcessingResult.SUCCESS:
         await IngestEventModel.updateOne(
           { _id: event._id },
-          { $set: { status: IngestEventStatus.PROCESSED } }
+          { $set: { status: IngestEventStatus.PROCESSED } },
         );
-        
+
         // Store idempotency record
         await this.storeIdempotency(event.eventId);
-        
+
         // Log success metric
         MetricsLogger.incrementCounter(MetricEventType.INGEST_EVENT_PROCESSED, {
           eventId: event.eventId,
@@ -277,7 +272,7 @@ export class IngestWorker {
           await this.moveToDLQ(
             event,
             response.errorCode || 'MAX_RETRIES_EXCEEDED',
-            response.errorMessage || 'Maximum retry attempts exceeded'
+            response.errorMessage || 'Maximum retry attempts exceeded',
           );
         } else {
           // Schedule retry
@@ -291,9 +286,9 @@ export class IngestWorker {
                 lastErrorCode: response.errorCode,
                 lastErrorAt: new Date(),
               },
-            }
+            },
           );
-          
+
           // Log failure metric
           MetricsLogger.incrementCounter(MetricEventType.INGEST_EVENT_FAILED, {
             eventId: event.eventId,
@@ -310,9 +305,9 @@ export class IngestWorker {
         await this.moveToDLQ(
           event,
           response.errorCode || 'NON_RETRYABLE_ERROR',
-          response.errorMessage || 'Non-retryable failure'
+          response.errorMessage || 'Non-retryable failure',
         );
-        
+
         // Log failure metric
         MetricsLogger.incrementCounter(MetricEventType.INGEST_EVENT_FAILED, {
           eventId: event.eventId,
@@ -331,7 +326,7 @@ export class IngestWorker {
   private calculateNextAttempt(attempts: number): Date {
     const delay = Math.min(
       this.config.initialRetryDelayMs * Math.pow(this.config.retryBackoffMultiplier, attempts - 1),
-      this.config.maxRetryDelayMs
+      this.config.maxRetryDelayMs,
     );
 
     return new Date(Date.now() + delay);
@@ -343,7 +338,7 @@ export class IngestWorker {
   private async moveToDLQ(
     event: any, // eslint-disable-line @typescript-eslint/no-explicit-any
     errorCode: string,
-    errorMessage: string
+    errorMessage: string,
   ): Promise<void> {
     // Create DLQ record
     await DLQEventModel.create({
@@ -368,9 +363,9 @@ export class IngestWorker {
           lastErrorCode: errorCode,
           lastErrorAt: new Date(),
         },
-      }
+      },
     );
-    
+
     // Log DLQ metric
     MetricsLogger.incrementCounter(MetricEventType.INGEST_EVENT_DLQ, {
       eventId: event.eventId,
@@ -378,14 +373,14 @@ export class IngestWorker {
       attempts: event.attempts,
       errorCode,
     });
-    
+
     // Log DLQ event moved metric
     MetricsLogger.incrementCounter(MetricEventType.DLQ_EVENT_MOVED, {
       eventId: event.eventId,
       eventType: event.eventType,
       errorCode,
     });
-    
+
     // Log alert for DLQ events (may indicate systemic issues)
     MetricsLogger.logAlert({
       severity: AlertSeverity.WARNING,
@@ -412,7 +407,7 @@ export class IngestWorker {
     });
 
     const isProcessed = record !== null;
-    
+
     // Log idempotency hit for monitoring
     if (isProcessed) {
       MetricsLogger.incrementCounter(MetricEventType.INGEST_IDEMPOTENCY_HIT, {

@@ -1,6 +1,6 @@
 /**
  * Ack Delivery Model
- * 
+ *
  * Tracks acknowledgment deliveries to external endpoints
  * Collection: ack_deliveries
  */
@@ -70,7 +70,7 @@ const AckDeliverySchema = new Schema<IAckDelivery>(
   {
     timestamps: true,
     collection: 'ack_deliveries',
-  }
+  },
 );
 
 // Indexes

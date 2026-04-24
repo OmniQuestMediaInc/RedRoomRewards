@@ -1,6 +1,6 @@
 /**
  * Lightweight Metrics Logger
- * 
+ *
  * Simple console-based metrics logging for M1 production hardening.
  * Follows existing logging patterns in the codebase.
  * In production, this can be replaced with a proper metrics backend.
@@ -24,7 +24,7 @@ export class MetricsLogger {
       timestamp: data.timestamp.toISOString(),
       metadata: data.metadata,
     };
-    
+
     console.log(JSON.stringify(logEntry));
   }
 
@@ -40,7 +40,7 @@ export class MetricsLogger {
       timestamp: data.timestamp.toISOString(),
       metadata: data.metadata,
     };
-    
+
     // Use appropriate console method based on severity
     switch (data.severity) {
       case AlertSeverity.CRITICAL:
@@ -70,7 +70,11 @@ export class MetricsLogger {
   /**
    * Helper to log a duration metric (in milliseconds)
    */
-  static recordDuration(type: MetricEventType, durationMs: number, metadata?: Record<string, unknown>): void {
+  static recordDuration(
+    type: MetricEventType,
+    durationMs: number,
+    metadata?: Record<string, unknown>,
+  ): void {
     MetricsLogger.logMetric({
       type,
       value: durationMs,

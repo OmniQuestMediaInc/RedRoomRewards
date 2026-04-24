@@ -1,6 +1,6 @@
 /**
  * Event Bus Implementation
- * 
+ *
  * Provides in-memory event publishing and subscription with idempotency guarantees.
  * Events are processed asynchronously with error handling and retry logic.
  */
@@ -21,16 +21,16 @@ import { MetricsLogger, MetricEventType } from '../metrics';
 export interface EventBusConfig {
   /** Enable event deduplication */
   enableDeduplication: boolean;
-  
+
   /** TTL for deduplication cache in milliseconds */
   deduplicationTtlMs: number;
-  
+
   /** Maximum retry attempts for failed handlers */
   maxRetryAttempts: number;
-  
+
   /** Retry delay in milliseconds */
   retryDelayMs: number;
-  
+
   /** Enable async event processing */
   asyncProcessing: boolean;
 }
@@ -54,7 +54,7 @@ export class EventBus {
 
   constructor(config: Partial<EventBusConfig> = {}) {
     this.config = { ...DEFAULT_CONFIG, ...config };
-    
+
     // Start cleanup interval for deduplication cache
     if (this.config.enableDeduplication) {
       this.startCleanupInterval();
@@ -69,14 +69,14 @@ export class EventBus {
       if (!this.subscriptions.has(eventType)) {
         this.subscriptions.set(eventType, []);
       }
-      
+
       const subs = this.subscriptions.get(eventType)!;
       subs.push(subscription);
-      
+
       // Sort by priority (lower number = higher priority)
       subs.sort((a, b) => (a.priority || 100) - (b.priority || 100));
     }
-    
+
     MetricsLogger.incrementCounter(MetricEventType.EVENT_SUBSCRIBER_REGISTERED, {
       subscriberId: subscription.subscriberId,
       eventTypes: subscription.eventTypes.join(','),
@@ -88,10 +88,10 @@ export class EventBus {
    */
   unsubscribe(subscriberId: string): void {
     for (const [eventType, subs] of this.subscriptions.entries()) {
-      const filtered = subs.filter(s => s.subscriberId !== subscriberId);
+      const filtered = subs.filter((s) => s.subscriberId !== subscriberId);
       this.subscriptions.set(eventType, filtered);
     }
-    
+
     MetricsLogger.incrementCounter(MetricEventType.EVENT_SUBSCRIBER_UNREGISTERED, {
       subscriberId,
     });
@@ -102,39 +102,39 @@ export class EventBus {
    */
   async publish(event: RewardEvent): Promise<EventPublishResult> {
     const startTime = Date.now();
-    
+
     // Check for duplicate event
     if (this.config.enableDeduplication && this.isDuplicate(event)) {
       MetricsLogger.incrementCounter(MetricEventType.EVENT_DUPLICATE_DETECTED, {
         eventId: event.eventId,
         eventType: event.eventType,
       });
-      
+
       return {
         eventId: event.eventId,
         success: true,
         handlersNotified: 0,
       };
     }
-    
+
     // Mark event as processed
     if (this.config.enableDeduplication) {
       this.markProcessed(event);
     }
-    
+
     // Get subscribers for this event type
     const subscribers = this.subscriptions.get(event.eventType as WalletEventType) || [];
-    
+
     if (subscribers.length === 0) {
       MetricsLogger.incrementCounter(MetricEventType.EVENT_NO_SUBSCRIBERS, {
         eventType: event.eventType,
       });
     }
-    
+
     // Notify all subscribers
     const errors: Array<{ subscriberId: string; error: string }> = [];
     let notifiedCount = 0;
-    
+
     const notifications = subscribers.map(async (subscription) => {
       try {
         await this.notifySubscriber(subscription, event);
@@ -145,7 +145,7 @@ export class EventBus {
           subscriberId: subscription.subscriberId,
           error: errorMessage,
         });
-        
+
         MetricsLogger.incrementCounter(MetricEventType.EVENT_HANDLER_ERROR, {
           eventId: event.eventId,
           eventType: event.eventType,
@@ -154,7 +154,7 @@ export class EventBus {
         });
       }
     });
-    
+
     if (this.config.asyncProcessing) {
       // Fire and forget - intentionally not awaiting
       void Promise.allSettled(notifications);
@@ -162,7 +162,7 @@ export class EventBus {
       // Wait for all
       await Promise.allSettled(notifications);
     }
-    
+
     const duration = Date.now() - startTime;
     MetricsLogger.incrementCounter(MetricEventType.EVENT_PUBLISHED, {
       eventId: event.eventId,
@@ -170,7 +170,7 @@ export class EventBus {
       subscriberCount: subscribers.length,
       duration,
     });
-    
+
     return {
       eventId: event.eventId,
       success: errors.length === 0,
@@ -184,34 +184,34 @@ export class EventBus {
    */
   private async notifySubscriber(
     subscription: EventSubscription,
-    event: RewardEvent
+    event: RewardEvent,
   ): Promise<void> {
     let attempts = 0;
     let lastError: Error | undefined;
-    
+
     while (attempts < this.config.maxRetryAttempts) {
       try {
         await subscription.handler(event);
-        
+
         // Success
         MetricsLogger.incrementCounter(MetricEventType.EVENT_HANDLER_SUCCESS, {
           eventId: event.eventId,
           subscriberId: subscription.subscriberId,
           attempts: attempts + 1,
         });
-        
+
         return;
       } catch (error) {
         lastError = error instanceof Error ? error : new Error('Unknown error');
         attempts++;
-        
+
         if (attempts < this.config.maxRetryAttempts) {
           // Wait before retry
           await this.sleep(this.config.retryDelayMs * attempts);
         }
       }
     }
-    
+
     // All retries failed
     throw lastError || new Error('Handler failed after retries');
   }
@@ -283,7 +283,7 @@ export class EventBus {
    * Sleep utility
    */
   private sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   /**
@@ -296,12 +296,12 @@ export class EventBus {
   } {
     let totalSubscribers = 0;
     const subscriptionsByType: Record<string, number> = {};
-    
+
     for (const [eventType, subs] of this.subscriptions.entries()) {
       subscriptionsByType[eventType] = subs.length;
       totalSubscribers += subs.length;
     }
-    
+
     return {
       totalSubscribers,
       processedEventsCount: this.processedEvents.size,
@@ -353,8 +353,15 @@ export class EventBuilder {
   static createBase<T extends WalletEventType>(
     eventType: T,
     idempotencyKey: string,
-    source: string = 'reward-service'
-  ): { eventId: string; eventType: T; idempotencyKey: string; timestamp: Date; source: string; version: string } {
+    source: string = 'reward-service',
+  ): {
+    eventId: string;
+    eventType: T;
+    idempotencyKey: string;
+    timestamp: Date;
+    source: string;
+    version: string;
+  } {
     return {
       eventId: uuidv4(),
       eventType,

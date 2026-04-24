@@ -1,6 +1,6 @@
 /**
  * Authentication and Authorization Service
- * 
+ *
  * Provides JWT-based authentication and authorization for queue operations.
  * Implements role-based access control (RBAC) and token management.
  */
@@ -77,7 +77,7 @@ export class AuthService {
     escrowId: string,
     modelId: string,
     amount: number,
-    reason: TransactionReason
+    reason: TransactionReason,
   ): QueueSettlementAuthorization {
     const issuedAt = new Date();
     const expiresAt = new Date(issuedAt.getTime() + this.config.tokenExpirySeconds * 1000);
@@ -119,7 +119,7 @@ export class AuthService {
     escrowId: string,
     userId: string,
     amount: number,
-    reason: TransactionReason
+    reason: TransactionReason,
   ): QueueRefundAuthorization {
     const issuedAt = new Date();
     const expiresAt = new Date(issuedAt.getTime() + this.config.tokenExpirySeconds * 1000);
@@ -163,7 +163,7 @@ export class AuthService {
     modelId: string,
     refundAmount: number,
     settleAmount: number,
-    reason: TransactionReason
+    reason: TransactionReason,
   ): QueuePartialSettlementAuthorization {
     const issuedAt = new Date();
     const expiresAt = new Date(issuedAt.getTime() + this.config.tokenExpirySeconds * 1000);
@@ -228,7 +228,7 @@ export class AuthService {
   validateSettlementAuthorization(
     authorization: QueueSettlementAuthorization,
     expectedQueueItemId: string,
-    expectedEscrowId: string
+    expectedEscrowId: string,
   ): void {
     const payload = this.verifyAuthorizationToken(authorization.token);
 
@@ -263,7 +263,7 @@ export class AuthService {
   validateRefundAuthorization(
     authorization: QueueRefundAuthorization,
     expectedQueueItemId: string,
-    expectedEscrowId: string
+    expectedEscrowId: string,
   ): void {
     const payload = this.verifyAuthorizationToken(authorization.token);
 
@@ -298,7 +298,7 @@ export class AuthService {
   validatePartialSettlementAuthorization(
     authorization: QueuePartialSettlementAuthorization,
     expectedQueueItemId: string,
-    expectedEscrowId: string
+    expectedEscrowId: string,
   ): void {
     const payload = this.verifyAuthorizationToken(authorization.token);
 

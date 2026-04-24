@@ -1,6 +1,6 @@
 /**
  * Database Connection and Configuration
- * 
+ *
  * Central module for MongoDB connection management
  */
 
@@ -23,7 +23,7 @@ export async function connectDatabase(config: DatabaseConfig): Promise<typeof mo
 
   try {
     await mongoose.connect(config.uri, options);
-    
+
     // Log connection success (no sensitive data)
     MetricsLogger.logAlert({
       severity: AlertSeverity.INFO,
@@ -34,7 +34,7 @@ export async function connectDatabase(config: DatabaseConfig): Promise<typeof mo
         readyState: mongoose.connection.readyState,
       },
     });
-    
+
     return mongoose;
   } catch (error) {
     // Log connection error (no sensitive data in error message)
@@ -57,7 +57,7 @@ export async function connectDatabase(config: DatabaseConfig): Promise<typeof mo
  */
 export async function disconnectDatabase(): Promise<void> {
   await mongoose.disconnect();
-  
+
   MetricsLogger.logAlert({
     severity: AlertSeverity.INFO,
     message: 'MongoDB disconnected',

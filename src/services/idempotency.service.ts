@@ -25,7 +25,7 @@ export interface IIdempotencyService {
   checkKey(
     key: string,
     tenantId: string,
-    operation: string
+    operation: string,
   ): Promise<Record<string, unknown> | null>;
 
   /**
@@ -39,7 +39,7 @@ export interface IIdempotencyService {
     key: string,
     tenantId: string,
     operation: string,
-    result: Record<string, unknown>
+    result: Record<string, unknown>,
   ): Promise<void>;
 }
 
@@ -66,7 +66,7 @@ function hashResult(result: Record<string, unknown>): string {
             acc[k] = (value as Record<string, unknown>)[k];
             return acc;
           },
-          {} as Record<string, unknown>
+          {} as Record<string, unknown>,
         );
       return sorted;
     }
@@ -82,7 +82,7 @@ export class IdempotencyService implements IIdempotencyService {
   async checkKey(
     key: string,
     tenantId: string,
-    operation: string
+    operation: string,
   ): Promise<Record<string, unknown> | null> {
     const scope = buildScope(tenantId, operation);
     const record = await IdempotencyRecordModel.findOne({
@@ -101,7 +101,7 @@ export class IdempotencyService implements IIdempotencyService {
     key: string,
     tenantId: string,
     operation: string,
-    result: Record<string, unknown>
+    result: Record<string, unknown>,
   ): Promise<void> {
     const scope = buildScope(tenantId, operation);
     const resultHash = hashResult(result);
