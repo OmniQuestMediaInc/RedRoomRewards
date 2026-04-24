@@ -12,6 +12,29 @@ import * as crypto from 'crypto';
 import { IdempotencyRecordModel } from '../db/models/idempotency.model';
 
 /**
+ * Canonical operation names for the idempotency cache. Every caller
+ * must use one of these constants — guards against typo-driven cache
+ * misses that would let a duplicate request through.
+ *
+ * B-010 extends the original credit/deduct surface to cover the rest
+ * of the FIZ mutation graph: redemption, expiration, and escrow
+ * hold/release.
+ */
+export const IDEMPOTENCY_OPERATIONS = {
+  WALLET_CREDIT: 'wallet_credit',
+  WALLET_DEDUCT: 'wallet_deduct',
+  POINT_REDEMPTION: 'point_redemption',
+  POINT_EXPIRATION: 'point_expiration',
+  ESCROW_HOLD: 'escrow_hold',
+  ESCROW_RELEASE: 'escrow_release',
+  ESCROW_SETTLE: 'escrow_settle',
+  ESCROW_REFUND: 'escrow_refund',
+} as const;
+
+export type IdempotencyOperation =
+  (typeof IDEMPOTENCY_OPERATIONS)[keyof typeof IDEMPOTENCY_OPERATIONS];
+
+/**
  * Interface for idempotency service
  */
 export interface IIdempotencyService {

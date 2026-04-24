@@ -15,7 +15,7 @@
  */
 
 import { IWalletService } from '../services/types';
-import { IIdempotencyService } from '../services/idempotency.service';
+import { IIdempotencyService, IDEMPOTENCY_OPERATIONS } from '../services/idempotency.service';
 
 /**
  * Error thrown when a required field is missing or invalid in the request.
@@ -152,7 +152,7 @@ export class WalletController {
     const cached = await this.idempotencyService.checkKey(
       request.idempotencyKey,
       userId,
-      'wallet_deduct',
+      IDEMPOTENCY_OPERATIONS.WALLET_DEDUCT,
     );
     if (cached !== null) {
       return cached as unknown as TransactionResponse;
@@ -187,7 +187,7 @@ export class WalletController {
     await this.idempotencyService.recordKey(
       request.idempotencyKey,
       userId,
-      'wallet_deduct',
+      IDEMPOTENCY_OPERATIONS.WALLET_DEDUCT,
       result as unknown as Record<string, unknown>,
     );
 
@@ -224,7 +224,7 @@ export class WalletController {
     const cached = await this.idempotencyService.checkKey(
       request.idempotencyKey,
       userId,
-      'wallet_credit',
+      IDEMPOTENCY_OPERATIONS.WALLET_CREDIT,
     );
     if (cached !== null) {
       return cached as unknown as TransactionResponse;
@@ -259,7 +259,7 @@ export class WalletController {
     await this.idempotencyService.recordKey(
       request.idempotencyKey,
       userId,
-      'wallet_credit',
+      IDEMPOTENCY_OPERATIONS.WALLET_CREDIT,
       result as unknown as Record<string, unknown>,
     );
 
