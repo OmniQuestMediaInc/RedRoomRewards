@@ -81,6 +81,18 @@
       "method": "findOneAndUpdate"
     },
     {
+      "file": "src/services/point-accrual.service.ts",
+      "line": 380,
+      "model": "WalletModel",
+      "method": "findOne"
+    },
+    {
+      "file": "src/services/point-accrual.service.ts",
+      "line": 395,
+      "model": "WalletModel",
+      "method": "findOneAndUpdate"
+    },
+    {
       "file": "src/services/point-expiration.service.ts",
       "line": 151,
       "model": "WalletModel",
