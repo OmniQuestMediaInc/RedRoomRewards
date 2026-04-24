@@ -1,3 +1,4 @@
-- Integrated with existing LedgerService.awardPromotionalPoints
-- GateGuard AV is stubbed (real call in next WO)
-- CSV validation/parsing assumed in controller layer (can be expanded)
+- AwardingWalletService integrates with existing LedgerService (awardPromotionalPoints method added via small patch in this payload)
+- GateGuard AV is stubbed for prototype phase (real integration in next payload)
+- CSV parsing and validation assumed to be handled in controller or a future middleware layer
+- All points awarded go into the Promotional Bonus bucket per Canonical Corpus
