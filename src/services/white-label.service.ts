@@ -35,7 +35,7 @@ export class WhiteLabelService {
     if (!config.brandName || !config.brandName.trim()) {
       throw new Error('brandName is required');
     }
-    if (!config.primaryColor || !/^#[0-9a-fA-F]{3,6}$/.test(config.primaryColor)) {
+    if (!config.primaryColor || !/^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(config.primaryColor)) {
       throw new Error('primaryColor must be a valid hex colour (e.g. #4c1d95)');
     }
 

@@ -91,4 +91,11 @@ describe('MemberService', () => {
   it('rejects signup with empty email', async () => {
     await expect(service.signup({ email: '' })).rejects.toThrow('Valid email is required');
   });
+
+  it('rejects malformed email with @@ prefix', async () => {
+    await expect(service.signup({ email: '@@domain.com' })).rejects.toThrow(
+      'Valid email is required',
+    );
+    expect(avService.verifyAccount).not.toHaveBeenCalled();
+  });
 });

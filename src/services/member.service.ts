@@ -25,7 +25,7 @@ export class MemberService {
   ) {}
 
   async signup(request: MemberSignupRequest): Promise<MemberProfile> {
-    if (!request.email || typeof request.email !== 'string' || !request.email.includes('@')) {
+    if (!request.email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(request.email)) {
       throw new Error('Valid email is required for signup');
     }
 

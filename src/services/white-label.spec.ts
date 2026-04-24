@@ -71,4 +71,26 @@ describe('WhiteLabelService (WO-013)', () => {
       }),
     ).resolves.not.toThrow();
   });
+
+  it('rejects 4-digit hex colours', async () => {
+    await expect(
+      service.saveConfig({
+        merchantId: 'm3',
+        brandName: 'Club',
+        primaryColor: '#1234',
+        serviceBureauMode: false,
+      }),
+    ).rejects.toThrow('primaryColor must be a valid hex colour');
+  });
+
+  it('rejects 5-digit hex colours', async () => {
+    await expect(
+      service.saveConfig({
+        merchantId: 'm3',
+        brandName: 'Club',
+        primaryColor: '#12345',
+        serviceBureauMode: false,
+      }),
+    ).rejects.toThrow('primaryColor must be a valid hex colour');
+  });
 });
