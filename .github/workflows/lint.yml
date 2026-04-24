@@ -49,16 +49,12 @@ jobs:
           # EXCLUDE: governance archives, legacy configs, reference libraries,
           # historical docs, vendored trees, and any path containing a space
           # (Super-Linter's path handling is fragile with spaces in filenames).
-          FILTER_REGEX_EXCLUDE: (^|/)(archive|LEGACY_CONFIGS|REFERENCE_LIBRARY|PROGRAM_CONTROL|node_modules|dist|build|out|coverage|\.next|super-linter-output)/|(^|/)docs/history/|.* .*
+          FILTER_REGEX_EXCLUDE: (^|/)(archive|LEGACY_CONFIGS|REFERENCE_LIBRARY|PROGRAM_CONTROL|node_modules|dist|build|out|coverage|\.next|super-linter-output)/|(^|/)docs/history/|.* .*|(^|/)tsconfig(\.[^/]+)?\.json$
 
           # Point validators at the repo's pinned configs explicitly.
           LINTER_RULES_PATH: .github/linters
           YAML_CONFIG_FILE: .yaml-lint.yml
           MARKDOWN_CONFIG_FILE: .markdownlint.yml
-
-          # tsconfig.json is JSONC (comments allowed). Super-Linter's JSON
-          # validator is strict and would fail on every PR that touches it.
-          JSON_FILTER_REGEX_EXCLUDE: (^|/)tsconfig(\.[^/]+)?\.json$
 
           # Regex filters apply to repo-relative paths.
           STRIP_DEFAULT_WORKSPACE_FOR_REGEX: true
