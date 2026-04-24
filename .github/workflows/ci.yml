@@ -23,6 +23,11 @@ jobs:
       - name: Charter integrity check
         run: node scripts/ci/charter-integrity-check.js
 
+      - name: No hardcoded balance values (B-008)
+        run: |
+          node scripts/ci/no-hardcoded-balance.js --self-test
+          node scripts/ci/no-hardcoded-balance.js
+
       - name: Required file structure
         run: |
           required_files=(
