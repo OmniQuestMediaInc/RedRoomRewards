@@ -6,19 +6,9 @@ export class HealthController {
   check() {
     return {
       status: 'ok',
-      version: '1.0',
+      service: 'redroom-rewards',
       timestamp: new Date().toISOString(),
-      components: [
-        'ledger',
-        'awarding-wallet',
-        'member',
-        'merchant',
-        'burn-catalog',
-        'reporting',
-        'white-label',
-        'creator-gifting',
-        'gateguard-av',
-      ],
+      uptime: process.uptime(),
     };
   }
 }

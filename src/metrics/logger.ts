@@ -9,16 +9,6 @@
 import { MetricData, AlertData, MetricEventType, AlertSeverity } from './types';
 
 /**
- * Returns false when metrics/alert logging should be suppressed.
- * Suppressed in NODE_ENV=test (prevents CI noise) and when
- * DISABLE_METRICS_LOGS=1 (allows opt-out in any environment).
- * Production behavior is fully preserved in all other envs.
- */
-function shouldEmitMetricsLogs(): boolean {
-  return process.env.NODE_ENV !== 'test' && process.env.DISABLE_METRICS_LOGS !== '1';
-}
-
-/**
  * Simple metrics logger using console output
  * Designed for easy integration with external monitoring systems
  */
@@ -27,7 +17,7 @@ export class MetricsLogger {
    * Log a metric event
    */
   static logMetric(data: MetricData): void {
-    if (!shouldEmitMetricsLogs()) return;
+    if (process.env.NODE_ENV === 'test' || process.env.DISABLE_METRICS_LOGS === '1') return;
 
     const logEntry = {
       level: 'METRIC',
@@ -44,7 +34,7 @@ export class MetricsLogger {
    * Log an alert
    */
   static logAlert(data: AlertData): void {
-    if (!shouldEmitMetricsLogs()) return;
+    if (process.env.NODE_ENV === 'test' || process.env.DISABLE_METRICS_LOGS === '1') return;
 
     const logEntry = {
       level: 'ALERT',

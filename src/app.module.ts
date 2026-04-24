@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { MemberModule } from './member/member.module';
 import { MerchantModule } from './merchant/merchant.module';
 import { BurnModule } from './burn/burn.module';
@@ -7,9 +8,11 @@ import { WhiteLabelModule } from './white-label/white-label.module';
 import { CreatorGiftingPanelModule } from './creator-gifting-panel/creator-gifting-panel.module';
 import { RedRoomLedgerModule } from './redroom-ledger/redroom-ledger.module';
 import { HealthController } from './health/health.controller';
+import productionConfig from './config/production.config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({ isGlobal: true, load: [productionConfig] }),
     MemberModule,
     MerchantModule,
     BurnModule,

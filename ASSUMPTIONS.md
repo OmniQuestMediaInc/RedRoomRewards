@@ -44,10 +44,11 @@
 - `LedgerService` (in `src/ledger/ledger.service.ts`) is not decorated with `@Injectable()` and its constructor takes a `Partial<LedgerConfig>` config object. To allow NestJS DI to instantiate it without resolving a non-existent type token, each module that depends on it (Member/Merchant/Burn/RedRoomLedger) registers it via `{ provide: LedgerService, useFactory: () => new LedgerService() }`. See F-016.
 - `WelfareGuardianScoreService` is added to `MemberModule` and `BurnModule` providers because it is a transitive dependency of `RedRoomLedgerService`. Payload #7 listed it only under `RedRoomLedgerModule`, but Nest resolves providers per-module.
 
-## RRR-PRODUCTION-READY (Payload #9)
+## RRR-ENGINE-COMPLETE (Payload #10)
 
-- All modules are now wired and production-ready
-- OpenAPI/Swagger is enabled for easy API documentation
-- Health endpoint provides operational visibility
-- `@nestjs/swagger` was added to `dependencies` (not previously present); `main.ts` now types the app as `NestExpressApplication` to match `setupSwagger`'s expected parameter type.
-- Pre-existing `noUnusedLocals` errors in `src/metrics/logger.ts` (dead `shouldEmitMetricsLogs`) and `src/metrics/logger.spec.ts` (stale `originalNodeEnv` / unused `setTestEnv` import after a partial refactor) were blocking the baseline build and test suite. Both were repaired as part of this payload so the merge gate can run green.
+- All 10 payloads are now integrated and wired
+- Production config (`src/config/production.config.ts`) is in place and loaded globally via `ConfigModule.forRoot({ load: [productionConfig] })`
+- `.env.example` extended with `GATEGUARD_AV_API_KEY`, `GATEGUARD_AV_ENDPOINT`, and `SERVICE_BUREAU_ENABLED` (existing security-critical secrets preserved, not replaced)
+- `HealthController` exposes `GET /api/v1/health` returning service status, timestamp, and uptime
+- `@nestjs/config@^4.0.0` installed as a runtime dependency
+- Engine is ready for staging deployment
