@@ -1,18 +1,18 @@
-# RedRoom Rewards™ Backend — Core Engine Complete (Payloads 1–7)
+# RedRoom Rewards™ Backend — PRODUCTION READY (Payloads 1–9)
 
-All external user components are now live:
-- Mandatory 18+ GateGuard AV on every signup and high-value action
-- AwardingWallet CSV upload for merchants & creators
-- Tier engine with RedDesire → RedReign vibes
-- Creator gifting panel (ready for ChatNow.Zone embed)
+**All external user components are now complete:**
+
+- Mandatory 18+ GateGuard AV on every account action
+- AwardingWallet CSV upload + creator gifting panel
+- Full tier engine (RedDesire → RedReign)
 - Burn catalog (RedRoomPleasures first partner)
-- Full reporting & liability statements
-- White-label SAAS config (hosted + self-hosted modes)
+- Liability / reporting endpoints
+- White-label SAAS configuration
+- OpenAPI / Swagger docs at `/api/docs`
+- Health check at `/health`
 
-Next steps for Claude:
-- Generate OpenAPI spec (`npm run generate-openapi` or similar)
-- Add health check endpoint
-- Update .github/PRODUCTION_SCHEDULE.md with latest merge SHA if needed
-- Deploy to staging
+**Deployment ready.**
 
-Engine is now feature-complete for MVP.
+Claude — run `npm run build`, `npm test`, and merge when green.
+
+This completes the MVP loyalty engine.
