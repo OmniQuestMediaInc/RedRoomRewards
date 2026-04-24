@@ -1,6 +1,6 @@
 /**
  * Escrow Race Condition Tests
- * 
+ *
  * Tests to verify that escrow settlement and refund operations are protected
  * against race conditions and double-processing through optimistic locking.
  */
@@ -11,10 +11,10 @@ import { EscrowItemModel } from '../../db/models/escrow-item.model';
 import { WalletModel } from '../../db/models/wallet.model';
 import { ModelWalletModel } from '../../db/models/model-wallet.model';
 import { TransactionReason } from '../types';
-import { 
-  EscrowNotFoundError, 
+import {
+  EscrowNotFoundError,
   EscrowAlreadyProcessedError,
-  OptimisticLockError 
+  OptimisticLockError,
 } from '../../services/types';
 
 // Mock all database models
@@ -49,7 +49,7 @@ describe('Escrow Race Condition Protection', () => {
 
       // Mock findOneAndUpdate to return the escrow (successful lock)
       (EscrowItemModel.findOneAndUpdate as jest.Mock).mockResolvedValueOnce(mockEscrow);
-      
+
       // Mock wallet and model wallet operations
       (ModelWalletModel.findOne as jest.Mock).mockResolvedValue(null);
       (ModelWalletModel.create as jest.Mock).mockResolvedValue({
@@ -73,7 +73,7 @@ describe('Escrow Race Condition Protection', () => {
         version: 1,
       });
       (EscrowItemModel.updateOne as jest.Mock).mockResolvedValue({ ok: 1 });
-      
+
       // Mock ledger service
       (ledgerService.checkIdempotency as jest.Mock).mockResolvedValue(false);
       (ledgerService.createEntry as jest.Mock).mockResolvedValue({});
@@ -114,20 +114,20 @@ describe('Escrow Race Condition Protection', () => {
             status: 'settling',
           }),
         }),
-        expect.any(Object)
+        expect.any(Object),
       );
     });
 
     it('should reject second settlement attempt on same escrow', async () => {
       // First call returns null (escrow already locked)
       (EscrowItemModel.findOneAndUpdate as jest.Mock).mockResolvedValueOnce(null);
-      
+
       // Second call finds escrow in 'settling' state
       (EscrowItemModel.findOne as jest.Mock).mockResolvedValueOnce({
         escrowId: 'escrow-123',
         status: 'settling',
       });
-      
+
       // Mock idempotency check
       (ledgerService.checkIdempotency as jest.Mock).mockResolvedValue(false);
 
@@ -154,10 +154,10 @@ describe('Escrow Race Condition Protection', () => {
       };
 
       // Second attempt should throw EscrowAlreadyProcessedError
-      await expect(
-        walletService.settleEscrow(request, authorization)
-      ).rejects.toThrow(EscrowAlreadyProcessedError);
-      
+      await expect(walletService.settleEscrow(request, authorization)).rejects.toThrow(
+        EscrowAlreadyProcessedError,
+      );
+
       // Verify error types exist
       expect(EscrowNotFoundError).toBeDefined();
       expect(OptimisticLockError).toBeDefined();
@@ -173,7 +173,7 @@ describe('Escrow Race Condition Protection', () => {
 
       // Mock successful escrow lock
       (EscrowItemModel.findOneAndUpdate as jest.Mock).mockResolvedValueOnce(mockEscrow);
-      
+
       // Mock model wallet success
       (ModelWalletModel.findOne as jest.Mock).mockResolvedValue(null);
       (ModelWalletModel.create as jest.Mock).mockResolvedValue({
@@ -186,7 +186,7 @@ describe('Escrow Race Condition Protection', () => {
         earnedBalance: 100,
         version: 1,
       });
-      
+
       // Mock wallet operations - findOne succeeds, findOneAndUpdate fails (null return)
       (WalletModel.findOne as jest.Mock).mockResolvedValue({
         userId: 'user-123',
@@ -194,10 +194,10 @@ describe('Escrow Race Condition Protection', () => {
         version: 0,
       });
       (WalletModel.findOneAndUpdate as jest.Mock).mockResolvedValue(null);
-      
+
       // Mock rollback updateOne
       (EscrowItemModel.updateOne as jest.Mock).mockResolvedValue({ ok: 1 });
-      
+
       (ledgerService.checkIdempotency as jest.Mock).mockResolvedValue(false);
 
       const request = {
@@ -223,14 +223,14 @@ describe('Escrow Race Condition Protection', () => {
       };
 
       // Should throw OptimisticLockError and rollback escrow
-      await expect(
-        walletService.settleEscrow(request, authorization)
-      ).rejects.toThrow(OptimisticLockError);
+      await expect(walletService.settleEscrow(request, authorization)).rejects.toThrow(
+        OptimisticLockError,
+      );
 
       // Verify rollback was called
       expect(EscrowItemModel.updateOne).toHaveBeenCalledWith(
         { escrowId: { $eq: 'escrow-123' } },
-        { $set: { status: 'held', processedAt: null } }
+        { $set: { status: 'held', processedAt: null } },
       );
     });
   });
@@ -296,7 +296,7 @@ describe('Escrow Race Condition Protection', () => {
             status: 'refunding',
           }),
         }),
-        expect.any(Object)
+        expect.any(Object),
       );
     });
 
@@ -331,9 +331,9 @@ describe('Escrow Race Condition Protection', () => {
         expiresAt: new Date(Date.now() + 3600000),
       };
 
-      await expect(
-        walletService.refundEscrow(request, authorization)
-      ).rejects.toThrow(EscrowAlreadyProcessedError);
+      await expect(walletService.refundEscrow(request, authorization)).rejects.toThrow(
+        EscrowAlreadyProcessedError,
+      );
     });
   });
 
@@ -412,7 +412,7 @@ describe('Escrow Race Condition Protection', () => {
             status: 'partial_settling',
           }),
         }),
-        expect.any(Object)
+        expect.any(Object),
       );
     });
   });

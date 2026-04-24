@@ -1,6 +1,6 @@
 /**
  * Point Accrual Service Tests
- * 
+ *
  * Tests for point earning operations including signups, referrals,
  * promotions, and admin credits.
  */
@@ -42,7 +42,7 @@ describe('PointAccrualService', () => {
       // Arrange
       const userId = 'user-123';
       const amount = 100;
-      
+
       (WalletModel.findOne as jest.Mock).mockResolvedValue(null);
       (WalletModel.create as jest.Mock).mockResolvedValue({
         userId,
@@ -93,7 +93,7 @@ describe('PointAccrualService', () => {
           amount,
           type: 'credit',
           reason: TransactionReason.USER_SIGNUP_BONUS,
-        })
+        }),
       );
     });
 
@@ -102,7 +102,7 @@ describe('PointAccrualService', () => {
       const userId = 'user-123';
       const amount = 50;
       const existingBalance = 100;
-      
+
       (WalletModel.findOne as jest.Mock).mockResolvedValue({
         userId,
         availableBalance: existingBalance,
@@ -133,7 +133,7 @@ describe('PointAccrualService', () => {
         expect.objectContaining({
           balanceBefore: existingBalance,
           balanceAfter: existingBalance + amount,
-        })
+        }),
       );
     });
 
@@ -146,7 +146,7 @@ describe('PointAccrualService', () => {
           reason: TransactionReason.USER_SIGNUP_BONUS,
           idempotencyKey: 'key-3',
           requestId: 'req-3',
-        })
+        }),
       ).rejects.toThrow('Amount must be at least 1');
     });
 
@@ -159,7 +159,7 @@ describe('PointAccrualService', () => {
           reason: TransactionReason.USER_SIGNUP_BONUS,
           idempotencyKey: 'key-4',
           requestId: 'req-4',
-        })
+        }),
       ).rejects.toThrow('Amount cannot exceed');
     });
 
@@ -172,7 +172,7 @@ describe('PointAccrualService', () => {
           reason: TransactionReason.CHIP_MENU_PURCHASE,
           idempotencyKey: 'key-5',
           requestId: 'req-5',
-        })
+        }),
       ).rejects.toThrow('Invalid earning reason');
     });
 
@@ -188,7 +188,7 @@ describe('PointAccrualService', () => {
           reason: TransactionReason.USER_SIGNUP_BONUS,
           idempotencyKey: 'duplicate-key',
           requestId: 'req-6',
-        })
+        }),
       ).rejects.toThrow('Idempotency key already used');
     });
   });
@@ -220,7 +220,7 @@ describe('PointAccrualService', () => {
       expect(mockLedgerService.createEntry).toHaveBeenCalledWith(
         expect.objectContaining({
           reason: TransactionReason.USER_SIGNUP_BONUS,
-        })
+        }),
       );
     });
   });
@@ -246,7 +246,7 @@ describe('PointAccrualService', () => {
         'referrer',
         'referred-user',
         100,
-        'req-referral'
+        'req-referral',
       );
 
       // Assert
@@ -258,7 +258,7 @@ describe('PointAccrualService', () => {
             bonusType: 'referral',
             referredUserId: 'referred-user',
           }),
-        })
+        }),
       );
     });
   });
@@ -267,7 +267,7 @@ describe('PointAccrualService', () => {
     it('should award promotional points with expiration', async () => {
       // Arrange
       const expiresAt = new Date('2025-12-31');
-      
+
       (WalletModel.findOne as jest.Mock).mockResolvedValue({
         userId: 'user-promo',
         availableBalance: 50,
@@ -287,7 +287,7 @@ describe('PointAccrualService', () => {
         100,
         'promo-2025',
         'req-promo',
-        expiresAt
+        expiresAt,
       );
 
       // Assert
@@ -299,7 +299,7 @@ describe('PointAccrualService', () => {
             promotionId: 'promo-2025',
             expiresAt: expiresAt.toISOString(),
           }),
-        })
+        }),
       );
     });
   });
@@ -326,7 +326,7 @@ describe('PointAccrualService', () => {
         200,
         'admin-001',
         'Compensation for service issue',
-        'req-admin'
+        'req-admin',
       );
 
       // Assert
@@ -339,7 +339,7 @@ describe('PointAccrualService', () => {
             adminReason: 'Compensation for service issue',
             operationType: 'admin_credit',
           }),
-        })
+        }),
       );
     });
   });

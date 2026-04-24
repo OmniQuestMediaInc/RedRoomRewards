@@ -1,6 +1,6 @@
 /**
  * DLQ (Dead Letter Queue) Event Model
- * 
+ *
  * Stores events that failed processing and moved to DLQ
  * Collection: dlq_events
  */
@@ -74,7 +74,7 @@ const DLQEventSchema = new Schema<IDLQEvent>(
   {
     timestamps: true,
     collection: 'dlq_events',
-  }
+  },
 );
 
 // Indexes

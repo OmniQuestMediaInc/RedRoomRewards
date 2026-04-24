@@ -6,7 +6,10 @@ import { LedgerService } from '../ledger/ledger.service'; // existing
 export class AwardingWalletService {
   constructor(private readonly ledgerService: LedgerService) {}
 
-  async uploadCSV(rows: AwardingWalletUploadRow[], merchantId: string): Promise<AwardingWalletUploadResult> {
+  async uploadCSV(
+    rows: AwardingWalletUploadRow[],
+    merchantId: string,
+  ): Promise<AwardingWalletUploadResult> {
     const result: AwardingWalletUploadResult = { successCount: 0, failedCount: 0, errors: [] };
 
     for (let i = 0; i < rows.length; i++) {
@@ -16,7 +19,7 @@ export class AwardingWalletService {
           rows[i].points,
           `MERCHANT_AWARD_${merchantId}`,
           rows[i].reason,
-          rows[i].expiryDays
+          rows[i].expiryDays,
         );
         result.successCount++;
       } catch (e: any) {

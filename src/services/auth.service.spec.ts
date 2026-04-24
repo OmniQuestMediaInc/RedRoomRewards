@@ -24,7 +24,7 @@ describe('AuthService', () => {
         'escrow-456',
         'model-789',
         1000,
-        TransactionReason.PERFORMANCE_COMPLETED
+        TransactionReason.PERFORMANCE_COMPLETED,
       );
 
       expect(authorization.queueItemId).toBe('queue-123');
@@ -43,7 +43,7 @@ describe('AuthService', () => {
         'escrow-456',
         'model-789',
         1000,
-        TransactionReason.PERFORMANCE_COMPLETED
+        TransactionReason.PERFORMANCE_COMPLETED,
       );
 
       const decoded = service.verifyAuthorizationToken(authorization.token);
@@ -62,7 +62,7 @@ describe('AuthService', () => {
         'escrow-456',
         'model-789',
         1000,
-        TransactionReason.PERFORMANCE_COMPLETED
+        TransactionReason.PERFORMANCE_COMPLETED,
       );
 
       const decoded = service.verifyAuthorizationToken(authorization.token);
@@ -80,7 +80,7 @@ describe('AuthService', () => {
         'escrow-def',
         'user-ghi',
         500,
-        TransactionReason.PERFORMANCE_ABANDONED
+        TransactionReason.PERFORMANCE_ABANDONED,
       );
 
       expect(authorization.queueItemId).toBe('queue-abc');
@@ -97,7 +97,7 @@ describe('AuthService', () => {
         'escrow-def',
         'user-ghi',
         500,
-        TransactionReason.PERFORMANCE_ABANDONED
+        TransactionReason.PERFORMANCE_ABANDONED,
       );
 
       const decoded = service.verifyAuthorizationToken(authorization.token);
@@ -120,7 +120,7 @@ describe('AuthService', () => {
         'model-opq',
         200,
         800,
-        TransactionReason.PARTIAL_PERFORMANCE
+        TransactionReason.PARTIAL_PERFORMANCE,
       );
 
       expect(authorization.queueItemId).toBe('queue-xyz');
@@ -141,7 +141,7 @@ describe('AuthService', () => {
         'model-opq',
         200,
         800,
-        TransactionReason.PARTIAL_PERFORMANCE
+        TransactionReason.PARTIAL_PERFORMANCE,
       );
 
       const decoded = service.verifyAuthorizationToken(authorization.token);
@@ -171,7 +171,7 @@ describe('AuthService', () => {
         'escrow-456',
         'model-789',
         1000,
-        TransactionReason.PERFORMANCE_COMPLETED
+        TransactionReason.PERFORMANCE_COMPLETED,
       );
 
       expect(() => {
@@ -196,7 +196,7 @@ describe('AuthService', () => {
         'escrow-456',
         'model-789',
         1000,
-        TransactionReason.PERFORMANCE_COMPLETED
+        TransactionReason.PERFORMANCE_COMPLETED,
       );
 
       expect(() => {
@@ -212,7 +212,7 @@ describe('AuthService', () => {
         'escrow-456',
         'model-789',
         1000,
-        TransactionReason.PERFORMANCE_COMPLETED
+        TransactionReason.PERFORMANCE_COMPLETED,
       );
 
       expect(() => {
@@ -226,7 +226,7 @@ describe('AuthService', () => {
         'escrow-456',
         'model-789',
         1000,
-        TransactionReason.PERFORMANCE_COMPLETED
+        TransactionReason.PERFORMANCE_COMPLETED,
       );
 
       expect(() => {
@@ -240,7 +240,7 @@ describe('AuthService', () => {
         'escrow-456',
         'model-789',
         1000,
-        TransactionReason.PERFORMANCE_COMPLETED
+        TransactionReason.PERFORMANCE_COMPLETED,
       );
 
       expect(() => {
@@ -254,7 +254,7 @@ describe('AuthService', () => {
         'escrow-456',
         'user-789',
         1000,
-        TransactionReason.PERFORMANCE_ABANDONED
+        TransactionReason.PERFORMANCE_ABANDONED,
       );
 
       expect(() => {
@@ -270,7 +270,7 @@ describe('AuthService', () => {
         'escrow-def',
         'user-ghi',
         500,
-        TransactionReason.PERFORMANCE_ABANDONED
+        TransactionReason.PERFORMANCE_ABANDONED,
       );
 
       expect(() => {
@@ -284,7 +284,7 @@ describe('AuthService', () => {
         'escrow-def',
         'user-ghi',
         500,
-        TransactionReason.PERFORMANCE_ABANDONED
+        TransactionReason.PERFORMANCE_ABANDONED,
       );
 
       expect(() => {

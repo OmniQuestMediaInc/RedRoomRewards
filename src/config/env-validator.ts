@@ -1,28 +1,28 @@
 /**
  * Environment Variable Validation
- * 
+ *
  * Validates that all required environment variables are set with appropriate values.
  * Enforces security requirements for secrets and credentials.
- * 
+ *
  * SECURITY: Prevents application from starting with missing or insecure configuration.
  */
 
 export interface EnvValidationRule {
   /** Environment variable name */
   name: string;
-  
+
   /** Is this variable required? */
   required: boolean;
-  
+
   /** Minimum length for the value (for secrets) */
   minLength?: number;
-  
+
   /** Pattern the value must match (regex) */
   pattern?: RegExp;
-  
+
   /** Description of the variable (for error messages) */
   description: string;
-  
+
   /** Is this a secret that should not be logged? */
   isSecret?: boolean;
 }
@@ -39,50 +39,50 @@ export interface ValidationResult {
 export function validateEnvironment(rules: EnvValidationRule[]): ValidationResult {
   const errors: string[] = [];
   const warnings: string[] = [];
-  
+
   for (const rule of rules) {
     const value = process.env[rule.name];
-    
+
     // Check if required variable is missing
     if (rule.required && !value) {
       errors.push(
         `SECURITY ERROR: Required environment variable ${rule.name} is not set. ` +
-        `Description: ${rule.description}`
+          `Description: ${rule.description}`,
       );
       continue;
     }
-    
+
     // Skip further validation if optional and not set
     if (!value) {
       continue;
     }
-    
+
     // Check minimum length (important for secrets)
     if (rule.minLength && value.length < rule.minLength) {
       errors.push(
         `SECURITY ERROR: Environment variable ${rule.name} is too short. ` +
-        `Minimum length: ${rule.minLength}, current length: ${value.length}. ` +
-        `Description: ${rule.description}`
+          `Minimum length: ${rule.minLength}, current length: ${value.length}. ` +
+          `Description: ${rule.description}`,
       );
     }
-    
+
     // Check pattern match
     if (rule.pattern && !rule.pattern.test(value)) {
       errors.push(
         `VALIDATION ERROR: Environment variable ${rule.name} does not match required pattern. ` +
-        `Description: ${rule.description}`
+          `Description: ${rule.description}`,
       );
     }
-    
+
     // Warning for common insecure values
     if (rule.isSecret && isInsecureSecret(value)) {
       warnings.push(
         `SECURITY WARNING: Environment variable ${rule.name} appears to use an insecure default value. ` +
-        `Please use a cryptographically random secret. Description: ${rule.description}`
+          `Please use a cryptographically random secret. Description: ${rule.description}`,
       );
     }
   }
-  
+
   return {
     valid: errors.length === 0,
     errors,
@@ -99,8 +99,8 @@ function isInsecureSecret(value: string): boolean {
     /^(123|abc|qwerty)/i,
     /^(key|token|pass)$/i,
   ];
-  
-  return insecurePatterns.some(pattern => pattern.test(value));
+
+  return insecurePatterns.some((pattern) => pattern.test(value));
 }
 
 /**
@@ -108,14 +108,14 @@ function isInsecureSecret(value: string): boolean {
  */
 export function assertValidEnvironment(rules: EnvValidationRule[]): void {
   const result = validateEnvironment(rules);
-  
+
   // Log warnings (non-blocking)
   // Note: We use process.stderr.write here as this is a startup check
   // before the logging system is initialized
   for (const warning of result.warnings) {
     process.stderr.write(`WARNING: ${warning}\n`);
   }
-  
+
   // Throw error for validation failures (blocking)
   if (!result.valid) {
     const errorMessage = [
@@ -131,7 +131,7 @@ export function assertValidEnvironment(rules: EnvValidationRule[]): void {
       '═══════════════════════════════════════════════════════════',
       '',
     ].join('\n');
-    
+
     throw new Error(errorMessage);
   }
 }
@@ -172,10 +172,10 @@ export const COMMON_ENV_RULES: EnvValidationRule[] = [
 /**
  * Initialize environment validation for production
  * Call this function explicitly during application startup
- * 
+ *
  * @example
  * import { initEnvironmentValidation } from './config/env-validator';
- * 
+ *
  * // In main application entry point (e.g., index.ts)
  * if (process.env.NODE_ENV === 'production') {
  *   initEnvironmentValidation();

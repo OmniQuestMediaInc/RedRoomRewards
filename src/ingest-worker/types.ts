@@ -1,6 +1,6 @@
 /**
  * Ingest Worker Types
- * 
+ *
  * Type definitions for the ingest worker and event processing
  */
 
@@ -24,9 +24,7 @@ export interface ProcessingResponse {
   errorMessage?: string;
 }
 
-export type EventHandler = (
-  context: EventProcessingContext
-) => Promise<ProcessingResponse>;
+export type EventHandler = (context: EventProcessingContext) => Promise<ProcessingResponse>;
 
 export interface WorkerConfig {
   pollIntervalMs: number;

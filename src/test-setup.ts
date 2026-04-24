@@ -1,8 +1,11 @@
 /**
  * Jest Test Setup
- * 
+ *
  * Global test configuration and mocks
  */
+
+// Required for NestJS DI (constructor metadata reflection)
+import 'reflect-metadata';
 
 // Mock uuid to avoid ES module issues in Jest
 jest.mock('uuid', () => ({

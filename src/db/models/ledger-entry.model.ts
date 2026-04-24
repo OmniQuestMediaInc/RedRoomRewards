@@ -1,6 +1,6 @@
 /**
  * Ledger Entry Model
- * 
+ *
  * Immutable transaction records for full audit trail.
  * Never modified after creation - corrections are new entries.
  * Collection: ledger_entries
@@ -156,7 +156,7 @@ const LedgerEntrySchema = new Schema<ILedgerEntry>(
   {
     timestamps: false, // We use our own timestamp field
     collection: 'ledger_entries',
-  }
+  },
 );
 
 // Unique index on entryId
@@ -186,29 +186,37 @@ LedgerEntrySchema.index({ timestamp: 1 });
 /**
  * Immutability Protection
  * Prevent any updates to ledger entries after creation
- * 
+ *
  * Note: These hooks throw errors to prevent updates.
  * For TypeScript compatibility with Mongoose v9, we use simplified hooks.
  */
-LedgerEntrySchema.pre('updateOne', function() {
-  throw new Error('Ledger entries are immutable and cannot be updated. Create a new offsetting entry instead.');
+LedgerEntrySchema.pre('updateOne', function () {
+  throw new Error(
+    'Ledger entries are immutable and cannot be updated. Create a new offsetting entry instead.',
+  );
 });
 
-LedgerEntrySchema.pre('updateMany', function() {
-  throw new Error('Ledger entries are immutable and cannot be updated. Create a new offsetting entry instead.');
+LedgerEntrySchema.pre('updateMany', function () {
+  throw new Error(
+    'Ledger entries are immutable and cannot be updated. Create a new offsetting entry instead.',
+  );
 });
 
-LedgerEntrySchema.pre('findOneAndUpdate', function() {
-  throw new Error('Ledger entries are immutable and cannot be updated. Create a new offsetting entry instead.');
+LedgerEntrySchema.pre('findOneAndUpdate', function () {
+  throw new Error(
+    'Ledger entries are immutable and cannot be updated. Create a new offsetting entry instead.',
+  );
 });
 
 // Note: findByIdAndUpdate not available as pre-hook in this Mongoose version
 // It will be blocked by the application layer and unique indexes
 
-LedgerEntrySchema.pre('save', function() {
+LedgerEntrySchema.pre('save', function () {
   // Allow save only if document is new
   if (!this.isNew) {
-    throw new Error('Ledger entries are immutable and cannot be modified. Create a new offsetting entry instead.');
+    throw new Error(
+      'Ledger entries are immutable and cannot be modified. Create a new offsetting entry instead.',
+    );
   }
 });
 

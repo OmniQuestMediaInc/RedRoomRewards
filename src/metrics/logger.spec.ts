@@ -133,11 +133,7 @@ describe('MetricsLogger', () => {
 
   describe('recordDuration', () => {
     it('should log a duration metric', () => {
-      MetricsLogger.recordDuration(
-        MetricEventType.DLQ_REPLAY_STARTED,
-        1500,
-        { eventCount: 10 }
-      );
+      MetricsLogger.recordDuration(MetricEventType.DLQ_REPLAY_STARTED, 1500, { eventCount: 10 });
 
       expect(consoleLogSpy).toHaveBeenCalledTimes(1);
       const loggedData = JSON.parse(consoleLogSpy.mock.calls[0][0]);

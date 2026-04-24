@@ -134,7 +134,7 @@ export const EarnRateConfigSchema = new Schema<IEarnRateConfig>(
   {
     timestamps: true,
     collection: 'earn_rate_configs',
-  }
+  },
 );
 
 // Compound index for active-config lookup (tenant + merchant, newest first)
@@ -145,5 +145,5 @@ EarnRateConfigSchema.index({ tenant_id: 1, merchant_id: 1, merchant_tier: 1, eve
 
 export const EarnRateConfigModel = mongoose.model<IEarnRateConfig>(
   'EarnRateConfig',
-  EarnRateConfigSchema
+  EarnRateConfigSchema,
 );

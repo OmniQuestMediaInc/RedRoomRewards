@@ -1,13 +1,18 @@
 /**
  * Ledger Controller
- * 
+ *
  * REST API controller for ledger operations based on OpenAPI specification.
  * Provides endpoints for transaction history and balance queries.
- * 
+ *
  * @see /api/openapi.yaml for API contract
  */
 
-import { LedgerQueryFilter, LedgerQueryResult, BalanceSnapshot, ILedgerService } from '../ledger/types';
+import {
+  LedgerQueryFilter,
+  LedgerQueryResult,
+  BalanceSnapshot,
+  ILedgerService,
+} from '../ledger/types';
 import { TransactionType } from '../wallets/types';
 
 /**
@@ -73,7 +78,7 @@ export class LedgerController {
   /**
    * GET /ledger/transactions
    * Retrieves a paginated list of transactions associated with the user
-   * 
+   *
    * @param request - Query parameters for filtering transactions
    * @returns Promise<TransactionListResponse>
    */
@@ -102,7 +107,7 @@ export class LedgerController {
 
     // Map to response format matching OpenAPI spec
     return {
-      transactions: result.entries.map(entry => ({
+      transactions: result.entries.map((entry) => ({
         id: entry.transactionId,
         userId: entry.accountId,
         amount: entry.amount,
@@ -127,16 +132,13 @@ export class LedgerController {
   /**
    * GET /ledger/balance/:userId
    * Returns the current ledger balance for the provided user ID
-   * 
+   *
    * @param userId - User identifier
    * @returns Promise<BalanceResponse>
    */
   async getBalance(userId: string): Promise<BalanceResponse> {
     // Get current balance snapshot
-    const snapshot: BalanceSnapshot = await this.ledgerService.getBalanceSnapshot(
-      userId,
-      'user'
-    );
+    const snapshot: BalanceSnapshot = await this.ledgerService.getBalanceSnapshot(userId, 'user');
 
     // Map to response format matching OpenAPI spec
     return {

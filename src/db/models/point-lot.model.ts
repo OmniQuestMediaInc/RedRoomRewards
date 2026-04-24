@@ -106,7 +106,7 @@ export const PointLotSchema = new Schema<IPointLot>(
   {
     timestamps: true,
     collection: 'point_lots',
-  }
+  },
 );
 
 // Compound index for FIFO expiration sweeps
@@ -119,7 +119,7 @@ PointLotSchema.index({ tenant_id: 1, wallet_id: 1 });
 PointLotSchema.pre('save', function () {
   if (this.points_remaining > this.points_awarded) {
     throw new Error(
-      `points_remaining (${this.points_remaining}) must not exceed points_awarded (${this.points_awarded})`
+      `points_remaining (${this.points_remaining}) must not exceed points_awarded (${this.points_awarded})`,
     );
   }
 });

@@ -1,6 +1,6 @@
 /**
  * Ingest Event Model
- * 
+ *
  * Manages incoming events for processing by the ingest worker
  * Collection: ingest_events
  */
@@ -120,7 +120,7 @@ const IngestEventSchema = new Schema<IIngestEvent>(
   {
     timestamps: true,
     collection: 'ingest_events',
-  }
+  },
 );
 
 // Indexes

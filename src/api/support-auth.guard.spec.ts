@@ -110,11 +110,7 @@ describe('Support Auth Guard', () => {
       const token = jwt.sign(mockPayload, config.jwtSecret, { algorithm: config.algorithm });
       const mockHandler = jest.fn().mockResolvedValue({ data: 'test' });
 
-      const result = await withAdminSupportAuth(
-        `Bearer ${token}`,
-        config,
-        mockHandler
-      );
+      const result = await withAdminSupportAuth(`Bearer ${token}`, config, mockHandler);
 
       expect(result).toEqual({
         authorized: true,
@@ -126,11 +122,7 @@ describe('Support Auth Guard', () => {
     it('should not execute handler with invalid auth', async () => {
       const mockHandler = jest.fn().mockResolvedValue({ data: 'test' });
 
-      const result = await withAdminSupportAuth(
-        undefined,
-        config,
-        mockHandler
-      );
+      const result = await withAdminSupportAuth(undefined, config, mockHandler);
 
       expect(result).toEqual({
         authorized: false,
@@ -147,11 +139,7 @@ describe('Support Auth Guard', () => {
       const token = jwt.sign(userPayload, config.jwtSecret, { algorithm: config.algorithm });
       const mockHandler = jest.fn().mockResolvedValue({ data: 'test' });
 
-      const result = await withAdminSupportAuth(
-        `Bearer ${token}`,
-        config,
-        mockHandler
-      );
+      const result = await withAdminSupportAuth(`Bearer ${token}`, config, mockHandler);
 
       expect(result.authorized).toBe(false);
       expect(mockHandler).not.toHaveBeenCalled();
@@ -161,9 +149,9 @@ describe('Support Auth Guard', () => {
       const token = jwt.sign(mockPayload, config.jwtSecret, { algorithm: config.algorithm });
       const mockHandler = jest.fn().mockRejectedValue(new Error('Handler error'));
 
-      await expect(
-        withAdminSupportAuth(`Bearer ${token}`, config, mockHandler)
-      ).rejects.toThrow('Handler error');
+      await expect(withAdminSupportAuth(`Bearer ${token}`, config, mockHandler)).rejects.toThrow(
+        'Handler error',
+      );
     });
   });
 });

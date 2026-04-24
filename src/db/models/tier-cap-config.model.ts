@@ -103,7 +103,7 @@ export const TierCapConfigSchema = new Schema<ITierCapConfig>(
   {
     timestamps: true,
     collection: 'tier_cap_configs',
-  }
+  },
 );
 
 // Compound index for active-config lookup (tenant + merchant, newest first)
@@ -114,5 +114,5 @@ TierCapConfigSchema.index({ tenant_id: 1, merchant_id: 1, tier_name: 1 });
 
 export const TierCapConfigModel = mongoose.model<ITierCapConfig>(
   'TierCapConfig',
-  TierCapConfigSchema
+  TierCapConfigSchema,
 );

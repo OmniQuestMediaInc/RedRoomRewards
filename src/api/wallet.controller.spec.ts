@@ -2,7 +2,12 @@
  * Wallet Controller Tests
  */
 
-import { WalletController, DeductPointsRequest, CreditPointsRequest, BadRequestError } from './wallet.controller';
+import {
+  WalletController,
+  DeductPointsRequest,
+  CreditPointsRequest,
+  BadRequestError,
+} from './wallet.controller';
 import { IWalletService } from '../services/types';
 import { IIdempotencyService } from '../services/idempotency.service';
 
@@ -103,9 +108,9 @@ describe('WalletController', () => {
         requestId: 'req-456',
       };
 
-      await expect(
-        controller.deductPoints('user-123', request)
-      ).rejects.toThrow('Amount must be positive');
+      await expect(controller.deductPoints('user-123', request)).rejects.toThrow(
+        'Amount must be positive',
+      );
     });
 
     it('should reject zero amounts', async () => {
@@ -116,9 +121,9 @@ describe('WalletController', () => {
         requestId: 'req-789',
       };
 
-      await expect(
-        controller.deductPoints('user-123', request)
-      ).rejects.toThrow('Amount must be positive');
+      await expect(controller.deductPoints('user-123', request)).rejects.toThrow(
+        'Amount must be positive',
+      );
     });
 
     it('should include metadata in transaction', async () => {
@@ -149,9 +154,7 @@ describe('WalletController', () => {
         requestId: 'req-missing',
       } as DeductPointsRequest;
 
-      await expect(
-        controller.deductPoints('user-123', request)
-      ).rejects.toThrow(BadRequestError);
+      await expect(controller.deductPoints('user-123', request)).rejects.toThrow(BadRequestError);
     });
 
     it('should reject request when idempotencyKey is whitespace only', async () => {
@@ -162,9 +165,7 @@ describe('WalletController', () => {
         requestId: 'req-whitespace',
       } as DeductPointsRequest;
 
-      await expect(
-        controller.deductPoints('user-123', request)
-      ).rejects.toThrow(BadRequestError);
+      await expect(controller.deductPoints('user-123', request)).rejects.toThrow(BadRequestError);
     });
 
     it('should return cached result on idempotency key hit', async () => {
@@ -193,7 +194,7 @@ describe('WalletController', () => {
         },
       };
       mockIdempotencyService.checkKey.mockResolvedValue(
-        cachedResponse as unknown as Record<string, unknown>
+        cachedResponse as unknown as Record<string, unknown>,
       );
 
       const request: DeductPointsRequest = {
@@ -231,7 +232,7 @@ describe('WalletController', () => {
         'idem-record',
         'user-123',
         'wallet_deduct',
-        expect.any(Object)
+        expect.any(Object),
       );
     });
   });
@@ -270,9 +271,9 @@ describe('WalletController', () => {
         requestId: 'req-neg',
       };
 
-      await expect(
-        controller.creditPoints('user-456', request)
-      ).rejects.toThrow('Amount must be positive');
+      await expect(controller.creditPoints('user-456', request)).rejects.toThrow(
+        'Amount must be positive',
+      );
     });
 
     it('should reject zero amounts', async () => {
@@ -283,9 +284,9 @@ describe('WalletController', () => {
         requestId: 'req-zero',
       };
 
-      await expect(
-        controller.creditPoints('user-456', request)
-      ).rejects.toThrow('Amount must be positive');
+      await expect(controller.creditPoints('user-456', request)).rejects.toThrow(
+        'Amount must be positive',
+      );
     });
 
     it('should handle different reason types', async () => {
@@ -316,9 +317,7 @@ describe('WalletController', () => {
         requestId: 'req-missing',
       } as CreditPointsRequest;
 
-      await expect(
-        controller.creditPoints('user-456', request)
-      ).rejects.toThrow(BadRequestError);
+      await expect(controller.creditPoints('user-456', request)).rejects.toThrow(BadRequestError);
     });
 
     it('should reject request when idempotencyKey is whitespace only', async () => {
@@ -329,9 +328,7 @@ describe('WalletController', () => {
         requestId: 'req-whitespace',
       } as CreditPointsRequest;
 
-      await expect(
-        controller.creditPoints('user-456', request)
-      ).rejects.toThrow(BadRequestError);
+      await expect(controller.creditPoints('user-456', request)).rejects.toThrow(BadRequestError);
     });
 
     it('should return cached result on idempotency key hit', async () => {
@@ -360,7 +357,7 @@ describe('WalletController', () => {
         },
       };
       mockIdempotencyService.checkKey.mockResolvedValue(
-        cachedResponse as unknown as Record<string, unknown>
+        cachedResponse as unknown as Record<string, unknown>,
       );
 
       const request: CreditPointsRequest = {
@@ -398,9 +395,8 @@ describe('WalletController', () => {
         'idem-credit-record',
         'user-123',
         'wallet_credit',
-        expect.any(Object)
+        expect.any(Object),
       );
     });
   });
 });
-

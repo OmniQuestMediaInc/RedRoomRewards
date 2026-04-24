@@ -34,6 +34,10 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
 
+    // ── Decorators (NestJS DI requires these) ─────────────────────────────
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+
     // ── Type Roots ────────────────────────────────────────────────────────
     "types": ["node", "jest"]
 

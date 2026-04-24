@@ -1,6 +1,6 @@
 /**
  * Ingest Event Structured Logger
- * 
+ *
  * Production-safe logging for /v1/events/ingest endpoint with automatic redaction.
  * Logs only approved fields, omitting secrets, PII, and raw payloads.
  */

@@ -1,6 +1,6 @@
 /**
  * SSO Session Model
- * 
+ *
  * Manages Single Sign-On sessions
  * Collection: sso_sessions
  */
@@ -51,7 +51,7 @@ const SSOSessionSchema = new Schema<ISSOSession>(
   {
     timestamps: true,
     collection: 'sso_sessions',
-  }
+  },
 );
 
 // Indexes

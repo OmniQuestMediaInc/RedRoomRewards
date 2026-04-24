@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, Req } from '@nestjs/common';
+import { Controller, Post, Body, Req } from '@nestjs/common';
 import { AwardingWalletService } from '../services/awarding-wallet.service';
 import { AwardingWalletUploadRow } from '../interfaces/redroom-rewards';
 

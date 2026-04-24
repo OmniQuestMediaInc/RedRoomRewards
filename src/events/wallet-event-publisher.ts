@@ -1,6 +1,6 @@
 /**
  * Wallet Event Publisher
- * 
+ *
  * Publishes events for wallet operations with idempotency guarantees.
  * Integrates with the event bus to enable real-time updates.
  */
@@ -55,7 +55,7 @@ export class WalletEventPublisher {
     try {
       const eventBus = getEventBus();
       await eventBus.publish(event);
-      
+
       MetricsLogger.incrementCounter(MetricEventType.WALLET_EVENT_PUBLISHED, {
         eventType: WalletEventType.ESCROW_HELD,
         userId: params.userId,
@@ -103,7 +103,7 @@ export class WalletEventPublisher {
     try {
       const eventBus = getEventBus();
       await eventBus.publish(event);
-      
+
       MetricsLogger.incrementCounter(MetricEventType.WALLET_EVENT_PUBLISHED, {
         eventType: WalletEventType.ESCROW_SETTLED,
         userId: params.userId,
@@ -152,7 +152,7 @@ export class WalletEventPublisher {
     try {
       const eventBus = getEventBus();
       await eventBus.publish(event);
-      
+
       MetricsLogger.incrementCounter(MetricEventType.WALLET_EVENT_PUBLISHED, {
         eventType: WalletEventType.ESCROW_REFUNDED,
         userId: params.userId,
@@ -206,7 +206,7 @@ export class WalletEventPublisher {
     try {
       const eventBus = getEventBus();
       await eventBus.publish(event);
-      
+
       MetricsLogger.incrementCounter(MetricEventType.WALLET_EVENT_PUBLISHED, {
         eventType: WalletEventType.ESCROW_PARTIAL_SETTLED,
         userId: params.userId,
@@ -257,7 +257,7 @@ export class WalletEventPublisher {
     try {
       const eventBus = getEventBus();
       await eventBus.publish(event);
-      
+
       MetricsLogger.incrementCounter(MetricEventType.WALLET_EVENT_PUBLISHED, {
         eventType: WalletEventType.BALANCE_UPDATED,
         accountId: params.accountId,

@@ -1,14 +1,14 @@
 /**
  * Service Layer Type Definitions
- * 
+ *
  * Defines interfaces for service orchestration, queue integration,
  * and external system boundaries.
- * 
+ *
  * @see /docs/WALLET_ESCROW_ARCHITECTURE.md for architecture details
  */
 
-import { 
-  EscrowHoldRequest, 
+import {
+  EscrowHoldRequest,
   EscrowHoldResponse,
   EscrowSettleRequest,
   EscrowSettleResponse,
@@ -18,7 +18,7 @@ import {
   EscrowPartialSettleResponse,
   QueueIntakeEvent,
   FinancialEvent,
-  TransactionReason
+  TransactionReason,
 } from '../wallets/types';
 
 /**
@@ -27,16 +27,16 @@ import {
 export enum QueueItemStatus {
   /** Item queued, awaiting performance */
   QUEUED = 'queued',
-  
+
   /** Performance in progress */
   IN_PROGRESS = 'in_progress',
-  
+
   /** Performance completed successfully */
   FINISHED = 'finished',
-  
+
   /** Performance abandoned or cancelled */
   ABANDONED = 'abandoned',
-  
+
   /** Partial performance delivered */
   PARTIAL = 'partial',
 }
@@ -47,40 +47,40 @@ export enum QueueItemStatus {
 export interface QueueItem {
   /** Queue item identifier */
   queueItemId: string;
-  
+
   /** User who requested performance */
   userId: string;
-  
+
   /** Model who will perform */
   modelId: string;
-  
+
   /** Associated escrow ID */
   escrowId: string;
-  
+
   /** Amount held in escrow */
   amount: number;
-  
+
   /** Feature type that created this item */
   featureType: string;
-  
+
   /** Current status */
   status: QueueItemStatus;
-  
+
   /** Queue priority (higher = sooner) */
   priority: number;
-  
+
   /** Item created timestamp */
   createdAt: Date;
-  
+
   /** Performance started timestamp */
   startedAt?: Date;
-  
+
   /** Performance completed timestamp */
   completedAt?: Date;
-  
+
   /** Reason for current status */
   statusReason?: TransactionReason;
-  
+
   /** Additional context */
   metadata?: Record<string, unknown>;
 }
@@ -91,22 +91,22 @@ export interface QueueItem {
 export interface QueueIntakeRequest {
   /** User requesting performance */
   userId: string;
-  
+
   /** Model to perform */
   modelId: string;
-  
+
   /** Escrow ID holding funds */
   escrowId: string;
-  
+
   /** Amount in escrow */
   amount: number;
-  
+
   /** Feature initiating request */
   featureType: string;
-  
+
   /** Priority level */
   priority?: number;
-  
+
   /** Additional metadata */
   metadata?: Record<string, unknown>;
 }
@@ -118,25 +118,25 @@ export interface QueueIntakeRequest {
 export interface QueueSettlementAuthorization {
   /** Queue item ID */
   queueItemId: string;
-  
+
   /** Authorization token (signed JWT) */
   token: string;
-  
+
   /** Escrow ID to settle */
   escrowId: string;
-  
+
   /** Model to credit */
   modelId: string;
-  
+
   /** Amount to settle */
   amount: number;
-  
+
   /** Reason for settlement */
   reason: TransactionReason;
-  
+
   /** Token issued at */
   issuedAt: Date;
-  
+
   /** Token expires at */
   expiresAt: Date;
 }
@@ -148,25 +148,25 @@ export interface QueueSettlementAuthorization {
 export interface QueueRefundAuthorization {
   /** Queue item ID */
   queueItemId: string;
-  
+
   /** Authorization token (signed JWT) */
   token: string;
-  
+
   /** Escrow ID to refund */
   escrowId: string;
-  
+
   /** User to refund */
   userId: string;
-  
+
   /** Amount to refund */
   amount: number;
-  
+
   /** Reason for refund */
   reason: TransactionReason;
-  
+
   /** Token issued at */
   issuedAt: Date;
-  
+
   /** Token expires at */
   expiresAt: Date;
 }
@@ -177,31 +177,31 @@ export interface QueueRefundAuthorization {
 export interface QueuePartialSettlementAuthorization {
   /** Queue item ID */
   queueItemId: string;
-  
+
   /** Authorization token (signed JWT) */
   token: string;
-  
+
   /** Escrow ID to process */
   escrowId: string;
-  
+
   /** User to refund partial */
   userId: string;
-  
+
   /** Model to settle partial */
   modelId: string;
-  
+
   /** Refund amount */
   refundAmount: number;
-  
+
   /** Settle amount */
   settleAmount: number;
-  
+
   /** Reason for partial settlement */
   reason: TransactionReason;
-  
+
   /** Token issued at */
   issuedAt: Date;
-  
+
   /** Token expires at */
   expiresAt: Date;
 }
@@ -215,34 +215,34 @@ export interface IWalletService {
    * Hold funds in escrow (deduct from available)
    */
   holdInEscrow(request: EscrowHoldRequest): Promise<EscrowHoldResponse>;
-  
+
   /**
    * Settle escrow to model earnings
    * Requires queue authorization
    */
   settleEscrow(
     request: EscrowSettleRequest,
-    authorization: QueueSettlementAuthorization
+    authorization: QueueSettlementAuthorization,
   ): Promise<EscrowSettleResponse>;
-  
+
   /**
    * Refund escrow to user available
    * Requires queue authorization
    */
   refundEscrow(
     request: EscrowRefundRequest,
-    authorization: QueueRefundAuthorization
+    authorization: QueueRefundAuthorization,
   ): Promise<EscrowRefundResponse>;
-  
+
   /**
    * Partial refund and settlement
    * Requires queue authorization
    */
   partialSettleEscrow(
     request: EscrowPartialSettleRequest,
-    authorization: QueuePartialSettlementAuthorization
+    authorization: QueuePartialSettlementAuthorization,
   ): Promise<EscrowPartialSettleResponse>;
-  
+
   /**
    * Get user wallet balance (all states)
    */
@@ -251,7 +251,7 @@ export interface IWalletService {
     escrow: number;
     total: number;
   }>;
-  
+
   /**
    * Get model wallet balance
    */
@@ -270,28 +270,34 @@ export interface IQueueService {
    * Called by features after escrow hold
    */
   enqueue(request: QueueIntakeRequest): Promise<QueueItem>;
-  
+
   /**
    * Mark performance as started
    */
   startPerformance(queueItemId: string): Promise<QueueItem>;
-  
+
   /**
    * Mark performance as finished and settle
    */
-  finishPerformance(queueItemId: string, modelId: string): Promise<{
+  finishPerformance(
+    queueItemId: string,
+    modelId: string,
+  ): Promise<{
     queueItem: QueueItem;
     settlement: EscrowSettleResponse;
   }>;
-  
+
   /**
    * Abandon performance and refund
    */
-  abandonPerformance(queueItemId: string, reason: TransactionReason): Promise<{
+  abandonPerformance(
+    queueItemId: string,
+    reason: TransactionReason,
+  ): Promise<{
     queueItem: QueueItem;
     refund: EscrowRefundResponse;
   }>;
-  
+
   /**
    * Partial completion with split settlement/refund
    */
@@ -299,22 +305,22 @@ export interface IQueueService {
     queueItemId: string,
     refundAmount: number,
     settleAmount: number,
-    reason: TransactionReason
+    reason: TransactionReason,
   ): Promise<{
     queueItem: QueueItem;
     partialSettle: EscrowPartialSettleResponse;
   }>;
-  
+
   /**
    * Get queue item status
    */
   getQueueItem(queueItemId: string): Promise<QueueItem | null>;
-  
+
   /**
    * Get user's queued items
    */
   getUserQueueItems(userId: string): Promise<QueueItem[]>;
-  
+
   /**
    * Get model's queued items
    */
@@ -327,13 +333,13 @@ export interface IQueueService {
 export interface FeatureActionData {
   /** Amount involved in the action */
   amount: number;
-  
+
   /** User initiating the action */
   userId: string;
-  
+
   /** Model involved in the action (if applicable) */
   modelId?: string;
-  
+
   /** Additional feature-specific data */
   [key: string]: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 }
@@ -345,7 +351,7 @@ export interface FeatureActionData {
 export interface IFeatureModule {
   /** Feature identifier */
   featureType: string;
-  
+
   /**
    * Process user action
    * Should: check balance, request escrow, emit queue event
@@ -353,12 +359,12 @@ export interface IFeatureModule {
    */
   processAction(
     userId: string,
-    actionData: FeatureActionData
+    actionData: FeatureActionData,
   ): Promise<{
     escrowHold: EscrowHoldResponse;
     queueIntake: QueueIntakeEvent;
   }>;
-  
+
   /**
    * Validate action parameters
    */
@@ -374,7 +380,7 @@ export interface IMessagingService {
    * Send financial event notification
    */
   sendFinancialNotification(event: FinancialEvent): Promise<void>;
-  
+
   /**
    * Format message from template
    */
@@ -389,7 +395,7 @@ export class WalletServiceError extends Error {
     message: string,
     public code: string,
     public statusCode: number,
-    public details?: any
+    public details?: any,
   ) {
     super(message);
     this.name = 'WalletServiceError';
@@ -402,7 +408,7 @@ export class InsufficientBalanceError extends WalletServiceError {
       `Insufficient balance. Required: ${required}, Available: ${available}`,
       'INSUFFICIENT_BALANCE',
       402,
-      { required, available }
+      { required, available },
     );
     this.name = 'InsufficientBalanceError';
   }
@@ -410,12 +416,7 @@ export class InsufficientBalanceError extends WalletServiceError {
 
 export class EscrowNotFoundError extends WalletServiceError {
   constructor(escrowId: string) {
-    super(
-      `Escrow not found: ${escrowId}`,
-      'ESCROW_NOT_FOUND',
-      404,
-      { escrowId }
-    );
+    super(`Escrow not found: ${escrowId}`, 'ESCROW_NOT_FOUND', 404, { escrowId });
     this.name = 'EscrowNotFoundError';
   }
 }
@@ -426,7 +427,7 @@ export class EscrowAlreadyProcessedError extends WalletServiceError {
       `Escrow already processed: ${escrowId} (status: ${status})`,
       'ESCROW_ALREADY_PROCESSED',
       409,
-      { escrowId, status }
+      { escrowId, status },
     );
     this.name = 'EscrowAlreadyProcessedError';
   }
@@ -434,11 +435,7 @@ export class EscrowAlreadyProcessedError extends WalletServiceError {
 
 export class InvalidAuthorizationError extends WalletServiceError {
   constructor(message: string) {
-    super(
-      `Invalid authorization: ${message}`,
-      'INVALID_AUTHORIZATION',
-      403
-    );
+    super(`Invalid authorization: ${message}`, 'INVALID_AUTHORIZATION', 403);
     this.name = 'InvalidAuthorizationError';
   }
 }
@@ -449,7 +446,7 @@ export class OptimisticLockError extends WalletServiceError {
       `Optimistic lock conflict on ${resourceType}: ${resourceId}`,
       'OPTIMISTIC_LOCK_CONFLICT',
       409,
-      { resourceType, resourceId }
+      { resourceType, resourceId },
     );
     this.name = 'OptimisticLockError';
   }
@@ -458,12 +455,10 @@ export class OptimisticLockError extends WalletServiceError {
 export class IdempotencyConflictError extends WalletServiceError {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   constructor(key: string, existingResult: any) {
-    super(
-      `Request with idempotency key already processed: ${key}`,
-      'IDEMPOTENCY_CONFLICT',
-      200,
-      { key, existingResult }
-    );
+    super(`Request with idempotency key already processed: ${key}`, 'IDEMPOTENCY_CONFLICT', 200, {
+      key,
+      existingResult,
+    });
     this.name = 'IdempotencyConflictError';
   }
 }
@@ -474,16 +469,16 @@ export class IdempotencyConflictError extends WalletServiceError {
 export interface ServiceHealth {
   /** Service name */
   service: string;
-  
+
   /** Health status */
   status: 'healthy' | 'degraded' | 'unhealthy';
-  
+
   /** Status message */
   message?: string;
-  
+
   /** Last check timestamp */
   checkedAt: Date;
-  
+
   /** Additional metrics */
   metrics?: Record<string, unknown>;
 }
@@ -499,14 +494,14 @@ export interface ServiceConfig {
     maxRetryAttempts: number;
     retryBackoffMs: number;
   };
-  
+
   /** Queue service config */
   queue: {
     defaultPriority: number;
     maxQueueSize: number;
     itemTimeoutSeconds: number;
   };
-  
+
   /** Authorization config */
   authorization: {
     tokenSecret: string;

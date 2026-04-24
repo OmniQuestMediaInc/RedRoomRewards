@@ -100,7 +100,7 @@ export const SpendOrderConfigSchema = new Schema<ISpendOrderConfig>(
   {
     timestamps: true,
     collection: 'spend_order_configs',
-  }
+  },
 );
 
 // Compound index for active-config lookup (tenant + merchant, newest first)
@@ -108,5 +108,5 @@ SpendOrderConfigSchema.index({ tenant_id: 1, merchant_id: 1, effective_at: -1 })
 
 export const SpendOrderConfigModel = mongoose.model<ISpendOrderConfig>(
   'SpendOrderConfig',
-  SpendOrderConfigSchema
+  SpendOrderConfigSchema,
 );

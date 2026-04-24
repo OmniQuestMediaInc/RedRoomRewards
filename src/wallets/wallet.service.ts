@@ -1,15 +1,15 @@
 /**
  * Wallet Service Implementation
- * 
+ *
  * Handles wallet operations including escrow management with optimistic locking.
  * All operations are idempotent and create immutable ledger entries.
- * 
+ *
  * IMPORTANT: Multi-model updates (wallet + escrow + ledger) should ideally use
  * MongoDB transactions for full atomicity. Current implementation uses optimistic
  * locking with rollback attempts, which provides good protection but is not
  * transaction-safe. For production deployment with high concurrency, wrap
  * operations in MongoDB sessions with transactions.
- * 
+ *
  * Example transaction pattern:
  * ```typescript
  * const session = await mongoose.startSession();
@@ -93,7 +93,7 @@ export class WalletService implements IWalletService {
     // key cannot both proceed to mutate the wallet.
     const claimed = await this.ledgerService.claimIdempotency(
       request.idempotencyKey,
-      'hold_escrow'
+      'hold_escrow',
     );
     if (!claimed) {
       throw new Error('Idempotency key already used');
@@ -158,7 +158,7 @@ export class WalletService implements IWalletService {
 
     // Update wallet with optimistic locking
     const updated = await WalletModel.findOneAndUpdate(
-      { 
+      {
         userId: { $eq: request.userId },
         version: { $eq: currentVersion },
       },
@@ -169,7 +169,7 @@ export class WalletService implements IWalletService {
           version: currentVersion + 1,
         },
       },
-      { new: true }
+      { new: true },
     );
 
     if (!updated) {
@@ -265,20 +265,20 @@ export class WalletService implements IWalletService {
    */
   async settleEscrow(
     request: EscrowSettleRequest,
-    authorization: QueueSettlementAuthorization
+    authorization: QueueSettlementAuthorization,
   ): Promise<EscrowSettleResponse> {
     // Validate authorization token
     // Note: This requires auth service instance - in production, inject AuthService
     // and call: this.authService.validateSettlementAuthorization(authorization, request.queueItemId, request.escrowId)
-    
+
     if (!authorization || !authorization.token) {
       throw new Error('Authorization required');
     }
-    
+
     // Atomically claim the idempotency key for this settle operation.
     const claimed = await this.ledgerService.claimIdempotency(
       request.idempotencyKey,
-      'settle_escrow'
+      'settle_escrow',
     );
     if (!claimed) {
       throw new Error('Idempotency key already used');
@@ -286,19 +286,19 @@ export class WalletService implements IWalletService {
 
     // Get escrow item and lock it atomically
     const escrow = await EscrowItemModel.findOneAndUpdate(
-      { 
+      {
         escrowId: { $eq: request.escrowId },
         status: { $eq: 'held' }, // Only process if still held
       },
       {
-        $set: { 
+        $set: {
           status: 'settling', // Intermediate state to prevent concurrent processing
           processedAt: new Date(),
         },
       },
-      { new: false } // Return original document
+      { new: false }, // Return original document
     );
-    
+
     if (!escrow) {
       // Either escrow doesn't exist or is already processed
       const existing = await EscrowItemModel.findOne({ escrowId: { $eq: request.escrowId } });
@@ -326,7 +326,7 @@ export class WalletService implements IWalletService {
 
     // Update model wallet with optimistic locking
     const updatedModelWallet = await ModelWalletModel.findOneAndUpdate(
-      { 
+      {
         modelId: { $eq: request.modelId },
         version: { $eq: modelVersion },
       },
@@ -336,7 +336,7 @@ export class WalletService implements IWalletService {
         },
         $inc: { version: 1 },
       },
-      { new: true }
+      { new: true },
     );
 
     if (!updatedModelWallet) {
@@ -351,7 +351,7 @@ export class WalletService implements IWalletService {
 
     const userVersion = userWallet.version;
     const updatedUserWallet = await WalletModel.findOneAndUpdate(
-      { 
+      {
         userId: { $eq: escrow.userId },
         version: { $eq: userVersion },
       },
@@ -361,14 +361,14 @@ export class WalletService implements IWalletService {
           version: 1,
         },
       },
-      { new: true }
+      { new: true },
     );
 
     if (!updatedUserWallet) {
       // Rollback escrow status if wallet update fails
       await EscrowItemModel.updateOne(
         { escrowId: { $eq: request.escrowId } },
-        { $set: { status: 'held', processedAt: null } }
+        { $set: { status: 'held', processedAt: null } },
       );
       throw new OptimisticLockError('wallet', escrow.userId);
     }
@@ -381,7 +381,7 @@ export class WalletService implements IWalletService {
           status: 'settled',
           modelId: request.modelId,
         },
-      }
+      },
     );
 
     // Create ledger entry for model
@@ -443,20 +443,20 @@ export class WalletService implements IWalletService {
    */
   async refundEscrow(
     request: EscrowRefundRequest,
-    authorization: QueueRefundAuthorization
+    authorization: QueueRefundAuthorization,
   ): Promise<EscrowRefundResponse> {
     // Validate authorization token
     // Note: This requires auth service instance - in production, inject AuthService
     // and call: this.authService.validateRefundAuthorization(authorization, request.queueItemId, request.escrowId)
-    
+
     if (!authorization || !authorization.token) {
       throw new Error('Authorization required');
     }
-    
+
     // Atomically claim the idempotency key for this refund operation.
     const claimed = await this.ledgerService.claimIdempotency(
       request.idempotencyKey,
-      'refund_escrow'
+      'refund_escrow',
     );
     if (!claimed) {
       throw new Error('Idempotency key already used');
@@ -464,19 +464,19 @@ export class WalletService implements IWalletService {
 
     // Get escrow item and lock it atomically
     const escrow = await EscrowItemModel.findOneAndUpdate(
-      { 
+      {
         escrowId: { $eq: request.escrowId },
         status: { $eq: 'held' }, // Only process if still held
       },
       {
-        $set: { 
+        $set: {
           status: 'refunding', // Intermediate state to prevent concurrent processing
           processedAt: new Date(),
         },
       },
-      { new: false } // Return original document
+      { new: false }, // Return original document
     );
-    
+
     if (!escrow) {
       // Either escrow doesn't exist or is already processed
       const existing = await EscrowItemModel.findOne({ escrowId: { $eq: request.escrowId } });
@@ -498,7 +498,7 @@ export class WalletService implements IWalletService {
 
     // Update user wallet with optimistic locking
     const updatedWallet = await WalletModel.findOneAndUpdate(
-      { 
+      {
         userId: { $eq: request.userId },
         version: { $eq: walletVersion },
       },
@@ -509,14 +509,14 @@ export class WalletService implements IWalletService {
           version: 1,
         },
       },
-      { new: true }
+      { new: true },
     );
 
     if (!updatedWallet) {
       // Rollback escrow status if wallet update fails
       await EscrowItemModel.updateOne(
         { escrowId: { $eq: request.escrowId } },
-        { $set: { status: 'held', processedAt: null } }
+        { $set: { status: 'held', processedAt: null } },
       );
       throw new OptimisticLockError('wallet', request.userId);
     }
@@ -528,7 +528,7 @@ export class WalletService implements IWalletService {
         $set: {
           status: 'refunded',
         },
-      }
+      },
     );
 
     // Create ledger entry
@@ -590,20 +590,20 @@ export class WalletService implements IWalletService {
    */
   async partialSettleEscrow(
     request: EscrowPartialSettleRequest,
-    authorization: QueuePartialSettlementAuthorization
+    authorization: QueuePartialSettlementAuthorization,
   ): Promise<EscrowPartialSettleResponse> {
     // Validate authorization token
     // Note: This requires auth service instance - in production, inject AuthService
     // and call: this.authService.validatePartialSettlementAuthorization(authorization, request.queueItemId, request.escrowId)
-    
+
     if (!authorization || !authorization.token) {
       throw new Error('Authorization required');
     }
-    
+
     // Atomically claim the idempotency key for this partial-settle operation.
     const claimed = await this.ledgerService.claimIdempotency(
       request.idempotencyKey,
-      'partial_settle_escrow'
+      'partial_settle_escrow',
     );
     if (!claimed) {
       throw new Error('Idempotency key already used');
@@ -611,19 +611,19 @@ export class WalletService implements IWalletService {
 
     // Get escrow item and lock it atomically
     const escrow = await EscrowItemModel.findOneAndUpdate(
-      { 
+      {
         escrowId: { $eq: request.escrowId },
         status: { $eq: 'held' }, // Only process if still held
       },
       {
-        $set: { 
+        $set: {
           status: 'partial_settling', // Intermediate state to prevent concurrent processing
           processedAt: new Date(),
         },
       },
-      { new: false } // Return original document
+      { new: false }, // Return original document
     );
-    
+
     if (!escrow) {
       // Either escrow doesn't exist or is already processed
       const existing = await EscrowItemModel.findOne({ escrowId: { $eq: request.escrowId } });
@@ -665,7 +665,7 @@ export class WalletService implements IWalletService {
 
     // Update user wallet with optimistic locking
     const updatedUserWallet = await WalletModel.findOneAndUpdate(
-      { 
+      {
         userId: { $eq: request.userId },
         version: { $eq: userVersion },
       },
@@ -676,21 +676,21 @@ export class WalletService implements IWalletService {
           version: 1,
         },
       },
-      { new: true }
+      { new: true },
     );
 
     if (!updatedUserWallet) {
       // Rollback escrow status if wallet update fails
       await EscrowItemModel.updateOne(
         { escrowId: { $eq: request.escrowId } },
-        { $set: { status: 'held', processedAt: null } }
+        { $set: { status: 'held', processedAt: null } },
       );
       throw new OptimisticLockError('wallet', request.userId);
     }
 
     // Update model wallet with optimistic locking
     const updatedModelWallet = await ModelWalletModel.findOneAndUpdate(
-      { 
+      {
         modelId: { $eq: request.modelId },
         version: { $eq: modelVersion },
       },
@@ -700,14 +700,14 @@ export class WalletService implements IWalletService {
         },
         $inc: { version: 1 },
       },
-      { new: true }
+      { new: true },
     );
 
     if (!updatedModelWallet) {
       // Rollback both escrow and user wallet if model wallet update fails
       await EscrowItemModel.updateOne(
         { escrowId: { $eq: request.escrowId } },
-        { $set: { status: 'held', processedAt: null } }
+        { $set: { status: 'held', processedAt: null } },
       );
       // Note: User wallet rollback is complex - in production use database transactions
       throw new OptimisticLockError('model_wallet', request.modelId);
@@ -721,7 +721,7 @@ export class WalletService implements IWalletService {
           status: 'settled',
           modelId: request.modelId,
         },
-      }
+      },
     );
 
     // Create ledger entries
@@ -817,7 +817,7 @@ export class WalletService implements IWalletService {
     total: number;
   }> {
     const wallet = await WalletModel.findOne({ userId: { $eq: userId } });
-    
+
     if (!wallet) {
       return {
         available: 0,
@@ -840,7 +840,7 @@ export class WalletService implements IWalletService {
     earned: number;
   }> {
     const wallet = await ModelWalletModel.findOne({ modelId: { $eq: modelId } });
-    
+
     if (!wallet) {
       return {
         earned: 0,
@@ -856,7 +856,7 @@ export class WalletService implements IWalletService {
    * Sleep utility for retry backoff
    */
   private sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
 
@@ -865,7 +865,7 @@ export class WalletService implements IWalletService {
  */
 export function createWalletService(
   ledgerService: ILedgerService,
-  config?: Partial<WalletServiceConfigOptions>
+  config?: Partial<WalletServiceConfigOptions>,
 ): IWalletService {
   return new WalletService(ledgerService, config);
 }

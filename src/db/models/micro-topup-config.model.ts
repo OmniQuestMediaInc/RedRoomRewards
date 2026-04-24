@@ -109,7 +109,7 @@ export const MicroTopupConfigSchema = new Schema<IMicroTopupConfig>(
   {
     timestamps: true,
     collection: 'micro_topup_configs',
-  }
+  },
 );
 
 // Compound index for active-config lookup (tenant + merchant, newest first)
@@ -117,5 +117,5 @@ MicroTopupConfigSchema.index({ tenant_id: 1, merchant_id: 1, effective_at: -1 })
 
 export const MicroTopupConfigModel = mongoose.model<IMicroTopupConfig>(
   'MicroTopupConfig',
-  MicroTopupConfigSchema
+  MicroTopupConfigSchema,
 );
