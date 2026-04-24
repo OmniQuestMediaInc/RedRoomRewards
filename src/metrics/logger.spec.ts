@@ -8,8 +8,14 @@ describe('MetricsLogger', () => {
   let consoleLogSpy: jest.SpyInstance;
   let consoleErrorSpy: jest.SpyInstance;
   let consoleWarnSpy: jest.SpyInstance;
+  let originalNodeEnv: string | undefined;
 
   beforeEach(() => {
+    // The logger is a no-op when NODE_ENV === 'test' (see src/metrics/logger.ts).
+    // Override here so this spec can verify the console-writing behavior.
+    originalNodeEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = 'development';
+
     consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
     consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
     consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
@@ -19,6 +25,8 @@ describe('MetricsLogger', () => {
     consoleLogSpy.mockRestore();
     consoleErrorSpy.mockRestore();
     consoleWarnSpy.mockRestore();
+
+    process.env.NODE_ENV = originalNodeEnv;
   });
 
   describe('logMetric', () => {
