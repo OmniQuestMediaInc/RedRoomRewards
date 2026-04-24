@@ -38,4 +38,35 @@ describe('BurnCatalogService', () => {
       'BURN_item-42_PROMO',
     );
   });
+
+  it('rejects redemption with zero pointsSpent', async () => {
+    await expect(
+      service.redeemPoints({ memberId: 'm', pointsSpent: 0, itemId: 'i', reason: 'R' }),
+    ).rejects.toThrow('pointsSpent must be a positive integer');
+    expect(ledgerService.awardPointsWithCompliance).not.toHaveBeenCalled();
+  });
+
+  it('rejects redemption with negative pointsSpent', async () => {
+    await expect(
+      service.redeemPoints({ memberId: 'm', pointsSpent: -100, itemId: 'i', reason: 'R' }),
+    ).rejects.toThrow('pointsSpent must be a positive integer');
+  });
+
+  it('rejects redemption with fractional pointsSpent', async () => {
+    await expect(
+      service.redeemPoints({ memberId: 'm', pointsSpent: 1.5, itemId: 'i', reason: 'R' }),
+    ).rejects.toThrow('pointsSpent must be a positive integer');
+  });
+
+  it('rejects redemption with missing memberId', async () => {
+    await expect(
+      service.redeemPoints({ memberId: '', pointsSpent: 100, itemId: 'i', reason: 'R' }),
+    ).rejects.toThrow('memberId is required');
+  });
+
+  it('rejects redemption with missing itemId', async () => {
+    await expect(
+      service.redeemPoints({ memberId: 'm', pointsSpent: 100, itemId: '', reason: 'R' }),
+    ).rejects.toThrow('itemId is required');
+  });
 });

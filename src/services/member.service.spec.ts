@@ -54,9 +54,9 @@ describe('MemberService', () => {
   it('enforces mandatory 18+ AV on signup and awards the welcome bonus', async () => {
     const profile = await service.signup({ email: 'guest@example.com' });
 
-    expect(avService.verifyAccount).toHaveBeenCalledWith('guest@example.com');
+    expect(avService.verifyAccount).toHaveBeenCalledWith('guest@example.com', undefined);
     expect(ledgerService.awardPointsWithCompliance).toHaveBeenCalledWith(
-      expect.stringMatching(/^rr-\d+$/),
+      expect.stringMatching(/^rr-[0-9a-f-]{36}$/),
       1000,
       'WELCOME_BONUS',
     );
@@ -79,5 +79,23 @@ describe('MemberService', () => {
       '18+ verification required - account creation blocked',
     );
     expect(ledgerService.awardPointsWithCompliance).not.toHaveBeenCalled();
+  });
+
+  it('rejects signup with invalid email', async () => {
+    await expect(service.signup({ email: 'not-an-email' })).rejects.toThrow(
+      'Valid email is required',
+    );
+    expect(avService.verifyAccount).not.toHaveBeenCalled();
+  });
+
+  it('rejects signup with empty email', async () => {
+    await expect(service.signup({ email: '' })).rejects.toThrow('Valid email is required');
+  });
+
+  it('rejects malformed email with @@ prefix', async () => {
+    await expect(service.signup({ email: '@@domain.com' })).rejects.toThrow(
+      'Valid email is required',
+    );
+    expect(avService.verifyAccount).not.toHaveBeenCalled();
   });
 });

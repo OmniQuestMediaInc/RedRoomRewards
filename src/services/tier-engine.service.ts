@@ -1,38 +1,67 @@
 import { Injectable } from '@nestjs/common';
 import { RedRoomTier, TierProgress } from '../interfaces/redroom-rewards';
 
+/**
+ * TierEngineService — WO-007 final polish.
+ *
+ * Calculates the member's current tier and points remaining to the next tier
+ * based on lifetime total points. Tier thresholds are locked per CEO spec (D3).
+ *
+ * Tier table (effective-dated constants — immutable until CEO amendment):
+ *
+ *   Tier            Min points  Vibe
+ *   ─────────────   ──────────  ─────────────────────────────────
+ *   RED_DESIRE      0           Heartbeat — alive in the program
+ *   RED_PASSION     5,000       Emotionally invested
+ *   RED_OBSESSION   25,000      Deep craving, committed
+ *   RED_REIGN       100,000     All-in — the most devoted members
+ *
+ * At max tier (RED_REIGN) `pointsToNextTier` is 0 — there is no next tier.
+ */
 @Injectable()
 export class TierEngineService {
-  private readonly tierThresholds = {
+  private readonly tierThresholds: Record<RedRoomTier, number> = {
     [RedRoomTier.RED_DESIRE]: 0,
-    [RedRoomTier.RED_PASSION]: 5000,
-    [RedRoomTier.RED_OBSESSION]: 25000,
-    [RedRoomTier.RED_REIGN]: 100000,
+    [RedRoomTier.RED_PASSION]: 5_000,
+    [RedRoomTier.RED_OBSESSION]: 25_000,
+    [RedRoomTier.RED_REIGN]: 100_000,
   };
 
-  private readonly vibeDescriptions = {
+  private readonly vibeDescriptions: Record<RedRoomTier, string> = {
     [RedRoomTier.RED_DESIRE]: 'Heartbeat — alive in the program',
     [RedRoomTier.RED_PASSION]: 'Emotionally invested',
     [RedRoomTier.RED_OBSESSION]: 'Deep craving, committed',
     [RedRoomTier.RED_REIGN]: 'All-in — the most devoted members',
   };
 
-  calculateTier(totalPoints: number): TierProgress {
-    let currentTier = RedRoomTier.RED_DESIRE;
-    let pointsToNext = this.tierThresholds[RedRoomTier.RED_PASSION];
+  /** Ordered list of tiers from lowest to highest threshold. */
+  private readonly orderedTiers: RedRoomTier[] = [
+    RedRoomTier.RED_DESIRE,
+    RedRoomTier.RED_PASSION,
+    RedRoomTier.RED_OBSESSION,
+    RedRoomTier.RED_REIGN,
+  ];
 
-    for (const [tier, threshold] of Object.entries(this.tierThresholds)) {
-      if (totalPoints >= threshold) {
-        currentTier = tier as RedRoomTier;
+  calculateTier(totalPoints: number): TierProgress {
+    const effective = Math.max(0, totalPoints);
+    let currentTier = RedRoomTier.RED_DESIRE;
+    let pointsToNextTier = 0;
+
+    for (let i = 0; i < this.orderedTiers.length; i++) {
+      const tier = this.orderedTiers[i];
+      if (effective >= this.tierThresholds[tier]) {
+        currentTier = tier;
+        const nextTier = this.orderedTiers[i + 1];
+        // No next tier at max (RED_REIGN) → pointsToNextTier = 0
+        pointsToNextTier = nextTier ? this.tierThresholds[nextTier] - effective : 0;
       } else {
-        pointsToNext = threshold - totalPoints;
         break;
       }
     }
 
     return {
       currentTier,
-      pointsToNextTier: pointsToNext,
+      pointsToNextTier,
       vibeDescription: this.vibeDescriptions[currentTier],
     };
   }
