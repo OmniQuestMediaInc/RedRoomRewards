@@ -3,18 +3,18 @@
  */
 
 import { MetricsLogger, MetricEventType, AlertSeverity, logIngestEvent } from './index';
+import { setTestEnv } from '../test/helpers/setTestEnv';
 
 describe('MetricsLogger', () => {
   let consoleLogSpy: jest.SpyInstance;
   let consoleErrorSpy: jest.SpyInstance;
   let consoleWarnSpy: jest.SpyInstance;
-  let originalNodeEnv: string | undefined;
+  let restoreEnv: () => void;
 
   beforeEach(() => {
-    // Override NODE_ENV so the shouldEmitMetricsLogs guard allows console output.
-    // Tests that validate silent-in-test behaviour restore this themselves.
-    originalNodeEnv = process.env.NODE_ENV;
-    process.env.NODE_ENV = 'production';
+    // 'production' matches the env required by the logIngestEvent assertion below;
+    // suppression-behaviour tests opt back into NODE_ENV=test individually.
+    restoreEnv = setTestEnv('production');
 
     consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
     consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
@@ -22,7 +22,7 @@ describe('MetricsLogger', () => {
   });
 
   afterEach(() => {
-    process.env.NODE_ENV = originalNodeEnv;
+    restoreEnv();
     consoleLogSpy.mockRestore();
     consoleErrorSpy.mockRestore();
     consoleWarnSpy.mockRestore();
