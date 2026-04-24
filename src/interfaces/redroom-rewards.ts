@@ -71,6 +71,20 @@ export interface MemberProfile {
   verifiedAt: Date;
 }
 
+export interface BurnRedemption {
+  memberId: string;
+  itemId: string; // RedRoomPleasures product ID
+  pointsSpent: number;
+  reason: string;
+}
+
+export interface LiabilityReport {
+  totalPromotionalIssued: number;
+  totalBurned: number;
+  outstandingLiability: number;
+  asOf: Date;
+}
+
 export interface WhiteLabelConfig {
   merchantId: string;
   brandName: string;

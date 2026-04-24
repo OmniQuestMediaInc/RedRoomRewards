@@ -24,6 +24,12 @@
 - `TierEngineService` is the Payload #2 implementation (no changes in this payload)
 - `RedRoomLedgerService` is the Payload #3 implementation (no changes in this payload) — MemberService invokes `awardPointsWithCompliance(memberId, 1000, 'WELCOME_BONUS')`
 
+## RRR-BURN-REPORTING (Payload #5)
+
+- Burn catalog integrates with RedRoomPleasures as the first redemption partner
+- Reporting service provides AirMiles-level liability statements
+- All burns route through RedRoomLedgerService for compliance
+
 ## RRR-WHITELABEL-CREATOR-FINAL (Payload #6)
 
 - White-label SAAS supports both hosted (service-bureau) and self-hosted modes

@@ -21,6 +21,13 @@
 |----|----------|-------------|--------------|------------|
 | F-008 | Member signup | Mandatory AV enforced; 1,000-point welcome bonus | Yes | Confirm welcome bonus amount |
 
+## RRR-BURN-REPORTING (Payload #5)
+
+| ID | Category | Description | Default Used | CEO Action |
+|----|----------|-------------|--------------|------------|
+| F-011 | Burn catalog | First partner is RedRoomPleasures | Yes | Confirm catalog source |
+| F-012 | Reporting | Liability numbers stubbed | Yes | Confirm real ledger query |
+
 ## RRR-WHITELABEL-CREATOR-FINAL (Payload #6)
 
 | ID | Category | Description | Default Used | CEO Action |
