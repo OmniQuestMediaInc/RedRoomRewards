@@ -7,6 +7,7 @@ import {
   DeductPointsRequest,
   CreditPointsRequest,
   BadRequestError,
+  createWalletController,
 } from './wallet.controller';
 import { IWalletService } from '../services/types';
 import { IIdempotencyService } from '../services/idempotency.service';
@@ -398,5 +399,14 @@ describe('WalletController', () => {
         expect.any(Object),
       );
     });
+  });
+});
+
+describe('createWalletController', () => {
+  it('should return a WalletController instance', () => {
+    const mockWalletService = {} as IWalletService;
+    const mockIdempotencyService = {} as IIdempotencyService;
+    const controller = createWalletController(mockWalletService, mockIdempotencyService);
+    expect(controller).toBeInstanceOf(WalletController);
   });
 });

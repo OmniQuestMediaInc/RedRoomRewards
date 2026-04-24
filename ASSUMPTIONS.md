@@ -35,3 +35,11 @@
 - White-label SAAS supports both hosted (service-bureau) and self-hosted modes
 - Creator gifting panel returns current balance + recent promotions for ChatNow.Zone embed
 - All new controllers follow existing auth pattern via req.user
+
+## RRR-FINAL-WIRING (Payload #7)
+
+- All modules are now properly wired in AppModule
+- Full NestJS architecture is in place and matches the repo
+- All services follow existing ledger and auth patterns
+- `LedgerService` (in `src/ledger/ledger.service.ts`) is not decorated with `@Injectable()` and its constructor takes a `Partial<LedgerConfig>` config object. To allow NestJS DI to instantiate it without resolving a non-existent type token, each module that depends on it (Member/Merchant/Burn/RedRoomLedger) registers it via `{ provide: LedgerService, useFactory: () => new LedgerService() }`. See F-016.
+- `WelfareGuardianScoreService` is added to `MemberModule` and `BurnModule` providers because it is a transitive dependency of `RedRoomLedgerService`. Payload #7 listed it only under `RedRoomLedgerModule`, but Nest resolves providers per-module.
