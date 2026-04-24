@@ -38,7 +38,7 @@ describe('MemberService', () => {
             calculateTier: jest.fn().mockReturnValue({
               currentTier: RedRoomTier.RED_DESIRE,
               pointsToNextTier: 4000,
-              nextTier: RedRoomTier.RED_PASSION,
+              vibeDescription: 'Heartbeat — alive in the program',
             }),
           },
         },

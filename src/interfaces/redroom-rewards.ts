@@ -25,6 +25,21 @@ export interface AwardingWalletUploadResult {
   errors: Array<{ row: number; error: string }>;
 }
 
+export interface CreatorGiftingPromotion {
+  creatorId: string;
+  title: string;
+  pointsAwarded: number;
+  condition: string; // e.g. "15-min private" or "Lovense 222 vibe"
+  maxRecipients?: number;
+  expiryDays?: number;
+}
+
+export interface TierProgress {
+  currentTier: RedRoomTier;
+  pointsToNextTier: number;
+  vibeDescription: string;
+}
+
 export interface MemberSignupRequest {
   email: string;
   password?: string;

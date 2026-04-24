@@ -1,48 +1,39 @@
 import { Injectable } from '@nestjs/common';
-import { RedRoomTier } from '../interfaces/redroom-rewards';
+import { RedRoomTier, TierProgress } from '../interfaces/redroom-rewards';
 
-export interface TierCalculationResult {
-  currentTier: RedRoomTier;
-  pointsToNextTier: number;
-  nextTier: RedRoomTier | null;
-}
-
-/**
- * TierEngineService
- *
- * Computes a member's Red Room tier from their lifetime/promotional point
- * balance using the brand ladder:
- *   RED_DESIRE → RED_PASSION → RED_OBSESSION → RED_REIGN
- *
- * Thresholds are prototype defaults and will be replaced by tenant-scoped
- * config in a later payload.
- */
 @Injectable()
 export class TierEngineService {
-  private static readonly THRESHOLDS: Array<{ tier: RedRoomTier; min: number }> = [
-    { tier: RedRoomTier.RED_DESIRE, min: 0 },
-    { tier: RedRoomTier.RED_PASSION, min: 5_000 },
-    { tier: RedRoomTier.RED_OBSESSION, min: 25_000 },
-    { tier: RedRoomTier.RED_REIGN, min: 100_000 },
-  ];
+  private readonly tierThresholds = {
+    [RedRoomTier.RED_DESIRE]: 0,
+    [RedRoomTier.RED_PASSION]: 5000,
+    [RedRoomTier.RED_OBSESSION]: 25000,
+    [RedRoomTier.RED_REIGN]: 100000,
+  };
 
-  calculateTier(totalPoints: number): TierCalculationResult {
-    const ladder = TierEngineService.THRESHOLDS;
+  private readonly vibeDescriptions = {
+    [RedRoomTier.RED_DESIRE]: 'Heartbeat — alive in the program',
+    [RedRoomTier.RED_PASSION]: 'Emotionally invested',
+    [RedRoomTier.RED_OBSESSION]: 'Deep craving, committed',
+    [RedRoomTier.RED_REIGN]: 'All-in — the most devoted members',
+  };
 
-    let currentIndex = 0;
-    for (let i = 0; i < ladder.length; i++) {
-      if (totalPoints >= ladder[i].min) {
-        currentIndex = i;
+  calculateTier(totalPoints: number): TierProgress {
+    let currentTier = RedRoomTier.RED_DESIRE;
+    let pointsToNext = this.tierThresholds[RedRoomTier.RED_PASSION];
+
+    for (const [tier, threshold] of Object.entries(this.tierThresholds)) {
+      if (totalPoints >= threshold) {
+        currentTier = tier as RedRoomTier;
+      } else {
+        pointsToNext = threshold - totalPoints;
+        break;
       }
     }
 
-    const currentTier = ladder[currentIndex].tier;
-    const nextStep = ladder[currentIndex + 1];
-
     return {
       currentTier,
-      pointsToNextTier: nextStep ? nextStep.min - totalPoints : 0,
-      nextTier: nextStep ? nextStep.tier : null,
+      pointsToNextTier: pointsToNext,
+      vibeDescription: this.vibeDescriptions[currentTier],
     };
   }
 }
