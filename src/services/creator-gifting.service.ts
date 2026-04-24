@@ -1,14 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { CreatorGiftingPromotion } from '../interfaces/redroom-rewards';
 import { LedgerService } from '../ledger/ledger.service';
-import { GateGuardAVService } from './gateguard-av.service';
 
 @Injectable()
 export class CreatorGiftingService {
-  constructor(
-    private readonly ledgerService: LedgerService,
-    private readonly avService: GateGuardAVService,
-  ) {}
+  constructor(private readonly ledgerService: LedgerService) {}
 
   async createPromotion(creatorId: string, promotion: CreatorGiftingPromotion): Promise<boolean> {
     // Creator must have promotional points balance (checked in ledger)

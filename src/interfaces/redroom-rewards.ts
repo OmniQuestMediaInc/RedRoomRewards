@@ -39,3 +39,20 @@ export interface TierProgress {
   pointsToNextTier: number;
   vibeDescription: string;
 }
+
+export interface WgsScoreRequest {
+  transactionId: string;
+  guestId: string;
+  amountCzt: number;
+  context?: Record<string, unknown>;
+}
+
+export type WgsAction = 'PASS' | 'REVIEW' | 'SOFT_DECLINE' | 'HARD_DECLINE';
+export type WgsWelfareTier = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+
+export interface WgsScoreResponse {
+  fraudRisk: number;
+  welfareRisk: number;
+  welfareTier: WgsWelfareTier;
+  action: WgsAction;
+}
