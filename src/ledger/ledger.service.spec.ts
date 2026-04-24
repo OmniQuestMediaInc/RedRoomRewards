@@ -400,4 +400,24 @@ describe('LedgerService', () => {
       );
     });
   });
+
+  describe('awardPromotionalPoints (stub)', () => {
+    it('should resolve true for the promotional-bonus stub', async () => {
+      const ok = await service.awardPromotionalPoints(
+        'creator-1',
+        5000,
+        'MERCHANT_AWARD_m1',
+        'reason',
+        30,
+      );
+      expect(ok).toBe(true);
+    });
+  });
+
+  describe('createGiftingPromotion (stub)', () => {
+    it('should resolve true for the gifting-promotion stub', async () => {
+      const ok = await service.createGiftingPromotion('creator-1', 1000, 'title', 'cond', 100, 7);
+      expect(ok).toBe(true);
+    });
+  });
 });
