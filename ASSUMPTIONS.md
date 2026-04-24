@@ -1,0 +1,3 @@
+- Integrated with existing LedgerService.awardPromotionalPoints
+- GateGuard AV is stubbed (real call in next WO)
+- CSV validation/parsing assumed in controller layer (can be expanded)
