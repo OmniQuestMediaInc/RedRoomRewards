@@ -20,3 +20,5 @@ export * from './earn-rate-config.model';
 export * from './tier-cap-config.model';
 export * from './micro-topup-config.model';
 export * from './spend-order-config.model';
+export * from './tenant.model';
+export * from './merchant.model';
