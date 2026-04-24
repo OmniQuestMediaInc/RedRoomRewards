@@ -42,3 +42,12 @@
 | F-016 | Final wiring | All modules registered | Yes | Review before production deploy |
 | F-017 | LedgerService DI | `LedgerService` lacks `@Injectable()` and takes a `Partial<LedgerConfig>` config arg. Each module that depends on it registers it with `useFactory: () => new LedgerService()` so Nest doesn't try to resolve `Partial<LedgerConfig>` as a token. | Yes | Decide whether to add `@Injectable()` and a CONFIG token, or keep the factory pattern |
 | F-018 | Transitive providers | `WelfareGuardianScoreService` was added as a provider to `MemberModule` and `BurnModule` (in addition to `RedRoomLedgerModule`) because Nest does not auto-share providers across feature modules unless they are exported. | Yes | Confirm or refactor into a shared `RedRoomLedgerModule` import |
+
+## RRR-ENGINE-COMPLETE (Payload #10)
+
+| ID | Category | Description | Default Used | CEO Action |
+|----|----------|-------------|--------------|------------|
+| F-020 | Final payload | Engine complete — production config, health check, ConfigModule wiring in place | Yes | Review before staging deploy |
+| F-021 | .env.example contract | Payload #10 shipped a minimal `.env.example`; we appended the GateGuard AV and `SERVICE_BUREAU_ENABLED` vars rather than replacing existing security-critical entries (`JWT_SECRET`, `QUEUE_AUTH_SECRET`, `RRR_WEBHOOK_SECRET`, `MONGODB_URI`, etc.) | Yes | Confirm additive approach or provide authoritative replacement |
+| F-022 | `@nestjs/config` dependency | Payload #10 used `ConfigModule.forRoot()` and `registerAs` without listing the package; installed `@nestjs/config@^4.0.0` to make the imports resolve | Installed exactly as implied | Confirm the pinned version is acceptable |
+| F-023 | OpenAPI docs | README references `/api/docs` but no Swagger module is wired in this payload; payload did not include Swagger setup. Endpoint is not yet live. | No | Decide whether Swagger should be added in a follow-up |
