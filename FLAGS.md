@@ -34,3 +34,11 @@
 |----|----------|-------------|--------------|------------|
 | F-013 | White-label | Service-bureau mode default | Yes | Confirm pricing model |
 | F-014 | Creator panel | Balance from ledger stub | Yes | Confirm real integration |
+
+## RRR-FINAL-WIRING (Payload #7)
+
+| ID | Category | Description | Default Used | CEO Action |
+|----|----------|-------------|--------------|------------|
+| F-016 | Final wiring | All modules registered | Yes | Review before production deploy |
+| F-017 | LedgerService DI | `LedgerService` lacks `@Injectable()` and takes a `Partial<LedgerConfig>` config arg. Each module that depends on it registers it with `useFactory: () => new LedgerService()` so Nest doesn't try to resolve `Partial<LedgerConfig>` as a token. | Yes | Decide whether to add `@Injectable()` and a CONFIG token, or keep the factory pattern |
+| F-018 | Transitive providers | `WelfareGuardianScoreService` was added as a provider to `MemberModule` and `BurnModule` (in addition to `RedRoomLedgerModule`) because Nest does not auto-share providers across feature modules unless they are exported. | Yes | Confirm or refactor into a shared `RedRoomLedgerModule` import |
