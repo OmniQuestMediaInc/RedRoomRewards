@@ -29,3 +29,9 @@
 - Burn catalog integrates with RedRoomPleasures as the first redemption partner
 - Reporting service provides AirMiles-level liability statements
 - All burns route through RedRoomLedgerService for compliance
+
+## RRR-WHITELABEL-CREATOR-FINAL (Payload #6)
+
+- White-label SAAS supports both hosted (service-bureau) and self-hosted modes
+- Creator gifting panel returns current balance + recent promotions for ChatNow.Zone embed
+- All new controllers follow existing auth pattern via req.user
