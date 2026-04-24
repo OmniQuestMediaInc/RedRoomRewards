@@ -21,9 +21,12 @@ export interface IngestLogEntry {
 }
 
 /**
- * Log structured ingest event with automatic redaction
+ * Log structured ingest event with automatic redaction.
+ * Suppressed in NODE_ENV=test and when DISABLE_METRICS_LOGS=1.
  */
 export function logIngestEvent(entry: IngestLogEntry): void {
+  if (process.env.NODE_ENV === 'test' || process.env.DISABLE_METRICS_LOGS === '1') return;
+
   const logEntry = {
     level: 'INFO',
     category: 'ingest',
