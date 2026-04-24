@@ -340,6 +340,122 @@ export class PointAccrualService {
   }
 
   /**
+   * Deduct points from a user's available balance (B-002).
+   *
+   * Mirror of awardPoints — atomic optimistic-locked WalletModel
+   * decrement plus an immutable LedgerEntry. Does NOT route through
+   * escrow; this is the path for direct admin debits and any other
+   * non-escrow deduct flow surfaced by `WalletController.deductPoints`.
+   * For escrow-flow redemptions (CHIP_MENU_PURCHASE, SPIN_WHEEL_PLAY,
+   * PERFORMANCE_REQUEST) callers should use
+   * `PointRedemptionService.redeemPoints`, which holds funds in
+   * escrow rather than burning them outright.
+   *
+   * Throws on insufficient balance; preserves existing retry/back-off
+   * semantics for optimistic-lock conflicts.
+   */
+  async deductFromAvailable(
+    request: AwardPointsRequest,
+    retryCount: number = 0,
+  ): Promise<AwardPointsResponse> {
+    if (retryCount >= this.config.maxRetryAttempts) {
+      throw new Error(
+        `Optimistic lock conflict after ${this.config.maxRetryAttempts} attempts for user ${request.userId}`,
+      );
+    }
+
+    this.validateAmount(request.amount);
+    this.validateDebitReason(request.reason);
+
+    if (retryCount === 0) {
+      const exists = await this.ledgerService.checkIdempotency(
+        request.idempotencyKey,
+        'deduct_points',
+      );
+      if (exists) {
+        throw new Error('Idempotency key already used');
+      }
+    }
+
+    const wallet = await WalletModel.findOne({ userId: { $eq: request.userId } });
+    if (!wallet) {
+      throw new Error(`Insufficient balance: wallet not found for ${request.userId}`);
+    }
+    if (wallet.availableBalance < request.amount) {
+      throw new Error(
+        `Insufficient balance for ${request.userId} — available ${wallet.availableBalance}, requested ${request.amount}`,
+      );
+    }
+
+    const previousBalance = wallet.availableBalance;
+    const newBalance = wallet.availableBalance - request.amount;
+    const currentVersion = wallet.version;
+
+    // Optimistic-locked decrement; matches the awardPoints retry pattern.
+    const updated = await WalletModel.findOneAndUpdate(
+      {
+        userId: { $eq: request.userId },
+        version: { $eq: currentVersion },
+        availableBalance: { $gte: request.amount },
+      },
+      {
+        $inc: {
+          availableBalance: -request.amount,
+          version: 1,
+        },
+      },
+      { new: true },
+    );
+
+    if (!updated) {
+      await this.sleep(this.config.retryBackoffMs * Math.pow(2, retryCount));
+      return this.deductFromAvailable(request, retryCount + 1);
+    }
+
+    const transactionId = uuidv4();
+    const timestamp = new Date();
+
+    await this.ledgerService.createEntry({
+      transactionId,
+      accountId: request.userId,
+      accountType: 'user',
+      amount: -request.amount,
+      type: TransactionType.DEBIT,
+      balanceState: 'available',
+      stateTransition: 'available→debit',
+      reason: request.reason,
+      idempotencyKey: request.idempotencyKey,
+      requestId: request.requestId,
+      balanceBefore: previousBalance,
+      balanceAfter: newBalance,
+      currency: this.config.defaultCurrency,
+      correlationId: transactionId,
+      metadata: {
+        ...request.metadata,
+      },
+    });
+
+    return {
+      transactionId,
+      amountAwarded: request.amount,
+      newBalance,
+      timestamp,
+    };
+  }
+
+  /**
+   * Validate that the reason is an admissible debit reason for
+   * `deductFromAvailable`. Escrow-flow redemption reasons go through
+   * `PointRedemptionService` instead.
+   */
+  private validateDebitReason(reason: TransactionReason): void {
+    const debitReasons = [TransactionReason.ADMIN_DEBIT, TransactionReason.POINT_EXPIRY];
+    if (!debitReasons.includes(reason)) {
+      throw new Error(`Invalid debit reason for deductFromAvailable: ${reason}`);
+    }
+  }
+
+  /**
    * Validate award amount is within acceptable range
    */
   private validateAmount(amount: number): void {
