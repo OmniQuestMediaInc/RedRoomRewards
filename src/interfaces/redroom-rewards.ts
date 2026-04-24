@@ -56,3 +56,20 @@ export interface WgsScoreResponse {
   welfareTier: WgsWelfareTier;
   action: WgsAction;
 }
+
+export interface WhiteLabelConfig {
+  merchantId: string;
+  brandName: string;
+  logoUrl?: string;
+  primaryColor: string;
+  serviceBureauMode: boolean; // true = RRR hosts + answers support
+}
+
+export interface CreatorGiftingPanelState {
+  promotionalBalance: number;
+  recentPromotions: Array<{
+    title: string;
+    pointsAwarded: number;
+    redeemedCount: number;
+  }>;
+}

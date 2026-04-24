@@ -14,3 +14,10 @@
 | ID | Category | Description | Default Used | CEO Action |
 |----|----------|-------------|--------------|------------|
 | F-009 | WGS thresholds | 1000-point trigger for scoring | Yes | Confirm or adjust |
+
+## RRR-WHITELABEL-CREATOR-FINAL (Payload #6)
+
+| ID | Category | Description | Default Used | CEO Action |
+|----|----------|-------------|--------------|------------|
+| F-013 | White-label | Service-bureau mode default | Yes | Confirm pricing model |
+| F-014 | Creator panel | Balance from ledger stub | Yes | Confirm real integration |

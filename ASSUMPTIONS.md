@@ -12,3 +12,9 @@
 - WGS scoring is stubbed (full WO-006 model coming in next payload)
 - All RedRoom Rewards points flow through RedRoomLedgerService (Promotional Bonus bucket)
 - High-value awards (>1000 points) trigger WGS check
+
+## RRR-WHITELABEL-CREATOR-FINAL (Payload #6)
+
+- White-label SAAS supports both hosted (service-bureau) and self-hosted modes
+- Creator gifting panel returns current balance + recent promotions for ChatNow.Zone embed
+- All new controllers follow existing auth pattern via req.user
