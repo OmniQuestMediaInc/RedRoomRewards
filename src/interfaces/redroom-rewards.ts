@@ -24,3 +24,17 @@ export interface AwardingWalletUploadResult {
   failedCount: number;
   errors: Array<{ row: number; error: string }>;
 }
+
+export interface MemberSignupRequest {
+  email: string;
+  password?: string;
+  billingAddress?: unknown;
+}
+
+export interface MemberProfile {
+  memberId: string;
+  tier: RedRoomTier;
+  totalPoints: number;
+  promotionalBalance: number;
+  verifiedAt: Date;
+}
