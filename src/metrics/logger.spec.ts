@@ -3,12 +3,13 @@
  */
 
 import { MetricsLogger, MetricEventType, AlertSeverity, logIngestEvent } from './index';
+import { setTestEnv } from '../test/helpers/setTestEnv';
 
 describe('MetricsLogger', () => {
   let consoleLogSpy: jest.SpyInstance;
   let consoleErrorSpy: jest.SpyInstance;
   let consoleWarnSpy: jest.SpyInstance;
-  let originalNodeEnv: string | undefined;
+  let restoreEnv: () => void;
 
   beforeEach(() => {
     // The logger is a no-op when NODE_ENV === 'test' (see src/metrics/logger.ts).
@@ -22,7 +23,7 @@ describe('MetricsLogger', () => {
   });
 
   afterEach(() => {
-    process.env.NODE_ENV = originalNodeEnv;
+    restoreEnv();
     consoleLogSpy.mockRestore();
     consoleErrorSpy.mockRestore();
     consoleWarnSpy.mockRestore();
