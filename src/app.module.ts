@@ -6,6 +6,7 @@ import { ReportingModule } from './reporting/reporting.module';
 import { WhiteLabelModule } from './white-label/white-label.module';
 import { CreatorGiftingPanelModule } from './creator-gifting-panel/creator-gifting-panel.module';
 import { RedRoomLedgerModule } from './redroom-ledger/redroom-ledger.module';
+import { HealthController } from './health/health.controller';
 
 @Module({
   imports: [
@@ -17,5 +18,6 @@ import { RedRoomLedgerModule } from './redroom-ledger/redroom-ledger.module';
     CreatorGiftingPanelModule,
     RedRoomLedgerModule,
   ],
+  controllers: [HealthController],
 })
 export class AppModule {}

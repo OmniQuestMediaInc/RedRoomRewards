@@ -27,7 +27,7 @@ export class MetricsLogger {
    * Log a metric event
    */
   static logMetric(data: MetricData): void {
-    if (process.env.NODE_ENV === 'test') return;
+    if (!shouldEmitMetricsLogs()) return;
 
     const logEntry = {
       level: 'METRIC',
@@ -44,7 +44,7 @@ export class MetricsLogger {
    * Log an alert
    */
   static logAlert(data: AlertData): void {
-    if (process.env.NODE_ENV === 'test') return;
+    if (!shouldEmitMetricsLogs()) return;
 
     const logEntry = {
       level: 'ALERT',

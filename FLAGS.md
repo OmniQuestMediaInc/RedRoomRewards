@@ -42,3 +42,12 @@
 | F-016 | Final wiring | All modules registered | Yes | Review before production deploy |
 | F-017 | LedgerService DI | `LedgerService` lacks `@Injectable()` and takes a `Partial<LedgerConfig>` config arg. Each module that depends on it registers it with `useFactory: () => new LedgerService()` so Nest doesn't try to resolve `Partial<LedgerConfig>` as a token. | Yes | Decide whether to add `@Injectable()` and a CONFIG token, or keep the factory pattern |
 | F-018 | Transitive providers | `WelfareGuardianScoreService` was added as a provider to `MemberModule` and `BurnModule` (in addition to `RedRoomLedgerModule`) because Nest does not auto-share providers across feature modules unless they are exported. | Yes | Confirm or refactor into a shared `RedRoomLedgerModule` import |
+
+## RRR-PRODUCTION-READY (Payload #9)
+
+| ID | Category | Description | Default Used | CEO Action |
+|----|----------|-------------|--------------|------------|
+| F-019 | Final payload | All external components complete | Yes | Review before staging |
+| F-020 | OpenAPI | Swagger enabled at `/api/docs`; `@nestjs/swagger` added to `dependencies` | Yes | Confirm auth setup / lock-down in prod |
+| F-021 | CORS | `enableCors({ origin: true })` reflects any origin — payload comment says "tighten in prod" | Yes | Restrict to park-owned origins before public launch |
+| F-022 | Baseline repair | Fixed pre-existing TS `noUnusedLocals` errors in `src/metrics/logger.ts` and `src/metrics/logger.spec.ts` that were blocking `npm run build` and `npm test` before Payload #9 ever touched the tree. Logger spec was half-migrated to the `setTestEnv` helper; completed the migration rather than rolling it back. | Yes | Confirm the spec still exercises the intended NODE_ENV matrix |

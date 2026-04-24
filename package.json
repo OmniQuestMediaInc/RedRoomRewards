@@ -32,6 +32,7 @@
   "license": "UNLICENSED",
   "dependencies": {
     "@nestjs/platform-express": "^11.1.19",
+    "@nestjs/swagger": "^11.4.1",
     "@types/jsonwebtoken": "^9.0.10",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.4.1",
