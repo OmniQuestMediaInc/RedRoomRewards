@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { AwardingWalletUploadRow, AwardingWalletUploadResult } from '../interfaces/redroom-rewards';
-import { LedgerService } from '../ledger/ledger.service'; // existing repo service
+import { LedgerService } from '../ledger/ledger.service'; // existing
 
 @Injectable()
 export class AwardingWalletService {
@@ -11,7 +11,6 @@ export class AwardingWalletService {
 
     for (let i = 0; i < rows.length; i++) {
       try {
-        // Enforce Promotional Bonus bucket (Canonical Corpus)
         await this.ledgerService.awardPromotionalPoints(
           rows[i].creatorId,
           rows[i].points,
@@ -20,7 +19,7 @@ export class AwardingWalletService {
           rows[i].expiryDays
         );
         result.successCount++;
-      } catch (e) {
+      } catch (e: any) {
         result.failedCount++;
         result.errors.push({ row: i + 1, error: e.message });
       }
