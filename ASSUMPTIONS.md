@@ -23,3 +23,9 @@
 - Merchant endpoints use existing auth context from `req.user`
 - `TierEngineService` is the Payload #2 implementation (no changes in this payload)
 - `RedRoomLedgerService` is the Payload #3 implementation (no changes in this payload) — MemberService invokes `awardPointsWithCompliance(memberId, 1000, 'WELCOME_BONUS')`
+
+## RRR-WHITELABEL-CREATOR-FINAL (Payload #6)
+
+- White-label SAAS supports both hosted (service-bureau) and self-hosted modes
+- Creator gifting panel returns current balance + recent promotions for ChatNow.Zone embed
+- All new controllers follow existing auth pattern via req.user
