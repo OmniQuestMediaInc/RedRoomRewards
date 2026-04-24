@@ -29,7 +29,7 @@ describe('RedRoomLedgerService', () => {
         {
           provide: LedgerService,
           useValue: {
-            awardPromotionalPoints: jest.fn().mockResolvedValue(true),
+            creditPoints: jest.fn().mockResolvedValue(true),
           },
         },
       ],
@@ -46,7 +46,7 @@ describe('RedRoomLedgerService', () => {
     expect(result).toBe(true);
     expect(avService.verifyAccount).toHaveBeenCalledWith('guest-1');
     expect(wgsService.scoreTransaction).toHaveBeenCalled();
-    expect(ledgerService.awardPromotionalPoints).toHaveBeenCalledWith(
+    expect(ledgerService.creditPoints).toHaveBeenCalledWith(
       'guest-1',
       5000,
       'REDROOM_REWARDS',
@@ -71,7 +71,7 @@ describe('RedRoomLedgerService', () => {
     await expect(
       service.awardPointsWithCompliance('guest-3', 5000, 'blocked-award'),
     ).rejects.toThrow('18+ verification required - blocked');
-    expect(ledgerService.awardPromotionalPoints).not.toHaveBeenCalled();
+    expect(ledgerService.creditPoints).not.toHaveBeenCalled();
   });
 
   it('blocks the award when WGS returns HARD_DECLINE', async () => {
@@ -85,6 +85,6 @@ describe('RedRoomLedgerService', () => {
     await expect(service.awardPointsWithCompliance('guest-4', 5000, 'risky-award')).rejects.toThrow(
       'Transaction blocked by Welfare Guardian Score',
     );
-    expect(ledgerService.awardPromotionalPoints).not.toHaveBeenCalled();
+    expect(ledgerService.creditPoints).not.toHaveBeenCalled();
   });
 });

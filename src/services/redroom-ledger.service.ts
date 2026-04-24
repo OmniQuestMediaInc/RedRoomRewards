@@ -37,6 +37,6 @@ export class RedRoomLedgerService {
     }
 
     // Award to Promotional Bonus bucket (Canonical Corpus)
-    return this.ledger.awardPromotionalPoints(guestId, points, 'REDROOM_REWARDS', reason);
+    return this.ledger.creditPoints(guestId, points, 'REDROOM_REWARDS', reason);
   }
 }

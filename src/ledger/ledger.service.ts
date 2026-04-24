@@ -19,6 +19,7 @@ import {
 } from './types';
 import { LedgerEntryModel, ILedgerEntry } from '../db/models/ledger-entry.model';
 import { IdempotencyRecordModel } from '../db/models/idempotency.model';
+import { TransactionType, TransactionReason } from '../wallets/types';
 
 /**
  * Default configuration for ledger service
@@ -443,16 +444,100 @@ export class LedgerService implements ILedgerService {
     });
   }
 
+  /**
+   * Credit promotional points to a user's available balance.
+   *
+   * Writes an immutable ledger entry tagged with PROMOTIONAL_AWARD.
+   * The string `reason` is captured in metadata alongside `source`.
+   * An optional `idempotencyKey` may be provided by the caller for true
+   * idempotency protection; without it a random key is generated so each
+   * call creates a new entry (B-010 will add mandatory caller-supplied keys).
+   * Balance snapshots are derived from the current ledger state immediately
+   * before the entry is written; full transactional safety will be added by B-006.
+   */
+  async creditPoints(
+    accountId: string,
+    amount: number,
+    source: string,
+    reason: string,
+    idempotencyKey?: string,
+  ): Promise<boolean> {
+    if (amount <= 0) {
+      throw new Error(`creditPoints: amount must be positive, got ${amount}`);
+    }
+    const snapshot = await this.getBalanceSnapshot(accountId, 'user');
+    await this.createEntry({
+      accountId,
+      accountType: 'user',
+      type: TransactionType.CREDIT,
+      amount,
+      balanceState: 'available',
+      stateTransition: 'promotional-credit→available',
+      reason: TransactionReason.PROMOTIONAL_AWARD,
+      idempotencyKey: idempotencyKey ?? `credit-${source}-${accountId}-${uuidv4()}`,
+      requestId: uuidv4(),
+      balanceBefore: snapshot.availableBalance,
+      balanceAfter: snapshot.availableBalance + amount,
+      correlationId: source,
+      metadata: { reason, source },
+    });
+    return true;
+  }
+
+  /**
+   * Deduct points from a user's available balance.
+   *
+   * Writes an immutable ledger entry tagged with ADMIN_DEBIT.
+   * Rejects the deduction if the account has insufficient available balance.
+   * The string `reason` is captured in metadata alongside `source`.
+   * An optional `idempotencyKey` may be provided by the caller for true
+   * idempotency protection; without it a random key is generated so each
+   * call creates a new entry (B-010 will add mandatory caller-supplied keys).
+   * Balance snapshots are derived from the current ledger state immediately
+   * before the entry is written; full transactional safety will be added by B-006.
+   */
+  async deductPoints(
+    accountId: string,
+    amount: number,
+    source: string,
+    reason: string,
+    idempotencyKey?: string,
+  ): Promise<boolean> {
+    if (amount <= 0) {
+      throw new Error(`deductPoints: amount must be positive, got ${amount}`);
+    }
+    const snapshot = await this.getBalanceSnapshot(accountId, 'user');
+    if (snapshot.availableBalance < amount) {
+      throw new Error(
+        `deductPoints: insufficient balance for ${accountId} — available ${snapshot.availableBalance}, requested ${amount}`,
+      );
+    }
+    await this.createEntry({
+      accountId,
+      accountType: 'user',
+      type: TransactionType.DEBIT,
+      amount: -amount,
+      balanceState: 'available',
+      stateTransition: 'available→promotional-debit',
+      reason: TransactionReason.ADMIN_DEBIT,
+      idempotencyKey: idempotencyKey ?? `debit-${source}-${accountId}-${uuidv4()}`,
+      requestId: uuidv4(),
+      balanceBefore: snapshot.availableBalance,
+      balanceAfter: snapshot.availableBalance - amount,
+      correlationId: source,
+      metadata: { reason, source },
+    });
+    return true;
+  }
+
   async awardPromotionalPoints(
     creatorId: string,
     points: number,
-    _source: string,
-    _reason: string,
+    source: string,
+    reason: string,
     _expiryDays?: number,
-  ) {
-    // STUB: real implementation in next payload
-    console.log(`[Ledger] Awarded ${points} promotional points to ${creatorId}`);
-    return true;
+  ): Promise<boolean> {
+    return this.creditPoints(creatorId, points, source, reason);
   }
 
   async createGiftingPromotion(
