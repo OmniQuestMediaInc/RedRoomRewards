@@ -1,0 +1,276 @@
+{
+  "$schema": "https://json.schemastore.org/base.json",
+  "_comment": "B-009 baseline allowlist. Each entry is a Model query call site that pre-dates the tenancy layer (B-004) and lacks a tenant_id filter. Adding to this list requires a documented justification or a follow-up ticket. The B-009 CI guard fails on any new violation that is not on this list.",
+  "allow": [
+    {
+      "file": "src/ledger/ledger.service.ts",
+      "line": 143,
+      "model": "LedgerEntryModel",
+      "method": "findOne"
+    },
+    {
+      "file": "src/ledger/ledger.service.ts",
+      "line": 220,
+      "model": "LedgerEntryModel",
+      "method": "find"
+    },
+    {
+      "file": "src/ledger/ledger.service.ts",
+      "line": 221,
+      "model": "LedgerEntryModel",
+      "method": "countDocuments"
+    },
+    {
+      "file": "src/ledger/ledger.service.ts",
+      "line": 239,
+      "model": "LedgerEntryModel",
+      "method": "findOne"
+    },
+    {
+      "file": "src/ledger/ledger.service.ts",
+      "line": 268,
+      "model": "LedgerEntryModel",
+      "method": "find"
+    },
+    {
+      "file": "src/ledger/ledger.service.ts",
+      "line": 320,
+      "model": "LedgerEntryModel",
+      "method": "find"
+    },
+    {
+      "file": "src/ledger/ledger.service.ts",
+      "line": 379,
+      "model": "LedgerEntryModel",
+      "method": "find"
+    },
+    {
+      "file": "src/ledger/ledger.service.ts",
+      "line": 398,
+      "model": "IdempotencyRecordModel",
+      "method": "findOne"
+    },
+    {
+      "file": "src/services/admin-ops.service.ts",
+      "line": 242,
+      "model": "WalletModel",
+      "method": "findOne"
+    },
+    {
+      "file": "src/services/admin-ops.service.ts",
+      "line": 257,
+      "model": "WalletModel",
+      "method": "findOneAndUpdate"
+    },
+    {
+      "file": "src/services/idempotency.service.ts",
+      "line": 111,
+      "model": "IdempotencyRecordModel",
+      "method": "findOne"
+    },
+    {
+      "file": "src/services/point-accrual.service.ts",
+      "line": 156,
+      "model": "WalletModel",
+      "method": "findOne"
+    },
+    {
+      "file": "src/services/point-accrual.service.ts",
+      "line": 172,
+      "model": "WalletModel",
+      "method": "findOneAndUpdate"
+    },
+    {
+      "file": "src/services/point-expiration.service.ts",
+      "line": 151,
+      "model": "WalletModel",
+      "method": "findOne"
+    },
+    {
+      "file": "src/services/point-expiration.service.ts",
+      "line": 168,
+      "model": "WalletModel",
+      "method": "findOneAndUpdate"
+    },
+    {
+      "file": "src/services/point-expiration.service.ts",
+      "line": 347,
+      "model": "WalletModel",
+      "method": "find"
+    },
+    {
+      "file": "src/wallets/wallet.service.ts",
+      "line": 124,
+      "model": "WalletModel",
+      "method": "findOne"
+    },
+    {
+      "file": "src/wallets/wallet.service.ts",
+      "line": 160,
+      "model": "WalletModel",
+      "method": "findOneAndUpdate"
+    },
+    {
+      "file": "src/wallets/wallet.service.ts",
+      "line": 177,
+      "model": "EscrowItemModel",
+      "method": "deleteOne"
+    },
+    {
+      "file": "src/wallets/wallet.service.ts",
+      "line": 19,
+      "model": "WalletModel",
+      "method": "updateOne"
+    },
+    {
+      "file": "src/wallets/wallet.service.ts",
+      "line": 288,
+      "model": "EscrowItemModel",
+      "method": "findOneAndUpdate"
+    },
+    {
+      "file": "src/wallets/wallet.service.ts",
+      "line": 304,
+      "model": "EscrowItemModel",
+      "method": "findOne"
+    },
+    {
+      "file": "src/wallets/wallet.service.ts",
+      "line": 312,
+      "model": "ModelWalletModel",
+      "method": "findOne"
+    },
+    {
+      "file": "src/wallets/wallet.service.ts",
+      "line": 328,
+      "model": "ModelWalletModel",
+      "method": "findOneAndUpdate"
+    },
+    {
+      "file": "src/wallets/wallet.service.ts",
+      "line": 347,
+      "model": "WalletModel",
+      "method": "findOne"
+    },
+    {
+      "file": "src/wallets/wallet.service.ts",
+      "line": 353,
+      "model": "WalletModel",
+      "method": "findOneAndUpdate"
+    },
+    {
+      "file": "src/wallets/wallet.service.ts",
+      "line": 369,
+      "model": "EscrowItemModel",
+      "method": "updateOne"
+    },
+    {
+      "file": "src/wallets/wallet.service.ts",
+      "line": 377,
+      "model": "EscrowItemModel",
+      "method": "updateOne"
+    },
+    {
+      "file": "src/wallets/wallet.service.ts",
+      "line": 466,
+      "model": "EscrowItemModel",
+      "method": "findOneAndUpdate"
+    },
+    {
+      "file": "src/wallets/wallet.service.ts",
+      "line": 482,
+      "model": "EscrowItemModel",
+      "method": "findOne"
+    },
+    {
+      "file": "src/wallets/wallet.service.ts",
+      "line": 490,
+      "model": "WalletModel",
+      "method": "findOne"
+    },
+    {
+      "file": "src/wallets/wallet.service.ts",
+      "line": 500,
+      "model": "WalletModel",
+      "method": "findOneAndUpdate"
+    },
+    {
+      "file": "src/wallets/wallet.service.ts",
+      "line": 517,
+      "model": "EscrowItemModel",
+      "method": "updateOne"
+    },
+    {
+      "file": "src/wallets/wallet.service.ts",
+      "line": 525,
+      "model": "EscrowItemModel",
+      "method": "updateOne"
+    },
+    {
+      "file": "src/wallets/wallet.service.ts",
+      "line": 613,
+      "model": "EscrowItemModel",
+      "method": "findOneAndUpdate"
+    },
+    {
+      "file": "src/wallets/wallet.service.ts",
+      "line": 629,
+      "model": "EscrowItemModel",
+      "method": "findOne"
+    },
+    {
+      "file": "src/wallets/wallet.service.ts",
+      "line": 643,
+      "model": "WalletModel",
+      "method": "findOne"
+    },
+    {
+      "file": "src/wallets/wallet.service.ts",
+      "line": 652,
+      "model": "ModelWalletModel",
+      "method": "findOne"
+    },
+    {
+      "file": "src/wallets/wallet.service.ts",
+      "line": 667,
+      "model": "WalletModel",
+      "method": "findOneAndUpdate"
+    },
+    {
+      "file": "src/wallets/wallet.service.ts",
+      "line": 684,
+      "model": "EscrowItemModel",
+      "method": "updateOne"
+    },
+    {
+      "file": "src/wallets/wallet.service.ts",
+      "line": 692,
+      "model": "ModelWalletModel",
+      "method": "findOneAndUpdate"
+    },
+    {
+      "file": "src/wallets/wallet.service.ts",
+      "line": 708,
+      "model": "EscrowItemModel",
+      "method": "updateOne"
+    },
+    {
+      "file": "src/wallets/wallet.service.ts",
+      "line": 717,
+      "model": "EscrowItemModel",
+      "method": "updateOne"
+    },
+    {
+      "file": "src/wallets/wallet.service.ts",
+      "line": 819,
+      "model": "WalletModel",
+      "method": "findOne"
+    },
+    {
+      "file": "src/wallets/wallet.service.ts",
+      "line": 842,
+      "model": "ModelWalletModel",
+      "method": "findOne"
+    }
+  ]
+}

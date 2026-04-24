@@ -22,3 +22,6 @@ export * from './micro-topup-config.model';
 export * from './spend-order-config.model';
 export * from './tenant.model';
 export * from './merchant.model';
+export * from './loyalty-account.model';
+export * from './identity-link.model';
+export * from './merchant-pair-config.model';

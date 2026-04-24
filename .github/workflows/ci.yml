@@ -28,6 +28,9 @@ jobs:
           node scripts/ci/no-hardcoded-balance.js --self-test
           node scripts/ci/no-hardcoded-balance.js
 
+      - name: tenant_id scope check (B-009)
+        run: node scripts/ci/tenant-id-scope-check.js
+
       - name: Required file structure
         run: |
           required_files=(
