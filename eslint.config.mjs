@@ -62,7 +62,7 @@ export default [
       // Broadly-firing rules from recommended — keep as warn until codebase is clean.
       '@typescript-eslint/no-empty-object-type': 'warn',
       '@typescript-eslint/no-this-alias': 'warn',
-      '@typescript-eslint/no-wrapper-objects-types': 'warn',
+      '@typescript-eslint/no-wrapper-object-types': 'warn',
 
       // Logging is intentional in this service layer
       'no-console': 'off',
