@@ -12,3 +12,9 @@
 - WGS scoring is stubbed (full WO-006 model coming in next payload)
 - All RedRoom Rewards points flow through RedRoomLedgerService (Promotional Bonus bucket)
 - High-value awards (>1000 points) trigger WGS check
+
+## RRR-BURN-REPORTING (Payload #5)
+
+- Burn catalog integrates with RedRoomPleasures as the first redemption partner
+- Reporting service provides AirMiles-level liability statements
+- All burns route through RedRoomLedgerService for compliance

@@ -14,3 +14,10 @@
 | ID | Category | Description | Default Used | CEO Action |
 |----|----------|-------------|--------------|------------|
 | F-009 | WGS thresholds | 1000-point trigger for scoring | Yes | Confirm or adjust |
+
+## RRR-BURN-REPORTING (Payload #5)
+
+| ID | Category | Description | Default Used | CEO Action |
+|----|----------|-------------|--------------|------------|
+| F-011 | Burn catalog | First partner is RedRoomPleasures | Yes | Confirm catalog source |
+| F-012 | Reporting | Liability numbers stubbed | Yes | Confirm real ledger query |
