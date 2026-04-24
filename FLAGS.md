@@ -15,6 +15,12 @@
 |----|----------|-------------|--------------|------------|
 | F-009 | WGS thresholds | 1000-point trigger for scoring | Yes | Confirm or adjust |
 
+## RRR-API-MEMBER-MERCHANT (Payload #4)
+
+| ID | Category | Description | Default Used | CEO Action |
+|----|----------|-------------|--------------|------------|
+| F-008 | Member signup | Mandatory AV enforced; 1,000-point welcome bonus | Yes | Confirm welcome bonus amount |
+
 ## RRR-BURN-REPORTING (Payload #5)
 
 | ID | Category | Description | Default Used | CEO Action |
