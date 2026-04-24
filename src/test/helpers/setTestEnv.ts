@@ -12,9 +12,7 @@
  *   beforeEach(() => { restoreEnv = setTestEnv('production'); });
  *   afterEach(() => { restoreEnv(); });
  */
-export function setTestEnv(
-  env: 'development' | 'production' | 'test' = 'test',
-): () => void {
+export function setTestEnv(env: 'development' | 'production' | 'test' = 'test'): () => void {
   const originalEnv = process.env.NODE_ENV;
   process.env.NODE_ENV = env;
   return () => {
