@@ -449,6 +449,9 @@ export class LedgerService implements ILedgerService {
    *
    * Writes an immutable ledger entry tagged with PROMOTIONAL_AWARD.
    * The string `reason` is captured in metadata alongside `source`.
+   * An optional `idempotencyKey` may be provided by the caller for true
+   * idempotency protection; without it a random key is generated so each
+   * call creates a new entry (B-010 will add mandatory caller-supplied keys).
    * Balance snapshots are derived from the current ledger state immediately
    * before the entry is written; full transactional safety will be added by B-006.
    */
@@ -457,7 +460,11 @@ export class LedgerService implements ILedgerService {
     amount: number,
     source: string,
     reason: string,
+    idempotencyKey?: string,
   ): Promise<boolean> {
+    if (amount <= 0) {
+      throw new Error(`creditPoints: amount must be positive, got ${amount}`);
+    }
     const snapshot = await this.getBalanceSnapshot(accountId, 'user');
     await this.createEntry({
       accountId,
@@ -467,7 +474,7 @@ export class LedgerService implements ILedgerService {
       balanceState: 'available',
       stateTransition: 'promotional-credit→available',
       reason: TransactionReason.PROMOTIONAL_AWARD,
-      idempotencyKey: `credit-${source}-${accountId}-${uuidv4()}`,
+      idempotencyKey: idempotencyKey ?? `credit-${source}-${accountId}-${uuidv4()}`,
       requestId: uuidv4(),
       balanceBefore: snapshot.availableBalance,
       balanceAfter: snapshot.availableBalance + amount,
@@ -481,7 +488,11 @@ export class LedgerService implements ILedgerService {
    * Deduct points from a user's available balance.
    *
    * Writes an immutable ledger entry tagged with ADMIN_DEBIT.
+   * Rejects the deduction if the account has insufficient available balance.
    * The string `reason` is captured in metadata alongside `source`.
+   * An optional `idempotencyKey` may be provided by the caller for true
+   * idempotency protection; without it a random key is generated so each
+   * call creates a new entry (B-010 will add mandatory caller-supplied keys).
    * Balance snapshots are derived from the current ledger state immediately
    * before the entry is written; full transactional safety will be added by B-006.
    */
@@ -490,8 +501,17 @@ export class LedgerService implements ILedgerService {
     amount: number,
     source: string,
     reason: string,
+    idempotencyKey?: string,
   ): Promise<boolean> {
+    if (amount <= 0) {
+      throw new Error(`deductPoints: amount must be positive, got ${amount}`);
+    }
     const snapshot = await this.getBalanceSnapshot(accountId, 'user');
+    if (snapshot.availableBalance < amount) {
+      throw new Error(
+        `deductPoints: insufficient balance for ${accountId} — available ${snapshot.availableBalance}, requested ${amount}`,
+      );
+    }
     await this.createEntry({
       accountId,
       accountType: 'user',
@@ -500,7 +520,7 @@ export class LedgerService implements ILedgerService {
       balanceState: 'available',
       stateTransition: 'available→promotional-debit',
       reason: TransactionReason.ADMIN_DEBIT,
-      idempotencyKey: `debit-${source}-${accountId}-${uuidv4()}`,
+      idempotencyKey: idempotencyKey ?? `debit-${source}-${accountId}-${uuidv4()}`,
       requestId: uuidv4(),
       balanceBefore: snapshot.availableBalance,
       balanceAfter: snapshot.availableBalance - amount,

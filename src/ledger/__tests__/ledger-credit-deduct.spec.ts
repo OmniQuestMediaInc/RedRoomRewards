@@ -70,7 +70,7 @@ describe('LedgerService - creditPoints / deductPoints', () => {
       );
     });
 
-    it('generates unique idempotency keys per call', async () => {
+    it('generates unique idempotency keys per call when none provided', async () => {
       await service.creditPoints('user-4', 50, 'SRC', 'a');
       await service.creditPoints('user-4', 50, 'SRC', 'b');
 
@@ -78,6 +78,15 @@ describe('LedgerService - creditPoints / deductPoints', () => {
       const key1 = (calls[0][0] as Record<string, unknown>).idempotencyKey as string;
       const key2 = (calls[1][0] as Record<string, unknown>).idempotencyKey as string;
       expect(key1).not.toBe(key2);
+    });
+
+    it('uses caller-provided idempotency key when supplied', async () => {
+      const callerKey = 'caller-idem-key-abc';
+      await service.creditPoints('user-4b', 50, 'SRC', 'a', callerKey);
+
+      expect(LedgerEntryModel.create).toHaveBeenCalledWith(
+        expect.objectContaining({ idempotencyKey: callerKey }),
+      );
     });
 
     it('sets balanceAfter = balanceBefore + amount (zero starting balance)', async () => {
@@ -91,15 +100,46 @@ describe('LedgerService - creditPoints / deductPoints', () => {
         }),
       );
     });
+
+    it('rejects zero amount', async () => {
+      await expect(service.creditPoints('user-z', 0, 'SRC', 'reason')).rejects.toThrow(
+        'amount must be positive',
+      );
+      expect(LedgerEntryModel.create).not.toHaveBeenCalled();
+    });
+
+    it('rejects negative amount', async () => {
+      await expect(service.creditPoints('user-z', -10, 'SRC', 'reason')).rejects.toThrow(
+        'amount must be positive',
+      );
+      expect(LedgerEntryModel.create).not.toHaveBeenCalled();
+    });
   });
 
   describe('deductPoints', () => {
-    it('returns true on successful deduction', async () => {
+    it('returns true on successful deduction when balance is sufficient', async () => {
+      // Mock getBalanceSnapshot to return a non-zero balance
+      (LedgerEntryModel.find as jest.Mock).mockReturnValue({
+        sort: jest.fn().mockReturnValue({
+          lean: jest.fn().mockReturnValue({
+            exec: jest.fn().mockResolvedValue([{ balanceState: 'available', balanceAfter: 500 }]),
+          }),
+        }),
+      });
+
       const result = await service.deductPoints('user-6', 100, 'TEST_SOURCE', 'spend');
       expect(result).toBe(true);
     });
 
     it('writes a debit ledger entry with correct type and negated amount', async () => {
+      (LedgerEntryModel.find as jest.Mock).mockReturnValue({
+        sort: jest.fn().mockReturnValue({
+          lean: jest.fn().mockReturnValue({
+            exec: jest.fn().mockResolvedValue([{ balanceState: 'available', balanceAfter: 500 }]),
+          }),
+        }),
+      });
+
       await service.deductPoints('user-7', 200, 'BURN', 'redemption');
 
       expect(LedgerEntryModel.create).toHaveBeenCalledWith(
@@ -115,6 +155,14 @@ describe('LedgerService - creditPoints / deductPoints', () => {
     });
 
     it('stores reason and source in metadata', async () => {
+      (LedgerEntryModel.find as jest.Mock).mockReturnValue({
+        sort: jest.fn().mockReturnValue({
+          lean: jest.fn().mockReturnValue({
+            exec: jest.fn().mockResolvedValue([{ balanceState: 'available', balanceAfter: 200 }]),
+          }),
+        }),
+      });
+
       await service.deductPoints('user-8', 50, 'API', 'point burn');
 
       expect(LedgerEntryModel.create).toHaveBeenCalledWith(
@@ -124,15 +172,43 @@ describe('LedgerService - creditPoints / deductPoints', () => {
       );
     });
 
-    it('sets balanceAfter = balanceBefore - amount (zero starting balance)', async () => {
-      await service.deductPoints('user-9', 75, 'SRC', 'reason');
+    it('uses caller-provided idempotency key when supplied', async () => {
+      (LedgerEntryModel.find as jest.Mock).mockReturnValue({
+        sort: jest.fn().mockReturnValue({
+          lean: jest.fn().mockReturnValue({
+            exec: jest.fn().mockResolvedValue([{ balanceState: 'available', balanceAfter: 200 }]),
+          }),
+        }),
+      });
+
+      const callerKey = 'debit-idem-key-xyz';
+      await service.deductPoints('user-8b', 50, 'SRC', 'reason', callerKey);
 
       expect(LedgerEntryModel.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          balanceBefore: 0,
-          balanceAfter: -75,
-        }),
+        expect.objectContaining({ idempotencyKey: callerKey }),
       );
+    });
+
+    it('rejects deduction when balance is insufficient', async () => {
+      // Default mock returns availableBalance: 0
+      await expect(service.deductPoints('user-9', 75, 'SRC', 'reason')).rejects.toThrow(
+        'insufficient balance',
+      );
+      expect(LedgerEntryModel.create).not.toHaveBeenCalled();
+    });
+
+    it('rejects zero amount', async () => {
+      await expect(service.deductPoints('user-z', 0, 'SRC', 'reason')).rejects.toThrow(
+        'amount must be positive',
+      );
+      expect(LedgerEntryModel.create).not.toHaveBeenCalled();
+    });
+
+    it('rejects negative amount', async () => {
+      await expect(service.deductPoints('user-z', -5, 'SRC', 'reason')).rejects.toThrow(
+        'amount must be positive',
+      );
+      expect(LedgerEntryModel.create).not.toHaveBeenCalled();
     });
   });
 
