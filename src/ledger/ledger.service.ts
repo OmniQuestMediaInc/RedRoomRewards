@@ -19,6 +19,7 @@ import {
 } from './types';
 import { LedgerEntryModel, ILedgerEntry } from '../db/models/ledger-entry.model';
 import { IdempotencyRecordModel } from '../db/models/idempotency.model';
+import { TransactionType, TransactionReason } from '../wallets/types';
 
 /**
  * Default configuration for ledger service
@@ -443,16 +444,80 @@ export class LedgerService implements ILedgerService {
     });
   }
 
+  /**
+   * Credit promotional points to a user's available balance.
+   *
+   * Writes an immutable ledger entry tagged with PROMOTIONAL_AWARD.
+   * The string `reason` is captured in metadata alongside `source`.
+   * Balance snapshots are derived from the current ledger state immediately
+   * before the entry is written; full transactional safety will be added by B-006.
+   */
+  async creditPoints(
+    accountId: string,
+    amount: number,
+    source: string,
+    reason: string,
+  ): Promise<boolean> {
+    const snapshot = await this.getBalanceSnapshot(accountId, 'user');
+    await this.createEntry({
+      accountId,
+      accountType: 'user',
+      type: TransactionType.CREDIT,
+      amount,
+      balanceState: 'available',
+      stateTransition: 'promotional-credit→available',
+      reason: TransactionReason.PROMOTIONAL_AWARD,
+      idempotencyKey: `credit-${source}-${accountId}-${uuidv4()}`,
+      requestId: uuidv4(),
+      balanceBefore: snapshot.availableBalance,
+      balanceAfter: snapshot.availableBalance + amount,
+      correlationId: source,
+      metadata: { reason, source },
+    });
+    return true;
+  }
+
+  /**
+   * Deduct points from a user's available balance.
+   *
+   * Writes an immutable ledger entry tagged with ADMIN_DEBIT.
+   * The string `reason` is captured in metadata alongside `source`.
+   * Balance snapshots are derived from the current ledger state immediately
+   * before the entry is written; full transactional safety will be added by B-006.
+   */
+  async deductPoints(
+    accountId: string,
+    amount: number,
+    source: string,
+    reason: string,
+  ): Promise<boolean> {
+    const snapshot = await this.getBalanceSnapshot(accountId, 'user');
+    await this.createEntry({
+      accountId,
+      accountType: 'user',
+      type: TransactionType.DEBIT,
+      amount: -amount,
+      balanceState: 'available',
+      stateTransition: 'available→promotional-debit',
+      reason: TransactionReason.ADMIN_DEBIT,
+      idempotencyKey: `debit-${source}-${accountId}-${uuidv4()}`,
+      requestId: uuidv4(),
+      balanceBefore: snapshot.availableBalance,
+      balanceAfter: snapshot.availableBalance - amount,
+      correlationId: source,
+      metadata: { reason, source },
+    });
+    return true;
+  }
+
   async awardPromotionalPoints(
     creatorId: string,
     points: number,
-    _source: string,
-    _reason: string,
+    source: string,
+    reason: string,
     _expiryDays?: number,
-  ) {
-    // STUB: real implementation in next payload
-    console.log(`[Ledger] Awarded ${points} promotional points to ${creatorId}`);
-    return true;
+  ): Promise<boolean> {
+    return this.creditPoints(creatorId, points, source, reason);
   }
 
   async createGiftingPromotion(
