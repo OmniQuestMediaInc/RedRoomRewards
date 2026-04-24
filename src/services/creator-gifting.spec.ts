@@ -1,7 +1,6 @@
 import { Test } from '@nestjs/testing';
 import { CreatorGiftingService } from './creator-gifting.service';
 import { LedgerService } from '../ledger/ledger.service';
-import { GateGuardAVService } from './gateguard-av.service';
 
 describe('CreatorGiftingService', () => {
   let service: CreatorGiftingService;
@@ -14,10 +13,6 @@ describe('CreatorGiftingService', () => {
         {
           provide: LedgerService,
           useValue: { createGiftingPromotion: jest.fn().mockResolvedValue(true) },
-        },
-        {
-          provide: GateGuardAVService,
-          useValue: { verifyAccount: jest.fn() },
         },
       ],
     }).compile();
