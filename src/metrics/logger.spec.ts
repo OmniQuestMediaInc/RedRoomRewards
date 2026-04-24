@@ -2,23 +2,72 @@
  * Metrics Logger Tests
  */
 
-import { MetricsLogger, MetricEventType, AlertSeverity } from './index';
+import { MetricsLogger, MetricEventType, AlertSeverity, logIngestEvent } from './index';
 
 describe('MetricsLogger', () => {
   let consoleLogSpy: jest.SpyInstance;
   let consoleErrorSpy: jest.SpyInstance;
   let consoleWarnSpy: jest.SpyInstance;
+  let originalNodeEnv: string | undefined;
 
   beforeEach(() => {
+    // Override NODE_ENV so the shouldEmitMetricsLogs guard allows console output.
+    // Tests that validate silent-in-test behaviour restore this themselves.
+    originalNodeEnv = process.env.NODE_ENV;
+    process.env.NODE_ENV = 'production';
+
     consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
     consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
     consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation();
   });
 
   afterEach(() => {
+    process.env.NODE_ENV = originalNodeEnv;
     consoleLogSpy.mockRestore();
     consoleErrorSpy.mockRestore();
     consoleWarnSpy.mockRestore();
+  });
+
+  describe('suppression behaviour', () => {
+    it('should be silent when NODE_ENV=test', () => {
+      process.env.NODE_ENV = 'test';
+
+      MetricsLogger.logMetric({
+        type: MetricEventType.INGEST_EVENT_PROCESSED,
+        value: 1,
+        timestamp: new Date(),
+      });
+      MetricsLogger.logAlert({
+        severity: AlertSeverity.ERROR,
+        message: 'should be suppressed',
+        timestamp: new Date(),
+      });
+
+      expect(consoleLogSpy).not.toHaveBeenCalled();
+      expect(consoleErrorSpy).not.toHaveBeenCalled();
+    });
+
+    it('should be silent when DISABLE_METRICS_LOGS=1', () => {
+      process.env.DISABLE_METRICS_LOGS = '1';
+
+      try {
+        MetricsLogger.logMetric({
+          type: MetricEventType.INGEST_EVENT_PROCESSED,
+          value: 1,
+          timestamp: new Date(),
+        });
+        MetricsLogger.logAlert({
+          severity: AlertSeverity.WARNING,
+          message: 'should be suppressed',
+          timestamp: new Date(),
+        });
+
+        expect(consoleLogSpy).not.toHaveBeenCalled();
+        expect(consoleWarnSpy).not.toHaveBeenCalled();
+      } finally {
+        delete process.env.DISABLE_METRICS_LOGS;
+      }
+    });
   });
 
   describe('logMetric', () => {
@@ -140,6 +189,45 @@ describe('MetricsLogger', () => {
       expect(loggedData.type).toBe(MetricEventType.DLQ_REPLAY_STARTED);
       expect(loggedData.value).toBe(1500);
       expect(loggedData.metadata).toEqual({ eventCount: 10 });
+    });
+  });
+
+  describe('logIngestEvent', () => {
+    it('should log a structured ingest event when NODE_ENV=production', () => {
+      logIngestEvent({
+        correlationId: 'corr-001',
+        merchantId: 'merch-42',
+        eventType: 'purchase',
+        eventId: 'evt-99',
+        idempotencyKey: 'idem-key-1',
+        outcome: 'accepted',
+        httpStatus: 200,
+      });
+
+      expect(consoleLogSpy).toHaveBeenCalledTimes(1);
+      const loggedData = JSON.parse(consoleLogSpy.mock.calls[0][0]);
+      expect(loggedData.level).toBe('INFO');
+      expect(loggedData.category).toBe('ingest');
+      expect(loggedData.correlationId).toBe('corr-001');
+      expect(loggedData.merchantId).toBe('merch-42');
+      expect(loggedData.eventId).toBe('evt-99');
+      expect(loggedData.outcome).toBe('accepted');
+      expect(loggedData.httpStatus).toBe(200);
+    });
+
+    it('should be silent when NODE_ENV=test', () => {
+      process.env.NODE_ENV = 'test';
+
+      logIngestEvent({
+        correlationId: 'corr-002',
+        eventId: 'evt-100',
+        idempotencyKey: 'idem-key-2',
+        outcome: 'rejected',
+        httpStatus: 400,
+        errorCode: 'VALIDATION_ERROR',
+      });
+
+      expect(consoleLogSpy).not.toHaveBeenCalled();
     });
   });
 });
