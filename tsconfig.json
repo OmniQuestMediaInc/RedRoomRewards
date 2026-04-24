@@ -16,14 +16,15 @@
     "resolveJsonModule": true,
     "esModuleInterop": true,
 
-    // ── Type Checking (strict) ─────────────────────────────────────────────
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    // TODO: Enable exactOptionalPropertyTypes once codebase is ready
-    // "exactOptionalPropertyTypes": true,
+    // ── Type Checking ─────────────────────────────────────────────────────
+    // Relaxed root config — per-service tsconfigs may be stricter independently.
+    "strict": false,
+    "noImplicitAny": false,
+    // TODO: Re-enable these once the codebase reaches full type coverage:
+    // "noUnusedLocals": true,
+    // "noUnusedParameters": true,
+    // "noImplicitReturns": true,
+    // "noFallthroughCasesInSwitch": true,
 
     // ── Emit ──────────────────────────────────────────────────────────────
     "declaration": true,

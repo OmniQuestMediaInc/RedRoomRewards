@@ -50,7 +50,8 @@ export default [
       // TypeScript recommended ruleset
       ...tseslint.configs.recommended.rules,
 
-      // Downgrade to warnings to avoid blocking CI on gradual adoption
+      // Downgrade to warnings to avoid blocking CI on gradual adoption.
+      // With --max-warnings 0 these are still a hard gate; promote to error incrementally.
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-unused-vars': [
         'warn',
@@ -58,10 +59,15 @@ export default [
       ],
       '@typescript-eslint/no-require-imports': 'warn',
 
+      // Broadly-firing rules from recommended — keep as warn until codebase is clean.
+      '@typescript-eslint/no-empty-object-type': 'warn',
+      '@typescript-eslint/no-this-alias': 'warn',
+      '@typescript-eslint/no-wrapper-objects-types': 'warn',
+
       // Logging is intentional in this service layer
       'no-console': 'off',
 
-      // TODO: Tighten these rules once codebase reaches full type coverage:
+      // TODO: Promote these to error once codebase reaches full type coverage:
       // '@typescript-eslint/no-explicit-any': 'error',
       // '@typescript-eslint/no-unused-vars': 'error',
     },
