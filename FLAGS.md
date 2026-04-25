@@ -104,6 +104,11 @@
 | F-040 | Wave C | C-001 `calculateEarnRate` does not mutate the existing `awardPoints` flow. Callers that want earn-rate-derived point awards must call `calculateEarnRate` first, then pass the result into `awardPoints`/`awardPromotionalPoints`. Integration wiring deferred to next Wave C task. | Yes | Review |
 | F-041 | Wave C | C-002 `validateTierCap` is a standalone validator — not yet called inside `redeemPoints`. Controllers or orchestration services should call it before invoking `redeemPoints` until it is integrated into the redemption flow. | Yes | Review |
 
+## Wave C Final (Payload #21 — C-012 + C-CLEAN)
+
+| ID | Category | Description | Default Used | CEO Action |
+|----|----------|-------------|--------------|------------|
+| F-042 | Wave C Final | `FraudSignalService` (C-009/C-012) and `WebhookEmitService` stub installed. Detection methods are intentional stubs pending C-012 production wiring. All Wave C rows marked DONE with SHA `a1d6d25`. | Yes | Review stub detection logic before production; wire C-005 webhook fan-out when GGS endpoints are confirmed |
 ## Wave D Start (Payload #22 — D-001, D-005)
 
 | ID | Category | Description | Default Used | CEO Action |
