@@ -115,3 +115,13 @@
 | B3  | Phase 1 merchants: RedRoomPleasures + Cyrano. Phase 2: ChatNow.Zone                   |
 | B4  | Cross-merchant rate 1:1 default via MerchantPairConfig                                |
 | B5  | Tier caps: PLATINUM 50 / GOLD 35 / SILVER 20 / MEMBER 10 / GUEST 5                    |
+
+---
+
+## WAVE D — Observability + Rate-Limiting + API Hardening
+
+| ID    | Task                                                                                                                                                                        | Status | Merge SHA |
+| :---- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----- | :-------- |
+| D-002 | OpenAPI drift check — `scripts/ci/openapi-drift-check.js` verifies `api/openapi.yaml` exists; full schema-diff deferred until controller surface is stable                 | WIP    | —         |
+| D-003 | Reservation flow E2E — hold → settle → refund lifecycle test at `src/__tests__/e2e/reservation.e2e.spec.ts`; uses WalletService mocks; full DB test deferred to B-006       | WIP    | —         |
+| D-006 | Rate-limit middleware — `src/middleware/rate-limit.middleware.ts`; 60 req/60 s per IP; `express-rate-limit` ^8.4.1; wire into AppModule once route scope confirmed           | WIP    | —         |

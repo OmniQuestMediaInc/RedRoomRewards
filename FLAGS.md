@@ -103,3 +103,9 @@
 | F-039 | Wave C | AuthMiddleware created but not yet registered in `AppModule.configure()`. Wire after confirming which routes need JWT auth — avoids breaking unauthenticated health/docs endpoints. | Yes | Register in AppModule once route scope is confirmed |
 | F-040 | Wave C | C-001 `calculateEarnRate` does not mutate the existing `awardPoints` flow. Callers that want earn-rate-derived point awards must call `calculateEarnRate` first, then pass the result into `awardPoints`/`awardPromotionalPoints`. Integration wiring deferred to next Wave C task. | Yes | Review |
 | F-041 | Wave C | C-002 `validateTierCap` is a standalone validator — not yet called inside `redeemPoints`. Controllers or orchestration services should call it before invoking `redeemPoints` until it is integrated into the redemption flow. | Yes | Review |
+
+## Wave D Continuation (Payload #23 — D-002, D-003, D-006)
+
+| ID | Category | Description | Default Used | CEO Action |
+|----|----------|-------------|--------------|------------|
+| F-034 | Wave D | D-002 OpenAPI drift check added as stub. D-003 Reservation E2E added using WalletService mocks (holdInEscrow/settleEscrow/refundEscrow); full DB-backed E2E deferred to B-006. D-006 RateLimitMiddleware created but not yet wired into AppModule — route scope confirmation pending. | Yes | Review |
