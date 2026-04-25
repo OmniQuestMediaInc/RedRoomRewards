@@ -5,16 +5,16 @@
 **Status:** SPIKE — Not production-ready. Architecture only.  
 **Authority:** Kevin B. Hartley, CEO — OmniQuest Media Inc.  
 **Date:** 2026-04-24  
-**Governs:** OmniQuestMediaInc/RedRoomRewards  
+**Governs:** OmniQuestMediaInc/RedRoomRewards
 
 ---
 
 ## 1. Purpose
 
-A **ZK Oracle** (Zero-Knowledge Oracle) is a privacy-preserving verification layer
-that allows the loyalty platform to prove claims about member state — balance
-sufficiency, tier status, earn eligibility, fraud score outcome — **without
-revealing the underlying sensitive data** to external parties.
+A **ZK Oracle** (Zero-Knowledge Oracle) is a privacy-preserving verification
+layer that allows the loyalty platform to prove claims about member state —
+balance sufficiency, tier status, earn eligibility, fraud score outcome —
+**without revealing the underlying sensitive data** to external parties.
 
 This research spike defines:
 
@@ -31,22 +31,22 @@ This research spike defines:
 
 ### 2.1 What we want to prove without revealing
 
-| Claim | Private input | Public statement |
-|---|---|---|
-| Balance sufficiency | Exact balance (e.g. 12,450 pts) | Balance ≥ threshold (e.g. ≥ 1,000 pts) |
-| Tier status | Lifetime earning history | Member is ≥ RED_PASSION tier |
-| Earn eligibility | Product purchase details | Purchase qualifies for points |
-| WGS fraud gate | Full WGS score model output | Score action is PASS |
-| Unique redemption | Full ledger history | Redemption `idempotency_key` not yet used |
+| Claim               | Private input                   | Public statement                          |
+| ------------------- | ------------------------------- | ----------------------------------------- |
+| Balance sufficiency | Exact balance (e.g. 12,450 pts) | Balance ≥ threshold (e.g. ≥ 1,000 pts)    |
+| Tier status         | Lifetime earning history        | Member is ≥ RED_PASSION tier              |
+| Earn eligibility    | Product purchase details        | Purchase qualifies for points             |
+| WGS fraud gate      | Full WGS score model output     | Score action is PASS                      |
+| Unique redemption   | Full ledger history             | Redemption `idempotency_key` not yet used |
 
 ### 2.2 Adversary model
 
-- **External partner APIs** — ChatNow.Zone, RedRoomPleasures, Cyrano — should receive
-  proofs, not raw balances or ledger dumps.
-- **Audit regulators** — should be able to verify correctness of a claimed payout
-  without seeing unrelated member data.
-- **Claude Code droid / AI agents** — should not have direct read access to member
-  balances during test runs; proofs should be verifiable in CI.
+- **External partner APIs** — ChatNow.Zone, RedRoomPleasures, Cyrano — should
+  receive proofs, not raw balances or ledger dumps.
+- **Audit regulators** — should be able to verify correctness of a claimed
+  payout without seeing unrelated member data.
+- **Claude Code droid / AI agents** — should not have direct read access to
+  member balances during test runs; proofs should be verifiable in CI.
 
 ### 2.3 Out of scope for this spike
 
@@ -63,8 +63,8 @@ This research spike defines:
 
 /** A cryptographic commitment to a private value */
 interface Commitment {
-  value: string;       // hex-encoded commitment (hash of secret + nonce)
-  nonce: string;       // random nonce used in commitment
+  value: string; // hex-encoded commitment (hash of secret + nonce)
+  nonce: string; // random nonce used in commitment
   algorithm: 'sha256'; // extensible to Pedersen etc.
 }
 
@@ -72,16 +72,16 @@ interface Commitment {
 interface RangeProof {
   commitment: Commitment;
   threshold: number;
-  proof: string;           // hex-encoded proof blob
-  verifierKey: string;     // public verifier key (circuit-specific)
+  proof: string; // hex-encoded proof blob
+  verifierKey: string; // public verifier key (circuit-specific)
   circuitId: CircuitId;
 }
 
 /** Supported circuit identifiers */
 enum CircuitId {
-  BALANCE_RANGE   = 'balance_range_v1',
+  BALANCE_RANGE = 'balance_range_v1',
   TIER_MEMBERSHIP = 'tier_membership_v1',
-  WGS_PASS_GATE   = 'wgs_pass_gate_v1',
+  WGS_PASS_GATE = 'wgs_pass_gate_v1',
 }
 
 /** Result of verifying a proof */
@@ -120,11 +120,12 @@ Verifier:
     - threshold == claimed threshold
 ```
 
-**Prototype simplification (this spike):**
-Uses SHA-256 commitments + HMAC-based range attestation (not a true ZK-SNARK).
-The interface is identical so the production Circom circuit can be a drop-in.
+**Prototype simplification (this spike):** Uses SHA-256 commitments + HMAC-based
+range attestation (not a true ZK-SNARK). The interface is identical so the
+production Circom circuit can be a drop-in.
 
 **Estimated production cost per proof (snarkjs Groth16):**
+
 - Prove: ~200 ms (client-side)
 - Verify: ~5 ms (server-side)
 
@@ -135,12 +136,13 @@ The interface is identical so the production Circom circuit can be a drop-in.
 **Goal:** Prove member tier ≥ `RED_PASSION` without revealing lifetime points.
 
 **Additional circuit constraint:**
+
 ```
   3. tier_from_points(balance) >= claimed_tier
 ```
 
-Where `tier_from_points` is a lookup using threshold constants
-(0, 5000, 25000, 100000) encoded as circuit constants.
+Where `tier_from_points` is a lookup using threshold constants (0, 5000,
+25000, 100000) encoded as circuit constants.
 
 ---
 
@@ -148,8 +150,8 @@ Where `tier_from_points` is a lookup using threshold constants
 
 **Goal:** Prove WGS action == PASS without revealing fraud/welfare score values.
 
-Requires WO-006 production model to be wired first.
-Deferred until WO-006 exits prototype stub phase.
+Requires WO-006 production model to be wired first. Deferred until WO-006 exits
+prototype stub phase.
 
 ---
 
@@ -177,12 +179,14 @@ Redemption approved / rejected
 2. `BurnCatalogService` asks `ZkOracleService` to generate a range proof:
    `proof = zkOracle.generateRangeProof(balance, requiredPoints)`
 3. Proof is sent to partner API alongside the redemption request.
-4. Partner API verifies proof locally — no balance data ever leaves the platform.
+4. Partner API verifies proof locally — no balance data ever leaves the
+   platform.
 5. `BurnCatalogService` records ledger entry as normal.
 
 ### 5.2 Audit trail
 
 Each proof generation writes an audit record:
+
 - `proof_id` (UUID)
 - `circuit_id`
 - `threshold` (public — not the balance)
@@ -196,6 +200,7 @@ The ledger entry references `proof_id` via `correlation_id`.
 ## 6. Prototype PoC (`src/zk-oracle/`)
 
 The PoC ships with this spike. It simulates the ZK Oracle interface using:
+
 - **SHA-256 commitments** (standard Node.js `crypto`)
 - **HMAC-based range attestation** (proves knowledge of a value that satisfies
   the range constraint, bound to the commitment)
@@ -203,6 +208,7 @@ The PoC ships with this spike. It simulates the ZK Oracle interface using:
 
 The PoC is not cryptographically secure as a ZK proof (it does not hide the
 balance against an adversary who knows the nonce). Its purpose is to:
+
 1. Define the stable TypeScript interface for production replacement.
 2. Allow integration tests to run in CI without ZK library dependencies.
 3. Demonstrate the proof generation → verification round-trip.
@@ -213,12 +219,12 @@ balance against an adversary who knows the nonce). Its purpose is to:
 
 Recommended stack for production:
 
-| Component | Library | Notes |
-|---|---|---|
-| Circuit language | Circom 2.x | Arithmetic circuit DSL |
-| Proof system | Groth16 (snarkjs) | Fast client-side prove + cheap verify |
-| Commitment scheme | Poseidon hash | ZK-friendly; replace SHA-256 in prod |
-| Trusted setup | Powers of Tau (perpetual) | Reuse existing ceremony |
+| Component         | Library                   | Notes                                 |
+| ----------------- | ------------------------- | ------------------------------------- |
+| Circuit language  | Circom 2.x                | Arithmetic circuit DSL                |
+| Proof system      | Groth16 (snarkjs)         | Fast client-side prove + cheap verify |
+| Commitment scheme | Poseidon hash             | ZK-friendly; replace SHA-256 in prod  |
+| Trusted setup     | Powers of Tau (perpetual) | Reuse existing ceremony               |
 
 **npm packages to add at production phase:**
 
@@ -233,12 +239,12 @@ These are NOT added in this spike (prototype only uses Node.js builtins).
 
 ## 8. Open Questions (for CEO / Architecture Review)
 
-| Q | Detail |
-|---|---|
-| Q1 | Do external partners need on-chain verification (blockchain anchor), or is server-side proof sufficient? |
-| Q2 | Which partners receive ZK proofs in Phase 1 (RedRoomPleasures, Cyrano) vs Phase 2 (ChatNow.Zone)? |
-| Q3 | Should proof generation happen client-side (browser WASM) or server-side (Node.js)? |
-| Q4 | WGS pass-gate circuit requires WO-006 production model — confirm sequencing. |
+| Q   | Detail                                                                                                   |
+| --- | -------------------------------------------------------------------------------------------------------- |
+| Q1  | Do external partners need on-chain verification (blockchain anchor), or is server-side proof sufficient? |
+| Q2  | Which partners receive ZK proofs in Phase 1 (RedRoomPleasures, Cyrano) vs Phase 2 (ChatNow.Zone)?        |
+| Q3  | Should proof generation happen client-side (browser WASM) or server-side (Node.js)?                      |
+| Q4  | WGS pass-gate circuit requires WO-006 production model — confirm sequencing.                             |
 
 ---
 
@@ -246,9 +252,11 @@ These are NOT added in this spike (prototype only uses Node.js builtins).
 
 - Circom documentation: https://docs.circom.io/
 - snarkjs: https://github.com/iden3/snarkjs
-- Groth16 paper: Groth 2016, "On the Size of Pairing-based Non-interactive Arguments"
-- ZK for loyalty programs: prior art search recommended before production implementation
+- Groth16 paper: Groth 2016, "On the Size of Pairing-based Non-interactive
+  Arguments"
+- ZK for loyalty programs: prior art search recommended before production
+  implementation
 
 ---
 
-*End of WO-011 Architecture Document*
+_End of WO-011 Architecture Document_

@@ -1,19 +1,24 @@
 # Implementation Summary: Secure RRR Webhook Controller
 
 ## Objective
-Implement a security-first RRR webhook controller that **proactively prevents** the CodeQL alert "Database query built from user-controlled sources" through multiple defensive layers.
+
+Implement a security-first RRR webhook controller that **proactively prevents**
+the CodeQL alert "Database query built from user-controlled sources" through
+multiple defensive layers.
 
 ## What Was Created
 
 ### 6 Files Implemented
 
-1. **api/src/modules/loyalty-points/controllers/rrr-webhook.controller.ts** (200 lines)
+1. **api/src/modules/loyalty-points/controllers/rrr-webhook.controller.ts** (200
+   lines)
    - Main webhook handler with multi-layer security
    - Input validation breaking CodeQL data flow
    - HMAC-SHA256 signature verification
    - Idempotency protection
 
-2. **api/src/modules/loyalty-points/controllers/rrr-webhook.controller.spec.ts** (385 lines)
+2. **api/src/modules/loyalty-points/controllers/rrr-webhook.controller.spec.ts**
+   (385 lines)
    - Comprehensive test suite with 15+ test cases
    - Validates security properties
    - Tests operator injection prevention
@@ -51,30 +56,31 @@ private getValidatedEventId(event_id: unknown): string {
   if (typeof event_id !== 'string') {
     throw new BadRequestException('event_id must be a string');
   }
-  
+
   // Layer 2: Sanitization
   const trimmed = event_id.trim();
-  
+
   // Layer 3: Non-empty validation
   if (!trimmed) {
     throw new BadRequestException('event_id is required');
   }
-  
+
   // Layer 4: Length validation
   if (trimmed.length > 128) {
     throw new BadRequestException('event_id too long');
   }
-  
+
   // Layer 5: Character hardening
   if (trimmed.includes('$') || trimmed.includes('.')) {
     throw new BadRequestException('event_id contains illegal characters');
   }
-  
+
   return trimmed; // Validated primitive string
 }
 ```
 
 **Why this works:**
+
 - Breaks CodeQL data flow from untrusted source to database sink
 - Transforms `unknown` (untrusted) → `string` (validated, trusted)
 - Rejects MongoDB operator injection attempts
@@ -83,7 +89,7 @@ private getValidatedEventId(event_id: unknown): string {
 
 ```typescript
 // In isEventProcessed()
-await this.webhookEventModel.findOne({ 
+await this.webhookEventModel.findOne({
   event_id: { $eq: eventId } // Explicit operator
 });
 
@@ -96,6 +102,7 @@ await this.webhookEventModel.updateOne(
 ```
 
 **Why this prevents injection:**
+
 - MongoDB treats `{ field: { $operator: value } }` as operator syntax
 - Using `$eq` explicitly prevents user input from being interpreted as operator
 - Even if input bypassed validation, it would be treated as literal value
@@ -110,6 +117,7 @@ async handleWebhook(
 ```
 
 **Benefits:**
+
 - Forces explicit type checking before use
 - Prevents accidental unsafe operations
 - Makes security boundaries explicit in code
@@ -123,17 +131,18 @@ async handleWebhook(
 
 ## Attack Vectors Mitigated
 
-| Attack Type | Example | Defense |
-|------------|---------|---------|
-| NoSQL Operator Injection | `event_id: { $ne: null }` | Type validation rejects non-string |
+| Attack Type                 | Example                     | Defense                              |
+| --------------------------- | --------------------------- | ------------------------------------ |
+| NoSQL Operator Injection    | `event_id: { $ne: null }`   | Type validation rejects non-string   |
 | Special Character Injection | `event_id: "$admin.system"` | Character validation rejects $ and . |
-| Replay Attack | Submit same webhook twice | Unique index enforces idempotency |
-| Signature Bypass | No/invalid signature | HMAC-SHA256 verification required |
-| Timing Attack | Guess signature via timing | `crypto.timingSafeEqual()` |
+| Replay Attack               | Submit same webhook twice   | Unique index enforces idempotency    |
+| Signature Bypass            | No/invalid signature        | HMAC-SHA256 verification required    |
+| Timing Attack               | Guess signature via timing  | `crypto.timingSafeEqual()`           |
 
 ## CodeQL Compliance Verification
 
 ### Analysis Result
+
 ```
 Analysis Result for 'javascript'. Found 0 alerts:
 - javascript: No alerts found.
@@ -144,6 +153,7 @@ Analysis Result for 'javascript'. Found 0 alerts:
 ### Data Flow Explanation
 
 **Before (Vulnerable Pattern):**
+
 ```
 Source: @Body() payload → event_id (untrusted)
 ↓
@@ -151,6 +161,7 @@ Sink: findOne({ event_id: event_id }) ← ALERT!
 ```
 
 **After (Secure Pattern):**
+
 ```
 Source: @Body() payload → event_id (untrusted)
 ↓
@@ -164,6 +175,7 @@ Sink: findOne({ event_id: { $eq: safeEventId } }) ← NO ALERT
 ```
 
 **Why no alert:**
+
 1. Validation function breaks data flow
 2. Output is new primitive string, not tainted
 3. `$eq` operator provides defense-in-depth
@@ -186,6 +198,7 @@ Sink: findOne({ event_id: { $eq: safeEventId } }) ← NO ALERT
 11. ✅ $eq operator used in all queries → Verified
 
 ### Coverage Statistics
+
 - 15 test cases implemented
 - 11 security-focused tests
 - 4 edge case tests
@@ -194,12 +207,14 @@ Sink: findOne({ event_id: { $eq: safeEventId } }) ← NO ALERT
 ## Standards Compliance
 
 ### OWASP
+
 - ✅ Input validation on all untrusted data
 - ✅ Whitelist validation (type checking)
 - ✅ Output encoding (explicit operators)
 - ✅ Principle of least privilege
 
 ### MongoDB Security Checklist
+
 - ✅ Typed schemas (String, not Mixed)
 - ✅ Explicit operators ($eq, $setOnInsert)
 - ✅ Input type validation
@@ -207,6 +222,7 @@ Sink: findOne({ event_id: { $eq: safeEventId } }) ← NO ALERT
 - ✅ Authentication (webhook signature)
 
 ### NestJS Best Practices
+
 - ✅ Type-safe decorators
 - ✅ Exception filters (BadRequestException)
 - ✅ Dependency injection
@@ -220,8 +236,11 @@ Before deploying to production:
 - [ ] Set `RRR_WEBHOOK_SECRET` environment variable
 - [ ] Create database indexes:
   ```javascript
-  db.webhook_events.createIndex({ "event_id": 1 }, { unique: true });
-  db.webhook_events.createIndex({ "processed_at": 1 }, { expireAfterSeconds: 7776000 });
+  db.webhook_events.createIndex({ event_id: 1 }, { unique: true });
+  db.webhook_events.createIndex(
+    { processed_at: 1 },
+    { expireAfterSeconds: 7776000 },
+  );
   ```
 - [ ] Run tests: `npm test -- rrr-webhook.controller.spec.ts`
 - [ ] Verify CodeQL passes in CI/CD
@@ -246,6 +265,7 @@ export class AppModule {}
 ```
 
 Webhook endpoint will be available at:
+
 ```
 POST /webhooks/rrr
 Headers:
@@ -267,7 +287,7 @@ This implementation follows RedRoomRewards principles:
 ✅ **Immutable audit trail** - Webhook events are write-once  
 ✅ **Security-first design** - Multiple defensive layers  
 ✅ **Idempotent operations** - Safe retries via event_id  
-✅ **No legacy patterns** - Built from scratch per modern standards  
+✅ **No legacy patterns** - Built from scratch per modern standards
 
 ## Key Achievements
 
@@ -279,7 +299,8 @@ This implementation follows RedRoomRewards principles:
 
 ## Conclusion
 
-This implementation demonstrates **security by design**, not security by patching. The webhook controller is:
+This implementation demonstrates **security by design**, not security by
+patching. The webhook controller is:
 
 - ✅ CodeQL-compliant from day one
 - ✅ Resistant to NoSQL injection attacks
@@ -287,7 +308,9 @@ This implementation demonstrates **security by design**, not security by patchin
 - ✅ Fully documented and tested
 - ✅ Ready for production deployment
 
-The code provides a **template for future webhook handlers** in the RedRoomRewards platform, ensuring consistent security standards across all external integrations.
+The code provides a **template for future webhook handlers** in the
+RedRoomRewards platform, ensuring consistent security standards across all
+external integrations.
 
 ---
 
@@ -306,7 +329,9 @@ The code provides a **template for future webhook handlers** in the RedRoomRewar
 
 ### Overview
 
-M1 adds production-grade monitoring and operational safety to critical platform surfaces:
+M1 adds production-grade monitoring and operational safety to critical platform
+surfaces:
+
 - Ingest worker and DLQ/replay operations
 - Reservation/hold lifecycle management
 - Foundation for activity feed and partner admin operations
@@ -314,6 +339,7 @@ M1 adds production-grade monitoring and operational safety to critical platform 
 ### Implementation Approach
 
 **Minimal, Additive Changes:**
+
 - No breaking changes to existing APIs
 - No refactoring of pre-existing code
 - Tiny metrics wrapper following existing console.log patterns
@@ -321,14 +347,20 @@ M1 adds production-grade monitoring and operational safety to critical platform 
 
 **Key Design Decisions:**
 
-1. **Console-Based Metrics**: Uses existing logging pattern (console.log/warn/error) with JSON-structured output for easy external monitoring integration
-2. **Type-Safe Framework**: Enum-based metric types prevent typos and enable compile-time validation
-3. **Safety-First Replay**: Idempotency checks before replay prevent double-processing
-4. **Operational Visibility**: Metrics capture success/failure/skip counts with rich metadata
+1. **Console-Based Metrics**: Uses existing logging pattern
+   (console.log/warn/error) with JSON-structured output for easy external
+   monitoring integration
+2. **Type-Safe Framework**: Enum-based metric types prevent typos and enable
+   compile-time validation
+3. **Safety-First Replay**: Idempotency checks before replay prevent
+   double-processing
+4. **Operational Visibility**: Metrics capture success/failure/skip counts with
+   rich metadata
 
 ### Monitoring Integration
 
 The metrics framework outputs JSON logs that can be consumed by:
+
 - CloudWatch Logs (AWS)
 - Stackdriver Logging (GCP)
 - Application Insights (Azure)
@@ -336,6 +368,7 @@ The metrics framework outputs JSON logs that can be consumed by:
 - Custom log aggregation pipelines
 
 **Example Metric Output:**
+
 ```json
 {
   "level": "METRIC",
@@ -351,6 +384,7 @@ The metrics framework outputs JSON logs that can be consumed by:
 ```
 
 **Example Alert Output:**
+
 ```json
 {
   "level": "ALERT",
@@ -369,16 +403,19 @@ The metrics framework outputs JSON logs that can be consumed by:
 ### Operational Safeguards
 
 **Double-Processing Prevention:**
+
 - Replay controller checks idempotency before re-queuing events
 - Logs prevented double-processing attempts for audit
 - Skipped events tracked separately from failures
 
 **DLQ Monitoring:**
+
 - Warning alerts on DLQ movement (may indicate systemic issues)
 - Metrics include error codes and attempt counts
 - Replay operations tracked end-to-end with duration
 
 **Reservation Safety:**
+
 - Full lifecycle tracking (create, commit, release, expire)
 - Expiry cleanup job with metric tracking
 - Active reservation monitoring for capacity planning
@@ -386,12 +423,14 @@ The metrics framework outputs JSON logs that can be consumed by:
 ### Production Deployment
 
 **Required Infrastructure:**
+
 1. Index creation (see infra/migrations/README.md)
 2. External monitoring configured to consume JSON logs
 3. Alerts configured based on documented thresholds
 4. Dashboard for operational metrics
 
 **No Migration Required:**
+
 - All changes are additive
 - Existing services continue unchanged
 - Metrics activate automatically on deployment
@@ -399,6 +438,7 @@ The metrics framework outputs JSON logs that can be consumed by:
 ### Scaling Considerations
 
 Documented in `infra/migrations/README.md`:
+
 - Ingest worker: 100-1000 events/sec capacity
 - DLQ: Alert at 1000 events (indicates problems)
 - Reservations: Alert at 100K active reservations

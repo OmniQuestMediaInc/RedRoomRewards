@@ -2,8 +2,8 @@
 
 ## Your role
 
-You are the janitorial agent for this repo. Claude Code owns all coding.
-You handle file operations, cleanup, audits, and simple non-coding tasks only.
+You are the janitorial agent for this repo. Claude Code owns all coding. You
+handle file operations, cleanup, audits, and simple non-coding tasks only.
 
 ## Your task source
 
@@ -14,9 +14,11 @@ You handle file operations, cleanup, audits, and simple non-coding tasks only.
 - Move, rename, archive, or delete files
 - Fix broken import paths after a file move
 - Run audits: grep for patterns, report findings, do not fix code
-- Simple test scaffolding: create blank spec files with describe/it shells only — no implementation
+- Simple test scaffolding: create blank spec files with describe/it shells only
+  — no implementation
 - Confirm CI passes after your changes
-- Update the task row in `PRODUCTION_SCHEDULE.md`: Status → DONE, Merge SHA → commit SHA
+- Update the task row in `PRODUCTION_SCHEDULE.md`: Status → DONE, Merge SHA →
+  commit SHA
 
 ## What you do not do
 
@@ -33,5 +35,6 @@ CI passes → auto-merge. No review needed.
 ## Alert Kevin when
 
 - A file you need to move or delete does not exist where expected
-- A grep audit surfaces something that looks like a critical bug — flag it, do not fix it
+- A grep audit surfaces something that looks like a critical bug — flag it, do
+  not fix it
 - Your remaining context is at 25% or less

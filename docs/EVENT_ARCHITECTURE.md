@@ -2,13 +2,17 @@
 
 ## Overview
 
-The RedRoomRewards platform implements a robust event-driven architecture for real-time wallet and ledger updates. This design ensures all balance changes are immediately propagated to interested subscribers while maintaining strict idempotency and consistency guarantees.
+The RedRoomRewards platform implements a robust event-driven architecture for
+real-time wallet and ledger updates. This design ensures all balance changes are
+immediately propagated to interested subscribers while maintaining strict
+idempotency and consistency guarantees.
 
 ## Architecture Components
 
 ### 1. Event Bus
 
-The `EventBus` is the central component that manages event publishing and subscription:
+The `EventBus` is the central component that manages event publishing and
+subscription:
 
 - **In-memory event distribution** with fire-and-forget semantics
 - **Idempotency guarantees** via event ID and idempotency key deduplication
@@ -82,14 +86,16 @@ The event bus prevents duplicate event processing through:
 
 1. **Event ID tracking**: Each event has a unique ID that is tracked
 2. **Idempotency key tracking**: Operations with the same key are deduplicated
-3. **TTL-based cleanup**: Old events are removed from cache after configurable TTL
+3. **TTL-based cleanup**: Old events are removed from cache after configurable
+   TTL
 
 ### Operation-Level Idempotency
 
 Wallet operations include their own idempotency checks:
 
 1. **Database-backed idempotency records**: Stored in `IdempotencyRecordModel`
-2. **Operation type scoping**: Same key can be reused for different operation types
+2. **Operation type scoping**: Same key can be reused for different operation
+   types
 3. **Result caching**: Original responses are stored for duplicate requests
 
 ## Race Condition Handling
@@ -101,7 +107,7 @@ All wallet operations use optimistic locking to prevent race conditions:
 ```typescript
 // Update wallet with version check
 const updated = await WalletModel.findOneAndUpdate(
-  { 
+  {
     userId: { $eq: userId },
     version: { $eq: currentVersion }, // Optimistic lock
   },
@@ -111,7 +117,7 @@ const updated = await WalletModel.findOneAndUpdate(
       version: currentVersion + 1, // Increment version
     },
   },
-  { new: true }
+  { new: true },
 );
 
 if (!updated) {
@@ -207,10 +213,7 @@ eventBus.subscribe({
 ```typescript
 eventBus.subscribe({
   subscriberId: 'analytics',
-  eventTypes: [
-    WalletEventType.ESCROW_HELD,
-    WalletEventType.ESCROW_SETTLED,
-  ],
+  eventTypes: [WalletEventType.ESCROW_HELD, WalletEventType.ESCROW_SETTLED],
   handler: async (event) => {
     // Track metrics
     await analyticsService.track({
@@ -282,7 +285,7 @@ const results = await Promise.allSettled([
 ]);
 
 // Verify all succeeded or failed gracefully
-const succeeded = results.filter(r => r.status === 'fulfilled');
+const succeeded = results.filter((r) => r.status === 'fulfilled');
 expect(succeeded.length).toBeGreaterThan(0);
 
 // Verify balance consistency
@@ -296,11 +299,11 @@ expect(wallet.availableBalance + wallet.escrowBalance).toBe(initialBalance);
 
 ```typescript
 const eventBus = new EventBus({
-  enableDeduplication: true,        // Enable idempotency
-  deduplicationTtlMs: 3600000,      // 1 hour TTL
-  maxRetryAttempts: 3,              // Retry failed handlers 3 times
-  retryDelayMs: 1000,               // 1 second between retries
-  asyncProcessing: true,            // Fire and forget
+  enableDeduplication: true, // Enable idempotency
+  deduplicationTtlMs: 3600000, // 1 hour TTL
+  maxRetryAttempts: 3, // Retry failed handlers 3 times
+  retryDelayMs: 1000, // 1 second between retries
+  asyncProcessing: true, // Fire and forget
 });
 ```
 
@@ -308,9 +311,9 @@ const eventBus = new EventBus({
 
 ```typescript
 const walletService = new WalletService(ledgerService, {
-  maxRetryAttempts: 3,              // Retry on lock conflicts
-  retryBackoffMs: 100,              // Exponential backoff base
-  defaultCurrency: 'points',        // Default currency
+  maxRetryAttempts: 3, // Retry on lock conflicts
+  retryBackoffMs: 100, // Exponential backoff base
+  defaultCurrency: 'points', // Default currency
 });
 ```
 
@@ -318,9 +321,9 @@ const walletService = new WalletService(ledgerService, {
 
 ```typescript
 const cache = new BalanceSnapshotCache({
-  enabled: true,                    // Enable cache
-  maxSize: 10000,                   // Cache up to 10k balances
-  ttlMs: 3600000,                   // 1 hour TTL
+  enabled: true, // Enable cache
+  maxSize: 10000, // Cache up to 10k balances
+  ttlMs: 3600000, // 1 hour TTL
 });
 ```
 
@@ -340,7 +343,8 @@ All event operations emit metrics for monitoring:
 
 1. **Always use idempotency keys**: Ensure safe retries
 2. **Subscribe early**: Register handlers before operations start
-3. **Handle failures gracefully**: Event publishing failures don't fail operations
+3. **Handle failures gracefully**: Event publishing failures don't fail
+   operations
 4. **Use appropriate priorities**: Critical handlers should run first
 5. **Monitor event flow**: Track metrics for operational health
 6. **Test concurrency**: Validate race condition handling

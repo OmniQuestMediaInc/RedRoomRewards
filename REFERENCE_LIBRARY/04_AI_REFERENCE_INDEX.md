@@ -1,10 +1,9 @@
 # BUILD CONTROL - REWARDS AI Development Reference Index
 
-**Authority:** Kevin B. Hartley, CEO — OmniQuest Media Inc.
-**Initialized:** 2026-04-18
-**Source:** CelaDaniel/free-ai-resources-x (MIT license)
-**Archive status:** This document IS the extracted archive.
-Do not re-pull source repo — treat this as authoritative.
+**Authority:** Kevin B. Hartley, CEO — OmniQuest Media Inc. **Initialized:**
+2026-04-18 **Source:** CelaDaniel/free-ai-resources-x (MIT license) **Archive
+status:** This document IS the extracted archive. Do not re-pull source repo —
+treat this as authoritative.
 
 ---
 
@@ -20,8 +19,7 @@ Do not re-pull source repo — treat this as authoritative.
   https://docs.anthropic.com/en/docs/intro-to-claude
 - **Andrej Karpathy: Neural Networks Zero to Hero**
   https://youtube.com/playlist?list=PLAqhIrjkxbuWI23v9cThsA9GvCAUhRvKZ
-- **vLLM** (high-throughput production serving)
-  https://docs.vllm.ai/
+- **vLLM** (high-throughput production serving) https://docs.vllm.ai/
 
 ### AI Agents
 
@@ -82,6 +80,6 @@ Do not re-pull source repo — treat this as authoritative.
 
 [POPULATE as AI-adjacent directives are identified]
 
-| Directive | AI Component | Primary Resources Above |
-|---|---|---|
-| [Add rows as directives are defined] | | |
+| Directive                            | AI Component | Primary Resources Above |
+| ------------------------------------ | ------------ | ----------------------- |
+| [Add rows as directives are defined] |              |                         |

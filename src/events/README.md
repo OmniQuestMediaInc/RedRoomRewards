@@ -1,12 +1,14 @@
 # Events Module
 
-The Events module provides a robust event-driven architecture for real-time wallet and ledger updates in the RedRoomRewards platform.
+The Events module provides a robust event-driven architecture for real-time
+wallet and ledger updates in the RedRoomRewards platform.
 
 ## Quick Start
 
 ### Publishing Events
 
-Events are automatically published by the wallet service when operations complete. No manual intervention is required for standard wallet operations.
+Events are automatically published by the wallet service when operations
+complete. No manual intervention is required for standard wallet operations.
 
 ```typescript
 import { WalletService } from '../wallets/wallet.service';
@@ -226,7 +228,9 @@ One failing handler doesn't affect others:
 eventBus.subscribe({
   subscriberId: 'failing-handler',
   eventTypes: [WalletEventType.ESCROW_HELD],
-  handler: async () => { throw new Error('Failed'); },
+  handler: async () => {
+    throw new Error('Failed');
+  },
 });
 
 eventBus.subscribe({
@@ -247,11 +251,11 @@ eventBus.subscribe({
 import { EventBus } from '../events';
 
 const eventBus = new EventBus({
-  enableDeduplication: true,        // Enable idempotency (default: true)
-  deduplicationTtlMs: 3600000,      // 1 hour (default)
-  maxRetryAttempts: 3,              // Retry count (default: 3)
-  retryDelayMs: 1000,               // Retry delay (default: 1000ms)
-  asyncProcessing: true,            // Fire and forget (default: true)
+  enableDeduplication: true, // Enable idempotency (default: true)
+  deduplicationTtlMs: 3600000, // 1 hour (default)
+  maxRetryAttempts: 3, // Retry count (default: 3)
+  retryDelayMs: 1000, // Retry delay (default: 1000ms)
+  asyncProcessing: true, // Fire and forget (default: true)
 });
 ```
 
@@ -261,9 +265,9 @@ const eventBus = new EventBus({
 import { BalanceSnapshotCache } from '../events';
 
 const cache = new BalanceSnapshotCache({
-  enabled: true,                    // Enable cache (default: true)
-  maxSize: 10000,                   // Max entries (default: 10000)
-  ttlMs: 3600000,                   // 1 hour (default)
+  enabled: true, // Enable cache (default: true)
+  maxSize: 10000, // Max entries (default: 10000)
+  ttlMs: 3600000, // 1 hour (default)
 });
 ```
 
@@ -314,10 +318,7 @@ eventBus.subscribe({
 ```typescript
 eventBus.subscribe({
   subscriberId: 'analytics',
-  eventTypes: [
-    WalletEventType.ESCROW_HELD,
-    WalletEventType.ESCROW_SETTLED,
-  ],
+  eventTypes: [WalletEventType.ESCROW_HELD, WalletEventType.ESCROW_SETTLED],
   handler: async (event) => {
     await analyticsService.track({
       eventType: event.eventType,
@@ -369,7 +370,7 @@ describe('MyEventHandler', () => {
 
   it('should process escrow held event', async () => {
     const handledEvents = [];
-    
+
     eventBus.subscribe({
       subscriberId: 'test',
       eventTypes: [WalletEventType.ESCROW_HELD],
@@ -377,7 +378,7 @@ describe('MyEventHandler', () => {
     });
 
     await eventBus.publish(mockEscrowHeldEvent);
-    
+
     expect(handledEvents).toHaveLength(1);
     expect(handledEvents[0].amount).toBe(100);
   });
@@ -390,7 +391,7 @@ describe('MyEventHandler', () => {
 describe('Wallet Event Integration', () => {
   it('should emit events for wallet operations', async () => {
     const events = [];
-    
+
     getEventBus().subscribe({
       subscriberId: 'test',
       eventTypes: [WalletEventType.ESCROW_HELD],
@@ -426,11 +427,13 @@ Monitor these metrics to ensure healthy event flow.
 ## Best Practices
 
 1. **Use unique subscriber IDs**: Avoid conflicts with other services
-2. **Handle errors gracefully**: Don't throw from event handlers unless necessary
+2. **Handle errors gracefully**: Don't throw from event handlers unless
+   necessary
 3. **Keep handlers fast**: Avoid long-running operations in handlers
 4. **Use appropriate priorities**: Critical operations first, analytics last
 5. **Log important events**: Track processing for debugging
-6. **Test idempotency**: Verify handlers can process events multiple times safely
+6. **Test idempotency**: Verify handlers can process events multiple times
+   safely
 7. **Monitor metrics**: Watch for handler failures and bottlenecks
 8. **Clean up subscriptions**: Unsubscribe when services shut down
 

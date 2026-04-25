@@ -8,7 +8,9 @@
 
 ## Overview
 
-This document provides practical security guidelines for developers. These practices are **mandatory** for all code contributions and are enforced through code review and automated scanning.
+This document provides practical security guidelines for developers. These
+practices are **mandatory** for all code contributions and are enforced through
+code review and automated scanning.
 
 ---
 
@@ -52,7 +54,10 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 // Or create custom validation rules
-import { assertValidEnvironment, EnvValidationRule } from './config/env-validator';
+import {
+  assertValidEnvironment,
+  EnvValidationRule,
+} from './config/env-validator';
 
 const customRules: EnvValidationRule[] = [
   {
@@ -92,7 +97,7 @@ openssl rand -hex 32
 
 - Passwords, API keys, tokens, secrets
 - Full credit card numbers
-- Social security numbers  
+- Social security numbers
 - Session tokens or JWTs
 - PII beyond user IDs
 - Database connection strings
@@ -118,7 +123,7 @@ console.log('User logged in:', user);
 logger.info('Password:', password);
 
 // WRONG: Logging full error with secrets
-console.error('Database error:', error);  // May contain connection string
+console.error('Database error:', error); // May contain connection string
 ```
 
 ### ✅ DO THIS INSTEAD
@@ -133,7 +138,7 @@ MetricsLogger.logAlert({
   metricType: 'user_login',
   timestamp: new Date(),
   metadata: {
-    userId: user.id,  // User ID only, no PII
+    userId: user.id, // User ID only, no PII
     requestId: req.headers['x-request-id'],
   },
 });
@@ -145,7 +150,7 @@ MetricsLogger.logAlert({
   metricType: 'database_error',
   timestamp: new Date(),
   metadata: {
-    errorType: error.name,  // Error type only
+    errorType: error.name, // Error type only
     // Do NOT log error.message which may contain connection string
   },
 });
@@ -157,7 +162,8 @@ MetricsLogger.logAlert({
 
 ### Always Validate User Input
 
-Every user input must be validated **server-side** (never trust client validation alone).
+Every user input must be validated **server-side** (never trust client
+validation alone).
 
 ### ✅ Validation Checklist
 
@@ -176,20 +182,20 @@ function validateUserId(input: unknown): string {
   if (typeof input !== 'string') {
     throw new Error('User ID must be a string');
   }
-  
+
   // Sanitize
   const sanitized = input.trim();
-  
+
   // Length check
   if (!sanitized || sanitized.length > 128) {
     throw new Error('User ID must be 1-128 characters');
   }
-  
+
   // Format check (alphanumeric, dash, underscore only)
   if (!/^[a-zA-Z0-9_-]+$/.test(sanitized)) {
     throw new Error('User ID contains invalid characters');
   }
-  
+
   return sanitized;
 }
 ```
@@ -216,8 +222,8 @@ const user = await UserModel.findOne({ userId: { $eq: validatedInput } });
 // CORRECT: JWT configuration
 import * as jwt from 'jsonwebtoken';
 
-const secret = process.env.JWT_SECRET!;  // Validated at startup
-const expirySeconds = 900;  // 15 minutes
+const secret = process.env.JWT_SECRET!; // Validated at startup
+const expirySeconds = 900; // 15 minutes
 
 const token = jwt.sign(
   {
@@ -228,7 +234,7 @@ const token = jwt.sign(
   {
     expiresIn: expirySeconds,
     algorithm: 'HS256',
-  }
+  },
 );
 ```
 
@@ -245,8 +251,8 @@ const token = jwt.sign(
 // CORRECT: Check authorization for every operation
 function checkAdminAuth(user: User): void {
   const requiredRoles = ['admin', 'super_admin', 'finance_admin'];
-  
-  if (!user.roles || !user.roles.some(r => requiredRoles.includes(r))) {
+
+  if (!user.roles || !user.roles.some((r) => requiredRoles.includes(r))) {
     throw new Error('Insufficient permissions');
   }
 }
@@ -256,26 +262,29 @@ function checkAdminAuth(user: User): void {
 
 ## 5. Idempotency
 
-All financial operations **must** be idempotent to prevent double-spend and race conditions.
+All financial operations **must** be idempotent to prevent double-spend and race
+conditions.
 
 ### ✅ Idempotency Pattern
 
 ```typescript
 // CORRECT: Check idempotency before processing
-async function processPayment(request: PaymentRequest): Promise<PaymentResponse> {
+async function processPayment(
+  request: PaymentRequest,
+): Promise<PaymentResponse> {
   // 1. Check idempotency
   const existing = await checkIdempotency(request.idempotencyKey, 'payment');
   if (existing) {
     // Return cached result, do not reprocess
     return existing.result;
   }
-  
+
   // 2. Process operation
   const result = await executePayment(request);
-  
+
   // 3. Store idempotency record
   await storeIdempotency(request.idempotencyKey, 'payment', result);
-  
+
   return result;
 }
 ```
@@ -300,27 +309,27 @@ Use optimistic locking for concurrent operations on shared resources.
 async function updateWallet(userId: string, amount: number): Promise<Wallet> {
   const wallet = await WalletModel.findOne({ userId });
   const currentVersion = wallet.version;
-  
+
   // Attempt update with version check
   const updated = await WalletModel.findOneAndUpdate(
     {
       userId: { $eq: userId },
-      version: { $eq: currentVersion },  // Only update if version matches
+      version: { $eq: currentVersion }, // Only update if version matches
     },
     {
       $inc: {
         balance: amount,
-        version: 1,  // Increment version
+        version: 1, // Increment version
       },
     },
-    { new: true }
+    { new: true },
   );
-  
+
   if (!updated) {
     // Version mismatch - someone else updated, retry
     return updateWallet(userId, amount);
   }
-  
+
   return updated;
 }
 ```
@@ -361,7 +370,7 @@ try {
       // Do NOT log sensitive details
     },
   });
-  
+
   // Return generic error to client
   throw new Error('Payment processing failed');
 }
@@ -403,7 +412,7 @@ try {
 const mongoOptions = {
   useNewUrlParser: true,
   useUnifiedTopology: true,
-  ssl: true,  // TLS 1.3 encryption
+  ssl: true, // TLS 1.3 encryption
   authSource: 'admin',
   retryWrites: true,
 };
@@ -482,17 +491,19 @@ res.json({ message: 'Success', data: sanitizedData });
 ## 12. Emergency Contacts
 
 **Security Incidents**: security@omniquestmedia.com  
-**Vulnerability Reports**: security@omniquestmedia.com  
+**Vulnerability Reports**: security@omniquestmedia.com
 
 ---
 
 ## 13. References
 
-- [SECURITY_AUDIT_AND_NO_BACKDOOR_POLICY.md](../SECURITY_AUDIT_AND_NO_BACKDOOR_POLICY.md) - Complete security policy
+- [SECURITY_AUDIT_AND_NO_BACKDOOR_POLICY.md](../SECURITY_AUDIT_AND_NO_BACKDOOR_POLICY.md) -
+  Complete security policy
 - [OWASP Top 10](https://owasp.org/Top10/) - Common vulnerabilities
 - [Node.js Security Best Practices](https://nodejs.org/en/docs/guides/security/)
 - [MongoDB Security Checklist](https://docs.mongodb.com/manual/administration/security-checklist/)
 
 ---
 
-**Remember**: Security is everyone's responsibility. When in doubt, ask for a security review!
+**Remember**: Security is everyone's responsibility. When in doubt, ask for a
+security review!

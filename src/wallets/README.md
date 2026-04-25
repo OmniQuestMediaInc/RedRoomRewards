@@ -5,6 +5,7 @@
 ## Purpose
 
 The wallets module manages:
+
 - User point balances and wallet state
 - Escrow holds for pending transactions
 - Model earnings wallets
@@ -27,6 +28,7 @@ Core service implementing `IWalletService` interface with operations:
 ### Types (`types.ts`)
 
 Comprehensive type definitions:
+
 - `Wallet` - User wallet with available/escrow balances
 - `ModelWallet` - Model earnings wallet
 - `EscrowItem` - Individual escrow tracking
@@ -39,28 +41,33 @@ Comprehensive type definitions:
 ## Key Features Implemented
 
 ### Optimistic Locking
+
 - Version field on all wallets
 - Automatic retry on conflicts
 - Prevents race conditions on concurrent updates
 
 ### Escrow Management
+
 - Three-state balance tracking (available/escrow/earned)
 - Atomic escrow holds
 - Queue-authorized settlement/refund only
 - Partial settlement support
 
 ### Balance Tracking
+
 - User wallets: available + escrow
 - Model wallets: earned balance
 - Real-time balance queries
 - Integration with ledger for audit trail
 
 ### Idempotency
+
 - All operations check idempotency keys
 - Cached results for duplicate requests
 - TTL-based cleanup
 
 ### Event Publishing
+
 - Real-time wallet events for UI updates
 - Escrow held/settled/refunded notifications
 - Graceful degradation if event bus unavailable
@@ -78,11 +85,13 @@ const walletService = new WalletService(ledgerService, {
 ## Database Models
 
 Uses three models:
+
 - `wallet.model.ts` - User wallets (available + escrow)
 - `model-wallet.model.ts` - Model earnings wallets
 - `escrow-item.model.ts` - Individual escrow tracking
 
 All models include:
+
 - Optimistic locking version field
 - Indexed queries for performance
 - Timestamps for audit trails
@@ -109,10 +118,12 @@ This ensures only the queue service can authorize final settlements.
 ## Testing
 
 Comprehensive test suite in:
+
 - `wallet.service.concurrency.spec.ts` - Concurrency tests
 - Additional unit tests for all operations
 
 Tests cover:
+
 - Escrow hold/settle/refund flows
 - Optimistic lock conflict handling
 - Insufficient balance errors
@@ -144,6 +155,7 @@ WalletService.refundEscrow() ← Queue authorized
 
 ## Related Documentation
 
-- `/.github/copilot-instructions.md` §9 "Coding Doctrine" - wallet-specific rules
+- `/.github/copilot-instructions.md` §9 "Coding Doctrine" - wallet-specific
+  rules
 - `/docs/WALLET_ESCROW_ARCHITECTURE.md` - Detailed escrow design
 - `/docs/TESTING_STRATEGY.md` - Testing requirements

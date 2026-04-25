@@ -1,148 +1,220 @@
 # RRR-WORK-001 — RedRoomRewards Active Work Charter
 
-**Document:** `PROGRAM_CONTROL/DIRECTIVES/QUEUE/RRR-WORK-001.md`
-**Repo:** OmniQuestMediaInc/RedRoomRewards
-**Supersedes:** `RRR-GOV-002.md` (retires to `archive/governance/RRR-GOV-002_2026-04-21.md` on Task A-002 merge)
-**Effective:** on merge of Task A-002 ratification PR
-**Authority:** Kevin B. Hartley, CEO — OmniQuest Media Inc.
-**Governing Document:** `PROGRAM_CONTROL/DIRECTIVES/QUEUE/OQMI_GOVERNANCE.md`
+**Document:** `PROGRAM_CONTROL/DIRECTIVES/QUEUE/RRR-WORK-001.md` **Repo:**
+OmniQuestMediaInc/RedRoomRewards **Supersedes:** `RRR-GOV-002.md` (retires to
+`archive/governance/RRR-GOV-002_2026-04-21.md` on Task A-002 merge)
+**Effective:** on merge of Task A-002 ratification PR **Authority:** Kevin B.
+Hartley, CEO — OmniQuest Media Inc. **Governing Document:**
+`PROGRAM_CONTROL/DIRECTIVES/QUEUE/OQMI_GOVERNANCE.md`
 
------
+---
 
 ## §0 — PERSISTENCE AND LIFECYCLE
 
-This charter is a **persistent, single-file** source of truth for RedRoomRewards coding tasks. It does not get replaced — it accumulates. Tasks retain their entries after completion; `Status: DONE` tasks remain in §6 as audit history, with merge SHA appended and a backref to the matching DONE record. New waves are appended below prior waves when the prior wave closes. The charter is never deleted; it is superseded only when a new top-level charter is ratified and this file moves to `archive/governance/`.
+This charter is a **persistent, single-file** source of truth for RedRoomRewards
+coding tasks. It does not get replaced — it accumulates. Tasks retain their
+entries after completion; `Status: DONE` tasks remain in §6 as audit history,
+with merge SHA appended and a backref to the matching DONE record. New waves are
+appended below prior waves when the prior wave closes. The charter is never
+deleted; it is superseded only when a new top-level charter is ratified and this
+file moves to `archive/governance/`.
 
 Lifecycle mechanics per `OQMI_GOVERNANCE.md §2`, §4, §8, and §10.
 
------
+---
 
 ## §1 — PURPOSE
 
-Single-file source of truth for all RedRoomRewards coding tasks and their status. Every task that touches `src/`, `.github/`, or `PROGRAM_CONTROL/` in this repo is either listed here or is out of scope for this charter period.
+Single-file source of truth for all RedRoomRewards coding tasks and their
+status. Every task that touches `src/`, `.github/`, or `PROGRAM_CONTROL/` in
+this repo is either listed here or is out of scope for this charter period.
 
-This charter does **not** re-state governance rules. Rules of engagement, merge policy, agent modes, escalation discipline, version control obligations, and the conflict-resolution hierarchy are all in `OQMI_GOVERNANCE.md`. This charter references them; it does not duplicate them.
+This charter does **not** re-state governance rules. Rules of engagement, merge
+policy, agent modes, escalation discipline, version control obligations, and the
+conflict-resolution hierarchy are all in `OQMI_GOVERNANCE.md`. This charter
+references them; it does not duplicate them.
 
------
+---
 
 ## §2 — AUTHORITY REFERENCES
 
-|Rule area                                                                                           |Location                |
-|:---------------------------------------------------------------------------------------------------|:-----------------------|
-|Merge policy (auto-merge, human-review categories, error-resolution clause)                         |`OQMI_GOVERNANCE.md §2` |
-|Agent rules of engagement (assignment-equals-approval, escalation triggers, DROID / ARCHITECT modes)|`OQMI_GOVERNANCE.md §4` |
-|Non-negotiable code and data invariants                                                             |`OQMI_GOVERNANCE.md §5` |
-|Security posture                                                                                    |`OQMI_GOVERNANCE.md §6` |
-|Commit discipline (format, FIZ 4-line format, prefix enum)                                          |`OQMI_GOVERNANCE.md §8` |
-|Agent handoff protocol                                                                              |`OQMI_GOVERNANCE.md §9` |
-|Conflict-resolution hierarchy                                                                       |`OQMI_GOVERNANCE.md §10`|
-|Amendment procedure                                                                                 |`OQMI_GOVERNANCE.md §11`|
+| Rule area                                                                                            | Location                 |
+| :--------------------------------------------------------------------------------------------------- | :----------------------- |
+| Merge policy (auto-merge, human-review categories, error-resolution clause)                          | `OQMI_GOVERNANCE.md §2`  |
+| Agent rules of engagement (assignment-equals-approval, escalation triggers, DROID / ARCHITECT modes) | `OQMI_GOVERNANCE.md §4`  |
+| Non-negotiable code and data invariants                                                              | `OQMI_GOVERNANCE.md §5`  |
+| Security posture                                                                                     | `OQMI_GOVERNANCE.md §6`  |
+| Commit discipline (format, FIZ 4-line format, prefix enum)                                           | `OQMI_GOVERNANCE.md §8`  |
+| Agent handoff protocol                                                                               | `OQMI_GOVERNANCE.md §9`  |
+| Conflict-resolution hierarchy                                                                        | `OQMI_GOVERNANCE.md §10` |
+| Amendment procedure                                                                                  | `OQMI_GOVERNANCE.md §11` |
 
-Active agent instructions file: `.github/copilot-instructions.md` (updated to reference this charter on Task A-002 merge).
+Active agent instructions file: `.github/copilot-instructions.md` (updated to
+reference this charter on Task A-002 merge).
 
------
+---
 
 ## §3 — RRR-SPECIFIC INVARIANTS
 
-These invariants are enforceable mappings of the generic `OQMI_GOVERNANCE.md §5` invariants onto this repo’s specific code paths. Where `OQMI_GOVERNANCE.md §5` states a pattern, this section states what that pattern means concretely in RedRoomRewards.
+These invariants are enforceable mappings of the generic `OQMI_GOVERNANCE.md §5`
+invariants onto this repo’s specific code paths. Where `OQMI_GOVERNANCE.md §5`
+states a pattern, this section states what that pattern means concretely in
+RedRoomRewards.
 
 ### §3.1 Financial integrity (FIZ-scope)
 
-1. **LedgerService is append-only.** `src/ledger/ledger.service.ts` exposes no `update` or `delete` primitives. The invariant test at `src/ledger/__tests__/ledger.invariants.spec.ts` (Task B-012) asserts this via reflection.
-1. **Sequence numbers are monotonic per `correlation_id` chain.** Each chain must increment strictly; gaps are a reconciliation error.
-1. **Every LedgerEntry has non-null `correlation_id` and `reason_code`.** No anonymous entries.
-1. **`Wallet.balance == sum(active PointLot.remaining)` AND `== sum(LedgerEntry.delta)`.** These equalities must hold at all times. Reconciliation job (Task B-011) detects drift; it never auto-corrects.
-1. **No hardcoded balance values in production code paths.** No `previousBalance = 100`, no `balance = 1000`, no test fixtures leaking into `src/`. **CI guard enforces (Task B-008).** *(Corrected: RRR-GOV-002 §3.1 incorrectly cited B-003 for this guard; the correct task in this charter is B-008.)*
-1. **WalletController must call the real service mutation before returning a response.** `creditPoints` must invoke `PointAccrualService`; `deductPoints` must invoke `PointRedemptionService`. A controller that fabricates a response without a mutation is a CRITICAL defect (see §5.2). Enforced by integration tests (Task B-003).
-1. **Multi-model wallet mutations (Wallet + Escrow + Ledger) must execute inside a `mongoose.startSession` transaction.** Optimistic-lock retry alone is insufficient for production atomicity (Task B-006). Runtime requirement: MongoDB replica-set or sharded deployment. `.env.example` must declare a `MONGO_URI` with a `?replicaSet=` example value.
+1. **LedgerService is append-only.** `src/ledger/ledger.service.ts` exposes no
+   `update` or `delete` primitives. The invariant test at
+   `src/ledger/__tests__/ledger.invariants.spec.ts` (Task B-012) asserts this
+   via reflection.
+1. **Sequence numbers are monotonic per `correlation_id` chain.** Each chain
+   must increment strictly; gaps are a reconciliation error.
+1. **Every LedgerEntry has non-null `correlation_id` and `reason_code`.** No
+   anonymous entries.
+1. **`Wallet.balance == sum(active PointLot.remaining)` AND
+   `== sum(LedgerEntry.delta)`.** These equalities must hold at all times.
+   Reconciliation job (Task B-011) detects drift; it never auto-corrects.
+1. **No hardcoded balance values in production code paths.** No
+   `previousBalance = 100`, no `balance = 1000`, no test fixtures leaking into
+   `src/`. **CI guard enforces (Task B-008).** _(Corrected: RRR-GOV-002 §3.1
+   incorrectly cited B-003 for this guard; the correct task in this charter is
+   B-008.)_
+1. **WalletController must call the real service mutation before returning a
+   response.** `creditPoints` must invoke `PointAccrualService`; `deductPoints`
+   must invoke `PointRedemptionService`. A controller that fabricates a response
+   without a mutation is a CRITICAL defect (see §5.2). Enforced by integration
+   tests (Task B-003).
+1. **Multi-model wallet mutations (Wallet + Escrow + Ledger) must execute inside
+   a `mongoose.startSession` transaction.** Optimistic-lock retry alone is
+   insufficient for production atomicity (Task B-006). Runtime requirement:
+   MongoDB replica-set or sharded deployment. `.env.example` must declare a
+   `MONGO_URI` with a `?replicaSet=` example value.
 
 ### §3.2 Data integrity
 
 Per `OQMI_GOVERNANCE.md §5`. Additionally in this repo:
 
-- `tenant_id` must be present as a filter key in every `Model.find`, `findOne`, `updateOne`, `updateMany`, `deleteOne` call in `src/services/`, `src/wallets/`, `src/ledger/`. CI guard enforces (Task B-009).
-- Schema migrations touching `balance`, `tokens`, `payout`, `escrow`, `commission`, `wallet`, `ledger_entry` require CEO merge per `OQMI_GOVERNANCE.md §2.2`.
+- `tenant_id` must be present as a filter key in every `Model.find`, `findOne`,
+  `updateOne`, `updateMany`, `deleteOne` call in `src/services/`,
+  `src/wallets/`, `src/ledger/`. CI guard enforces (Task B-009).
+- Schema migrations touching `balance`, `tokens`, `payout`, `escrow`,
+  `commission`, `wallet`, `ledger_entry` require CEO merge per
+  `OQMI_GOVERNANCE.md §2.2`.
 
 ### §3.3 Naming and canon
 
-Per `OQMI_GOVERNANCE.md §5` and CEO Decisions §4: `ChatNow.Zone` is the canonical merchant name (D2). `XXXChatNow.com` must not appear in any new code, comment, or document. Slot machine mechanics and seed data are permanently retired (D1).
+Per `OQMI_GOVERNANCE.md §5` and CEO Decisions §4: `ChatNow.Zone` is the
+canonical merchant name (D2). `XXXChatNow.com` must not appear in any new code,
+comment, or document. Slot machine mechanics and seed data are permanently
+retired (D1).
 
 ### §3.4 Governance
 
-- This charter is the single active task queue. New standalone directive files under `PROGRAM_CONTROL/DIRECTIVES/QUEUE/` bypass the model and are invalid.
-- On task merge: the executing agent (a) deletes the `.claim` file from `PROGRAM_CONTROL/DIRECTIVES/IN_PROGRESS/`, (b) writes the DONE record at `PROGRAM_CONTROL/DIRECTIVES/DONE/RRR-WORK-001-<id>-DONE.md`, (c) amends the task’s `Status:` line in this charter to `DONE` and appends `Merge SHA:` and `DONE record:` fields — all in the same PR. This is the full agent-owned lifecycle per CEO Decision W1.
-- Charter-integrity CI (Task A-003) enforces: every `Status: DONE` task must have a matching DONE record with a valid `Merge SHA:` line that resolves via `git cat-file -e`. CI fails any PR where this invariant is violated.
+- This charter is the single active task queue. New standalone directive files
+  under `PROGRAM_CONTROL/DIRECTIVES/QUEUE/` bypass the model and are invalid.
+- On task merge: the executing agent (a) deletes the `.claim` file from
+  `PROGRAM_CONTROL/DIRECTIVES/IN_PROGRESS/`, (b) writes the DONE record at
+  `PROGRAM_CONTROL/DIRECTIVES/DONE/RRR-WORK-001-<id>-DONE.md`, (c) amends the
+  task’s `Status:` line in this charter to `DONE` and appends `Merge SHA:` and
+  `DONE record:` fields — all in the same PR. This is the full agent-owned
+  lifecycle per CEO Decision W1.
+- Charter-integrity CI (Task A-003) enforces: every `Status: DONE` task must
+  have a matching DONE record with a valid `Merge SHA:` line that resolves via
+  `git cat-file -e`. CI fails any PR where this invariant is violated.
 
------
+---
 
 ## §4 — CEO DECISIONS IN FORCE
 
 Ported verbatim from `RRR-GOV-002.md §4`. Do not relitigate.
 
-|ID|Decision                                                                                |
-|:-|:---------------------------------------------------------------------------------------|
-|D1|Slot machine retired                                                                    |
-|D2|ChatNow.Zone canonical merchant name                                                    |
-|D3|Diamond Concierge zero earn                                                             |
-|D4|Room-Heat Inferno Bonus configurable via required `inferno_multiplier` on EarnRateConfig|
-|D5|GGS deferred — webhook-receive endpoints only                                           |
-|B1|`inferno_multiplier` required, no default                                               |
-|B2|Dual-tier model — `merchant_tier` (launch) + `rrr_member_tier` (future, nullable)       |
-|B3|Phase 1 merchants: RedRoomPleasures + Cyrano. Phase 2: ChatNow.Zone                     |
-|B4|Cross-merchant rate 1:1 default via `MerchantPairConfig`                                |
-|B5|Tier caps placeholders: PLATINUM 50 / GOLD 35 / SILVER 20 / MEMBER 10 / GUEST 5         |
+| ID  | Decision                                                                                 |
+| :-- | :--------------------------------------------------------------------------------------- |
+| D1  | Slot machine retired                                                                     |
+| D2  | ChatNow.Zone canonical merchant name                                                     |
+| D3  | Diamond Concierge zero earn                                                              |
+| D4  | Room-Heat Inferno Bonus configurable via required `inferno_multiplier` on EarnRateConfig |
+| D5  | GGS deferred — webhook-receive endpoints only                                            |
+| B1  | `inferno_multiplier` required, no default                                                |
+| B2  | Dual-tier model — `merchant_tier` (launch) + `rrr_member_tier` (future, nullable)        |
+| B3  | Phase 1 merchants: RedRoomPleasures + Cyrano. Phase 2: ChatNow.Zone                      |
+| B4  | Cross-merchant rate 1:1 default via `MerchantPairConfig`                                 |
+| B5  | Tier caps placeholders: PLATINUM 50 / GOLD 35 / SILVER 20 / MEMBER 10 / GUEST 5          |
 
 Additional decisions locked 2026-04-21 (thread #5 assessment sign-off):
 
-|ID|Decision                                                                                                                                                                                                                                          |
-|:-|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-|W1|`directive-dispatch.yml` deleted entirely (Option A). Agents own the full lifecycle in their final commit.                                                                                                                                        |
-|W2|`.github/copilot-instructions.md` filename retained. Content is agent-neutral; filename is historical.                                                                                                                                            |
-|W3|Transition model: Path 2. Wave A of this charter IS the cleanup bundle. Charter ratification (Task A-002) is the second task; A-001 (repo scoping) is first. On A-002 merge, RRR-GOV-002 retires to `archive/governance/` in the same commit.     |
-|W4|`infra/` ship-vs-delete deferred pending CEO deploy-target decision. Not a blocker for Wave A or B.                                                                                                                                               |
-|W5|`OQMI_SYSTEM_STATE.md` found at `PROGRAM_CONTROL/DIRECTIVES/QUEUE/OQMI_SYSTEM_STATE.md` is scoped to ChatNowZone–BUILD. RRR-WORK-001 installs a separate RRR-scoped `OQMI_SYSTEM_STATE_RRR.md` as Task A-001. The CNZ-scoped file is not modified.|
+| ID  | Decision                                                                                                                                                                                                                                           |
+| :-- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| W1  | `directive-dispatch.yml` deleted entirely (Option A). Agents own the full lifecycle in their final commit.                                                                                                                                         |
+| W2  | `.github/copilot-instructions.md` filename retained. Content is agent-neutral; filename is historical.                                                                                                                                             |
+| W3  | Transition model: Path 2. Wave A of this charter IS the cleanup bundle. Charter ratification (Task A-002) is the second task; A-001 (repo scoping) is first. On A-002 merge, RRR-GOV-002 retires to `archive/governance/` in the same commit.      |
+| W4  | `infra/` ship-vs-delete deferred pending CEO deploy-target decision. Not a blocker for Wave A or B.                                                                                                                                                |
+| W5  | `OQMI_SYSTEM_STATE.md` found at `PROGRAM_CONTROL/DIRECTIVES/QUEUE/OQMI_SYSTEM_STATE.md` is scoped to ChatNowZone–BUILD. RRR-WORK-001 installs a separate RRR-scoped `OQMI_SYSTEM_STATE_RRR.md` as Task A-001. The CNZ-scoped file is not modified. |
 
------
+---
 
 ## §5 — CURRENT BUILD STATE
 
 ### §5.1 Merged on `main` (verified 2026-04-21)
 
-All Wave A tasks from `RRR-GOV-002` are confirmed `Status: DONE` with DONE records on `main`:
+All Wave A tasks from `RRR-GOV-002` are confirmed `Status: DONE` with DONE
+records on `main`:
 
 - Wallet, ModelWallet, EscrowItem, LedgerEntry, Idempotency models
 - PointLot model (RRR-P1-001, PR #218)
-- Five Config models — ValuationConfig, EarnRateConfig, TierCapConfig, MicroTopupConfig, SpendOrderConfig (RRR-P1-CFG, PR #226)
+- Five Config models — ValuationConfig, EarnRateConfig, TierCapConfig,
+  MicroTopupConfig, SpendOrderConfig (RRR-P1-CFG, PR #226)
 - LedgerService (append-only)
-- WalletService (partial — optimistic-lock posture; atomicity gap is CRITICAL finding #3, see §5.2)
+- WalletService (partial — optimistic-lock posture; atomicity gap is CRITICAL
+  finding #3, see §5.2)
 - EscrowService
-- PointAccrualService, PointRedemptionService, PointExpirationService (partial — no config wiring)
+- PointAccrualService, PointRedemptionService, PointExpirationService (partial —
+  no config wiring)
 - WalletController real-balance wiring (RRR-P0-001)
-- Idempotency wrapper on credit/deduct (RRR-P0-002) — **wrapper present; underlying mutation absent — see §5.2 CRITICAL #2**
+- Idempotency wrapper on credit/deduct (RRR-P0-002) — **wrapper present;
+  underlying mutation absent — see §5.2 CRITICAL #2**
 - Repo-wide rename XXXChatNow.com → ChatNow.Zone (RRR-P1-006)
 - Slot machine + seed data removed (RRR-P1-007)
 - PROGRAM_CONTROL scaffolding + CI workflows (RRR-BOOTSTRAP-001 / RRR-GOV-001)
 - `OQMI_GOVERNANCE.md` v1.0 at `PROGRAM_CONTROL/DIRECTIVES/QUEUE/`
-- RRR-GOV-002 Wave A (A-001 through A-005): all `Status: DONE`, DONE records confirmed on `main`
+- RRR-GOV-002 Wave A (A-001 through A-005): all `Status: DONE`, DONE records
+  confirmed on `main`
 
 ### §5.2 Critical findings (thread #5 assessment — must close before further FIZ work)
 
-**CRITICAL #1 — Dead NestJS tree `api/src/modules/`**
-A parallel, inert code tree exists under `api/src/modules/` (ledger + loyalty-points NestJS modules, ~9,500 bytes of middleware with no NestJS dependencies in `package.json`). Outside `tsconfig.json` compilation roots; test files never run under Jest. Creates phantom “we already have X” signals during planning. Must be deleted before any Wave B work touching idempotency, webhooks, or ledger controllers. Task A-004. Closes assessment §3.1.
+**CRITICAL #1 — Dead NestJS tree `api/src/modules/`** A parallel, inert code
+tree exists under `api/src/modules/` (ledger + loyalty-points NestJS modules,
+~9,500 bytes of middleware with no NestJS dependencies in `package.json`).
+Outside `tsconfig.json` compilation roots; test files never run under Jest.
+Creates phantom “we already have X” signals during planning. Must be deleted
+before any Wave B work touching idempotency, webhooks, or ledger controllers.
+Task A-004. Closes assessment §3.1.
 
-**CRITICAL #2 — `WalletController.creditPoints` and `.deductPoints` are no-ops returning fabricated responses**
-Both endpoints run idempotency checks, compute `newBalance = previousBalance ± amount` locally, cache that response, and return it — without ever calling `PointAccrualService`, `PointRedemptionService`, or creating a `LedgerEntry`. Controller docstring (lines 7–12) confirms it is a placeholder. A subsequent `GET /wallets/:userId` returns the unchanged balance. Tasks B-001, B-002, B-003. Closes assessment §3.2.
+**CRITICAL #2 — `WalletController.creditPoints` and `.deductPoints` are no-ops
+returning fabricated responses** Both endpoints run idempotency checks, compute
+`newBalance = previousBalance ± amount` locally, cache that response, and return
+it — without ever calling `PointAccrualService`, `PointRedemptionService`, or
+creating a `LedgerEntry`. Controller docstring (lines 7–12) confirms it is a
+placeholder. A subsequent `GET /wallets/:userId` returns the unchanged balance.
+Tasks B-001, B-002, B-003. Closes assessment §3.2.
 
-**CRITICAL #3 — Wallet writes lack MongoDB transaction atomicity (carry-forward)**
-`src/wallets/wallet.service.ts` header comment acknowledges multi-model mutations rely on optimistic-lock retries, not `mongoose.startSession` transactions. Must resolve before the reconciliation job (B-011) — shipping recon before closing the atomicity gap means the recon will reliably find drift it didn’t cause. Task B-006. Closes assessment §3.3.
+**CRITICAL #3 — Wallet writes lack MongoDB transaction atomicity
+(carry-forward)** `src/wallets/wallet.service.ts` header comment acknowledges
+multi-model mutations rely on optimistic-lock retries, not
+`mongoose.startSession` transactions. Must resolve before the reconciliation job
+(B-011) — shipping recon before closing the atomicity gap means the recon will
+reliably find drift it didn’t cause. Task B-006. Closes assessment §3.3.
 
 ### §5.3 Known-missing (drives §6 Wave B)
 
-- `Tenant`, `Merchant`, `LoyaltyAccount`, `IdentityLink`, `MerchantPairConfig` models
-- Service-to-config wiring (accrual ↔ EarnRateConfig; redemption ↔ TierCapConfig + SpendOrderConfig; expiration ↔ SpendOrderConfig)
+- `Tenant`, `Merchant`, `LoyaltyAccount`, `IdentityLink`, `MerchantPairConfig`
+  models
+- Service-to-config wiring (accrual ↔ EarnRateConfig; redemption ↔
+  TierCapConfig + SpendOrderConfig; expiration ↔ SpendOrderConfig)
 - Auth / authz / tenant-isolation middleware (Wave C)
 - Webhook receive (D5 GGS-ready) + emit infrastructure (Wave C)
-- Reconciliation job, settlement service, tier evaluation service, fraud signal service
+- Reconciliation job, settlement service, tier evaluation service, fraud signal
+  service
 - Idempotency coverage beyond credit/deduct
 - CI guards: hardcoded-balance, tenant_id scope
 - LedgerService invariant tests
@@ -150,31 +222,43 @@ Both endpoints run idempotency checks, compute `newBalance = previousBalance ± 
 ### §5.4 Carry-forward concerns
 
 - 8 pre-existing test failures (triaged in Wave B cleanup, Task B-CLEAN)
-- `infra/` is README-only scaffolding; ship-vs-delete pending CEO deploy-target decision (W4)
-- RRR-GOV-002 §10 changelog gap: PR #235 amended §3.5 item 18 (CEO_GATE removal) without appending a §10 row. Backfill via ARCHITECT MODE with CEO rationale is an A-CLEAN concern.
+- `infra/` is README-only scaffolding; ship-vs-delete pending CEO deploy-target
+  decision (W4)
+- RRR-GOV-002 §10 changelog gap: PR #235 amended §3.5 item 18 (CEO_GATE removal)
+  without appending a §10 row. Backfill via ARCHITECT MODE with CEO rationale is
+  an A-CLEAN concern.
 
------
+---
 
 ## §6 — ACTIVE TASK STREAM
 
 **Conventions:**
 
-- Tasks are claimed first-come-first-served once all `Depends-on` entries are `DONE`.
+- Tasks are claimed first-come-first-served once all `Depends-on` entries are
+  `DONE`.
 - `Agent:` is a hint, not a lock. Claude Code is the sole executing agent.
-- `FIZ: YES` tasks require the 4-line FIZ commit format per `OQMI_GOVERNANCE.md §8` and do not auto-merge.
-- `CEO_GATE` field dropped — superseded by `OQMI_GOVERNANCE.md §2.2` Human-Review Categories.
-- On merge: agent (1) deletes `.claim` file from `IN_PROGRESS/`, (2) writes DONE record at `PROGRAM_CONTROL/DIRECTIVES/DONE/RRR-WORK-001-<id>-DONE.md`, (3) amends this charter’s `Status:` line to `DONE` with `Merge SHA:` and `DONE record:` — all in the same PR.
-- `Closes assessment §X` lines trace provenance to the thread #5 tech debt assessment.
+- `FIZ: YES` tasks require the 4-line FIZ commit format per
+  `OQMI_GOVERNANCE.md §8` and do not auto-merge.
+- `CEO_GATE` field dropped — superseded by `OQMI_GOVERNANCE.md §2.2`
+  Human-Review Categories.
+- On merge: agent (1) deletes `.claim` file from `IN_PROGRESS/`, (2) writes DONE
+  record at `PROGRAM_CONTROL/DIRECTIVES/DONE/RRR-WORK-001-<id>-DONE.md`, (3)
+  amends this charter’s `Status:` line to `DONE` with `Merge SHA:` and
+  `DONE record:` — all in the same PR.
+- `Closes assessment §X` lines trace provenance to the thread #5 tech debt
+  assessment.
 
------
+---
 
 ### WAVE A — Repo Scoping, Cleanup + Foundation
 
 Wave A must close before Wave B FIZ work begins.
 
-**Task ordering:** A-001 (repo state file) must merge first. A-002 (ratification) depends on A-001. All other Wave A tasks depend on A-002 and may run in parallel unless noted. A-007 depends on A-004 (dead tree deleted first).
+**Task ordering:** A-001 (repo state file) must merge first. A-002
+(ratification) depends on A-001. All other Wave A tasks depend on A-002 and may
+run in parallel unless noted. A-007 depends on A-004 (dead tree deleted first).
 
------
+---
 
 #### Task A-001 — Install RRR-scoped `OQMI_SYSTEM_STATE_RRR.md`
 
@@ -187,30 +271,48 @@ Wave A must close before Wave B FIZ work begins.
 - **FIZ:** NO
 - **Depends-on:** (none — first task; must merge before A-002)
 - **Scope:**
-  - The existing `OQMI_SYSTEM_STATE.md` at `PROGRAM_CONTROL/DIRECTIVES/QUEUE/` is scoped to **ChatNowZone–BUILD**, not RedRoomRewards. It must not be used as-is for this repo.
-  - Create `PROGRAM_CONTROL/DIRECTIVES/QUEUE/OQMI_SYSTEM_STATE_RRR.md` scoped specifically to OmniQuestMediaInc/RedRoomRewards, containing:
-    - **§0 Purpose** — living state tracker for this repo; not a doctrine document
-    - **§1 Repo Orientation** — repo name, URL, default branch (`main`), language (TypeScript), active charter (`RRR-WORK-001.md`)
-    - **§2 Service Inventory** — confirmed on `main`: WalletService, LedgerService, EscrowService, PointAccrualService, PointRedemptionService, PointExpirationService, IdempotencyService, WalletController (flagged: CRITICAL #2 — mutation absent); missing: Tenant, Merchant, ReconciliationService
-    - **§3 DONE** — mirror of §5.1 from this charter (reverse-chronological shipped items)
+  - The existing `OQMI_SYSTEM_STATE.md` at `PROGRAM_CONTROL/DIRECTIVES/QUEUE/`
+    is scoped to **ChatNowZone–BUILD**, not RedRoomRewards. It must not be used
+    as-is for this repo.
+  - Create `PROGRAM_CONTROL/DIRECTIVES/QUEUE/OQMI_SYSTEM_STATE_RRR.md` scoped
+    specifically to OmniQuestMediaInc/RedRoomRewards, containing:
+    - **§0 Purpose** — living state tracker for this repo; not a doctrine
+      document
+    - **§1 Repo Orientation** — repo name, URL, default branch (`main`),
+      language (TypeScript), active charter (`RRR-WORK-001.md`)
+    - **§2 Service Inventory** — confirmed on `main`: WalletService,
+      LedgerService, EscrowService, PointAccrualService, PointRedemptionService,
+      PointExpirationService, IdempotencyService, WalletController (flagged:
+      CRITICAL #2 — mutation absent); missing: Tenant, Merchant,
+      ReconciliationService
+    - **§3 DONE** — mirror of §5.1 from this charter (reverse-chronological
+      shipped items)
     - **§4 WIP** — current in-progress items (initially: RRR-WORK-001 Wave A)
-    - **§5 OUTSTANDING** — mirror of §5.2–§5.3 (CRITICAL findings + Wave B backlog)
+    - **§5 OUTSTANDING** — mirror of §5.2–§5.3 (CRITICAL findings + Wave B
+      backlog)
     - **§6 BLOCKERS** — CRITICAL #1, #2, #3 plus W4 (infra decision)
-    - **§7 RETIRED** — D1 (slot machine), D2-rename, archived CLAUDE.md, directive workflows (pending A-005)
-    - **§8 Update Protocol** — any agent completing work must update this file in the same PR
-  - Add a one-line reference to `OQMI_SYSTEM_STATE_RRR.md` in `.github/copilot-instructions.md`
+    - **§7 RETIRED** — D1 (slot machine), D2-rename, archived CLAUDE.md,
+      directive workflows (pending A-005)
+    - **§8 Update Protocol** — any agent completing work must update this file
+      in the same PR
+  - Add a one-line reference to `OQMI_SYSTEM_STATE_RRR.md` in
+    `.github/copilot-instructions.md`
   - Do NOT copy CNZ service inventory or CNZ-specific flags into this file
-- **Out of scope:** modifying the CNZ-scoped `OQMI_SYSTEM_STATE.md`; any `src/` changes
+- **Out of scope:** modifying the CNZ-scoped `OQMI_SYSTEM_STATE.md`; any `src/`
+  changes
 - **Acceptance:**
-  - `PROGRAM_CONTROL/DIRECTIVES/QUEUE/OQMI_SYSTEM_STATE_RRR.md` present with all eight sections
+  - `PROGRAM_CONTROL/DIRECTIVES/QUEUE/OQMI_SYSTEM_STATE_RRR.md` present with all
+    eight sections
   - File header declares `Repo: OmniQuestMediaInc/RedRoomRewards`
   - `.github/copilot-instructions.md` references it
   - No CNZ-specific content bleeds in
-- **Commit format:** `GOV: install RRR-scoped OQMI_SYSTEM_STATE_RRR.md — RRR-WORK-001-A001`
+- **Commit format:**
+  `GOV: install RRR-scoped OQMI_SYSTEM_STATE_RRR.md — RRR-WORK-001-A001`
 - **Report-back:** `PROGRAM_CONTROL/REPORT_BACK/RRR-WORK-001-A001-report.md`
-- **Closes assessment:** Open question Q1 (OQMI_SYSTEM_STATE.md — CEO confirmed: install scoped to RRR as first task)
+- **Closes assessment:** Open question Q1 (OQMI_SYSTEM_STATE.md — CEO confirmed:
+  install scoped to RRR as first task)
 
------
+---
 
 #### Task A-002 — Charter ratification + RRR-GOV-002 retirement
 
@@ -225,23 +327,30 @@ Wave A must close before Wave B FIZ work begins.
 - **Scope:**
   - This PR IS the ratification. On merge:
     - `RRR-WORK-001.md` becomes the active charter
-    - `RRR-GOV-002.md` moves to `archive/governance/RRR-GOV-002_2026-04-21.md` in the same commit (all Wave A tasks confirmed `Status: DONE` with DONE records; the archive copy is internally consistent)
-    - `.github/copilot-instructions.md` updated to reference `RRR-WORK-001` as the active charter (if not already done in A-001)
-    - `PROGRAM_CONTROL/HANDOFFS/` directory created with `.gitkeep` (per `OQMI_GOVERNANCE.md §9`)
+    - `RRR-GOV-002.md` moves to `archive/governance/RRR-GOV-002_2026-04-21.md`
+      in the same commit (all Wave A tasks confirmed `Status: DONE` with DONE
+      records; the archive copy is internally consistent)
+    - `.github/copilot-instructions.md` updated to reference `RRR-WORK-001` as
+      the active charter (if not already done in A-001)
+    - `PROGRAM_CONTROL/HANDOFFS/` directory created with `.gitkeep` (per
+      `OQMI_GOVERNANCE.md §9`)
     - Thread #6 handoff filed at `PROGRAM_CONTROL/HANDOFFS/THREAD-06-HANDOFF.md`
-    - `docs/history/TECH_DEBT_ASSESSMENT_2026-04-21.md` installed (archive of thread #5 assessment)
+    - `docs/history/TECH_DEBT_ASSESSMENT_2026-04-21.md` installed (archive of
+      thread #5 assessment)
 - **Out of scope:** any `src/` changes; authoring OQMI_GOVERNANCE.md content
 - **Acceptance:**
-  - `PROGRAM_CONTROL/DIRECTIVES/QUEUE/RRR-GOV-002.md` absent; present at `archive/governance/RRR-GOV-002_2026-04-21.md`
+  - `PROGRAM_CONTROL/DIRECTIVES/QUEUE/RRR-GOV-002.md` absent; present at
+    `archive/governance/RRR-GOV-002_2026-04-21.md`
   - `.github/copilot-instructions.md` references `RRR-WORK-001`
   - `PROGRAM_CONTROL/HANDOFFS/` directory exists
   - Thread #6 handoff filed
   - Assessment archived under `docs/history/`
-- **Commit format:** `GOV: ratify RRR-WORK-001, retire RRR-GOV-002 to archive — RRR-WORK-001-A002`
+- **Commit format:**
+  `GOV: ratify RRR-WORK-001, retire RRR-GOV-002 to archive — RRR-WORK-001-A002`
 - **Report-back:** `PROGRAM_CONTROL/REPORT_BACK/RRR-WORK-001-A002-report.md`
 - **Closes assessment:** §7 Wave A ratification task (Path 2 transition)
 
------
+---
 
 #### Task A-003 — Charter-integrity CI check
 
@@ -252,22 +361,29 @@ Wave A must close before Wave B FIZ work begins.
 - **Depends-on:** A-002
 - **Scope:**
   - Add CI script at `scripts/ci/charter-integrity-check.js` (or `.ts`)
-  - Parses `PROGRAM_CONTROL/DIRECTIVES/QUEUE/RRR-WORK-001.md`, collects every task with `Status: DONE`
+  - Parses `PROGRAM_CONTROL/DIRECTIVES/QUEUE/RRR-WORK-001.md`, collects every
+    task with `Status: DONE`
   - For each DONE task, asserts:
-    - A file exists at `PROGRAM_CONTROL/DIRECTIVES/DONE/RRR-WORK-001-<id>-DONE.md`
+    - A file exists at
+      `PROGRAM_CONTROL/DIRECTIVES/DONE/RRR-WORK-001-<id>-DONE.md`
     - That file contains a `Merge SHA:` line
     - `git cat-file -e <sha>` resolves (SHA is real and reachable)
-  - Exits non-zero on any mismatch: `CHARTER INTEGRITY FAIL: Task <id> marked DONE but missing DONE record at <path>`
-  - Wired into `.github/workflows/ci.yml` as a required step on PR and `main` push
-- **Out of scope:** checking RRR-GOV-002 DONE records (archived; historical only)
+  - Exits non-zero on any mismatch:
+    `CHARTER INTEGRITY FAIL: Task <id> marked DONE but missing DONE record at <path>`
+  - Wired into `.github/workflows/ci.yml` as a required step on PR and `main`
+    push
+- **Out of scope:** checking RRR-GOV-002 DONE records (archived; historical
+  only)
 - **Acceptance:**
-  - Script fires correctly on a deliberately-introduced bad fixture (inject a fake `Status: DONE` task with no DONE record; confirm non-zero exit)
+  - Script fires correctly on a deliberately-introduced bad fixture (inject a
+    fake `Status: DONE` task with no DONE record; confirm non-zero exit)
   - CI green on current `main` after A-002 merges
-- **Commit format:** `INFRA: charter-integrity CI check for DONE records and merge SHAs — RRR-WORK-001-A003`
+- **Commit format:**
+  `INFRA: charter-integrity CI check for DONE records and merge SHAs — RRR-WORK-001-A003`
 - **Report-back:** `PROGRAM_CONTROL/REPORT_BACK/RRR-WORK-001-A003-report.md`
 - **Closes assessment:** §4.1 (structural fix for charter-reality drift)
 
------
+---
 
 #### Task A-004 — Delete dead `api/src/modules/` tree
 
@@ -277,20 +393,24 @@ Wave A must close before Wave B FIZ work begins.
 - **FIZ:** NO
 - **Depends-on:** A-002
 - **Scope:**
-  - `git rm -r api/src/modules/` — wholesale deletion of the dead NestJS code tree
-  - Verify no file outside `api/src/modules/` imports from it: `grep -r "from.*api/src/modules" src/`
+  - `git rm -r api/src/modules/` — wholesale deletion of the dead NestJS code
+    tree
+  - Verify no file outside `api/src/modules/` imports from it:
+    `grep -r "from.*api/src/modules" src/`
   - Remove any cross-references found in the same PR
   - Update `OQMI_SYSTEM_STATE_RRR.md §7 RETIRED` to note deletion (same PR)
-- **Out of scope:** NestJS migration or replacement; touching `src/` beyond cross-reference cleanup
+- **Out of scope:** NestJS migration or replacement; touching `src/` beyond
+  cross-reference cleanup
 - **Acceptance:**
   - `api/src/modules/` absent from repo tree
   - `tsc --noEmit` still passes
   - `npm run test:ci` still passes
-- **Commit format:** `CHORE: delete dead api/src/modules NestJS tree — RRR-WORK-001-A004`
+- **Commit format:**
+  `CHORE: delete dead api/src/modules NestJS tree — RRR-WORK-001-A004`
 - **Report-back:** `PROGRAM_CONTROL/REPORT_BACK/RRR-WORK-001-A004-report.md`
 - **Closes assessment:** §3.1
 
------
+---
 
 #### Task A-005 — Reissue: delete `directive-intake.yml` and `directive-dispatch.yml`
 
@@ -299,24 +419,33 @@ Wave A must close before Wave B FIZ work begins.
 - **Type:** INFRA
 - **FIZ:** NO
 - **Depends-on:** A-002
-- **Note:** Any open PR touching these workflow files is superseded by this task. CEO will close any in-flight PR before this task is claimed. This task owns the final state of both files — execute cleanly without reference to prior attempts.
+- **Note:** Any open PR touching these workflow files is superseded by this
+  task. CEO will close any in-flight PR before this task is claimed. This task
+  owns the final state of both files — execute cleanly without reference to
+  prior attempts.
 - **Scope:**
   - Confirm CEO has closed any in-flight PR on these files before claiming
   - Delete `.github/workflows/directive-intake.yml`
   - Delete `.github/workflows/directive-dispatch.yml`
-  - Verify no other workflow references either filename: `grep -r "directive-intake\|directive-dispatch" .github/`
-  - Add an `## Agent Lifecycle` section to `.github/copilot-instructions.md` documenting the agent-owned lifecycle: claim `.claim` file → execute → in the merge PR: delete claim file, write DONE record, amend charter `Status:` — no workflow automation
-- **Out of scope:** replacing these workflows with new automation; any `src/` changes
+  - Verify no other workflow references either filename:
+    `grep -r "directive-intake\|directive-dispatch" .github/`
+  - Add an `## Agent Lifecycle` section to `.github/copilot-instructions.md`
+    documenting the agent-owned lifecycle: claim `.claim` file → execute → in
+    the merge PR: delete claim file, write DONE record, amend charter `Status:`
+    — no workflow automation
+- **Out of scope:** replacing these workflows with new automation; any `src/`
+  changes
 - **Acceptance:**
   - Both workflow files absent from `.github/workflows/`
   - No remaining references to either filename in any workflow file
   - CI still passes
   - Agent lifecycle documented in `.github/copilot-instructions.md`
-- **Commit format:** `INFRA: delete directive-intake and directive-dispatch; document agent-owned lifecycle — RRR-WORK-001-A005`
+- **Commit format:**
+  `INFRA: delete directive-intake and directive-dispatch; document agent-owned lifecycle — RRR-WORK-001-A005`
 - **Report-back:** `PROGRAM_CONTROL/REPORT_BACK/RRR-WORK-001-A005-report.md`
 - **Closes assessment:** §4.2 (CEO Decision W1)
 
------
+---
 
 #### Task A-006 — Consolidate five Copilot-governance docs into `.github/copilot-instructions.md`
 
@@ -326,25 +455,37 @@ Wave A must close before Wave B FIZ work begins.
 - **FIZ:** NO
 - **Depends-on:** A-002
 - **Scope:**
-  - **Keep and update:** `.github/copilot-instructions.md` — updated in A-002 to reference RRR-WORK-001; this task collapses the other four into it where non-redundant
-  - **Collapse:** merge non-redundant content from the legacy root copilot-instructions doc (616 lines) and the legacy `docs/governance/` copilot-governance doc (139 lines) into `.github/copilot-instructions.md`; archive originals to `docs/history/`
-  - **Rename + relocate:** legacy `docs/governance/` copilot-execution-rules doc → `docs/governance/AGENT_EXECUTION_RULES.md`
-  - **Relocate:** legacy `docs/copilot/` chip-menu spec → `docs/specs/CHIP_MENU_TOKEN_SYSTEMS_v1.0.md` (product-feature spec, not governance); delete empty `docs/copilot/` directory
-  - **Scan and fix cross-references:** grep for all inbound references to renamed/relocated files; patch in the same PR
-  - **Low-severity folds:** check `docs/DECISIONS.md` — if single-entry, add pointer to this charter’s §4; remove `"nextjs"` from `package.json` keywords
+  - **Keep and update:** `.github/copilot-instructions.md` — updated in A-002 to
+    reference RRR-WORK-001; this task collapses the other four into it where
+    non-redundant
+  - **Collapse:** merge non-redundant content from the legacy root
+    copilot-instructions doc (616 lines) and the legacy `docs/governance/`
+    copilot-governance doc (139 lines) into `.github/copilot-instructions.md`;
+    archive originals to `docs/history/`
+  - **Rename + relocate:** legacy `docs/governance/` copilot-execution-rules doc
+    → `docs/governance/AGENT_EXECUTION_RULES.md`
+  - **Relocate:** legacy `docs/copilot/` chip-menu spec →
+    `docs/specs/CHIP_MENU_TOKEN_SYSTEMS_v1.0.md` (product-feature spec, not
+    governance); delete empty `docs/copilot/` directory
+  - **Scan and fix cross-references:** grep for all inbound references to
+    renamed/relocated files; patch in the same PR
+  - **Low-severity folds:** check `docs/DECISIONS.md` — if single-entry, add
+    pointer to this charter’s §4; remove `"nextjs"` from `package.json` keywords
 - **Out of scope:** authoring new governance doctrine; touching `src/`
 - **Acceptance:**
-  - One canonical agent-instructions file: `.github/copilot-instructions.md` (references RRR-WORK-001 and `OQMI_SYSTEM_STATE_RRR.md`)
+  - One canonical agent-instructions file: `.github/copilot-instructions.md`
+    (references RRR-WORK-001 and `OQMI_SYSTEM_STATE_RRR.md`)
   - Legacy root copilot-instructions file absent from repo root
   - `docs/copilot/` directory absent
   - `docs/governance/AGENT_EXECUTION_RULES.md` present
   - `docs/specs/CHIP_MENU_TOKEN_SYSTEMS_v1.0.md` present
   - No broken cross-references
-- **Commit format:** `DOCS: consolidate Copilot-governance docs into agent-neutral instructions — RRR-WORK-001-A006`
+- **Commit format:**
+  `DOCS: consolidate Copilot-governance docs into agent-neutral instructions — RRR-WORK-001-A006`
 - **Report-back:** `PROGRAM_CONTROL/REPORT_BACK/RRR-WORK-001-A006-report.md`
 - **Closes assessment:** §4.3 (CEO Decision W2), §6.2, §6.4
 
------
+---
 
 #### Task A-007 — Audit `CLEANUP.md` mandatory-removal sections
 
@@ -354,24 +495,30 @@ Wave A must close before Wave B FIZ work begins.
 - **FIZ:** NO
 - **Depends-on:** A-004 (dead tree deleted first so grep is clean)
 - **Scope:**
-  - Grep `src/` for residual legacy imports against the four unchecked sections in `CLEANUP.md`:
+  - Grep `src/` for residual legacy imports against the four unchecked sections
+    in `CLEANUP.md`:
     - Media & Broadcasting
     - Social/Interactive Features
     - Market/Commerce Logic
     - Discovery/Social Browsing
-  - For each match: remove the import/reference in this PR (if isolated) or file a follow-up task
-  - Tick checkboxes in `CLEANUP.md` for confirmed-clean sections; annotate any with follow-ups
+  - For each match: remove the import/reference in this PR (if isolated) or file
+    a follow-up task
+  - Tick checkboxes in `CLEANUP.md` for confirmed-clean sections; annotate any
+    with follow-ups
   - Audit the four “Other Areas” unchecked boxes on the same pass
-- **Out of scope:** implementing replacements for removed modules; `src/` refactors beyond import removal
+- **Out of scope:** implementing replacements for removed modules; `src/`
+  refactors beyond import removal
 - **Acceptance:**
   - `CLEANUP.md` updated — every tick is verified clean
-  - Any remaining legacy imports have a follow-up task filed or removed in this PR
+  - Any remaining legacy imports have a follow-up task filed or removed in this
+    PR
   - `npm run test:ci` still passes
-- **Commit format:** `CHORE: audit CLEANUP.md mandatory-removal sections; grep src for legacy imports — RRR-WORK-001-A007`
+- **Commit format:**
+  `CHORE: audit CLEANUP.md mandatory-removal sections; grep src for legacy imports — RRR-WORK-001-A007`
 - **Report-back:** `PROGRAM_CONTROL/REPORT_BACK/RRR-WORK-001-A007-report.md`
 - **Closes assessment:** §5.1
 
------
+---
 
 #### Task A-008 — Duplicate-file cleanup
 
@@ -381,23 +528,33 @@ Wave A must close before Wave B FIZ work begins.
 - **FIZ:** NO
 - **Depends-on:** A-002
 - **Scope:**
-  - **Work-order files:** diff `docs/work-orders/WORK_ORDER_82B.md` vs `docs/WORK_ORDER_82B_82C_ADDENDUM.md`; archive both to `docs/history/`
-  - **Admin-ops duplication:** diff `src/admin-ops/service.ts` (1.2 KB stub) vs `src/services/admin-ops.service.ts` (12.1 KB); if stub is superseded: delete `src/admin-ops/service.ts` and `src/admin-ops/index.ts`, update any imports; if not: document the relationship in a comment
-  - **`validate-schema.js` at repo root:** relocate to `scripts/`; update `package.json` `scripts.validate:schema` path; delete root copy
-  - **`docs/RISKY_NAME_CHANGE_TAGS.md`:** migration artifact for RRR-P1-006 (complete). Archive to `docs/history/`
-  - **`console.error` in `src/api/receipt-endpoint.example.ts`:** route through `Logger` or delete the file
-- **Out of scope:** refactoring `admin-ops.service.ts` logic; touching financial code paths
+  - **Work-order files:** diff `docs/work-orders/WORK_ORDER_82B.md` vs
+    `docs/WORK_ORDER_82B_82C_ADDENDUM.md`; archive both to `docs/history/`
+  - **Admin-ops duplication:** diff `src/admin-ops/service.ts` (1.2 KB stub) vs
+    `src/services/admin-ops.service.ts` (12.1 KB); if stub is superseded: delete
+    `src/admin-ops/service.ts` and `src/admin-ops/index.ts`, update any imports;
+    if not: document the relationship in a comment
+  - **`validate-schema.js` at repo root:** relocate to `scripts/`; update
+    `package.json` `scripts.validate:schema` path; delete root copy
+  - **`docs/RISKY_NAME_CHANGE_TAGS.md`:** migration artifact for RRR-P1-006
+    (complete). Archive to `docs/history/`
+  - **`console.error` in `src/api/receipt-endpoint.example.ts`:** route through
+    `Logger` or delete the file
+- **Out of scope:** refactoring `admin-ops.service.ts` logic; touching financial
+  code paths
 - **Acceptance:**
   - No duplicate work-order files at prior paths
   - `src/admin-ops/` cleaned or documented
   - `npm run validate:schema` still passes from new path
-  - `docs/RISKY_NAME_CHANGE_TAGS.md` absent from `docs/`; present in `docs/history/`
+  - `docs/RISKY_NAME_CHANGE_TAGS.md` absent from `docs/`; present in
+    `docs/history/`
   - `npm run test:ci` still passes
-- **Commit format:** `CHORE: archive duplicate files, consolidate admin-ops, relocate validate-schema — RRR-WORK-001-A008`
+- **Commit format:**
+  `CHORE: archive duplicate files, consolidate admin-ops, relocate validate-schema — RRR-WORK-001-A008`
 - **Report-back:** `PROGRAM_CONTROL/REPORT_BACK/RRR-WORK-001-A008-report.md`
 - **Closes assessment:** §5.6, §5.7, §6.1
 
------
+---
 
 #### Task A-009 — Remove duplicate CodeQL workflow
 
@@ -407,19 +564,23 @@ Wave A must close before Wave B FIZ work begins.
 - **FIZ:** NO
 - **Depends-on:** A-002
 - **Scope:**
-  - Diff `.github/workflows/codeql-analysis.yml` (704 bytes) vs `.github/workflows/CodeQL Code Scanning.yml` (967 bytes)
-  - Determine which is the hand-maintained version vs the GitHub scaffold default
-  - Delete the redundant one — prefer deleting the space-containing filename on maintenance grounds; confirm content-redundancy first
+  - Diff `.github/workflows/codeql-analysis.yml` (704 bytes) vs
+    `.github/workflows/CodeQL Code Scanning.yml` (967 bytes)
+  - Determine which is the hand-maintained version vs the GitHub scaffold
+    default
+  - Delete the redundant one — prefer deleting the space-containing filename on
+    maintenance grounds; confirm content-redundancy first
   - Verify the surviving workflow still triggers on the correct events
 - **Out of scope:** CodeQL rule tuning; any `src/` changes
 - **Acceptance:**
   - Exactly one CodeQL workflow file in `.github/workflows/`
   - CI CodeQL step still runs on PR and `main` push
-- **Commit format:** `INFRA: remove duplicate CodeQL workflow — RRR-WORK-001-A009`
+- **Commit format:**
+  `INFRA: remove duplicate CodeQL workflow — RRR-WORK-001-A009`
 - **Report-back:** `PROGRAM_CONTROL/REPORT_BACK/RRR-WORK-001-A009-report.md`
 - **Closes assessment:** §5.8
 
------
+---
 
 #### Task A-010 — Add pre-commit hooks (husky + lint-staged)
 
@@ -430,21 +591,24 @@ Wave A must close before Wave B FIZ work begins.
 - **Depends-on:** A-002
 - **Scope:**
   - Install `husky` and `lint-staged` as dev dependencies
-  - Pre-commit hook runs `eslint --fix` and `prettier --write` on staged `.ts` files only
+  - Pre-commit hook runs `eslint --fix` and `prettier --write` on staged `.ts`
+    files only
   - Configure `lint-staged` in `package.json` or `.lintstagedrc`
   - Initialize husky; commit `.husky/pre-commit` script
-  - Add `prepare` script to `package.json` so `npm install` installs hooks in fresh clones
+  - Add `prepare` script to `package.json` so `npm install` installs hooks in
+    fresh clones
 - **Out of scope:** changing ESLint or Prettier rules; CI workflow changes
 - **Acceptance:**
   - `.husky/pre-commit` present and executable
   - `lint-staged` configured for `*.ts`
   - `npm install` in a fresh clone installs the hooks
   - Pre-commit fires correctly on a test staged `.ts` file
-- **Commit format:** `CHORE: add husky pre-commit with lint-staged for staged TS files — RRR-WORK-001-A010`
+- **Commit format:**
+  `CHORE: add husky pre-commit with lint-staged for staged TS files — RRR-WORK-001-A010`
 - **Report-back:** `PROGRAM_CONTROL/REPORT_BACK/RRR-WORK-001-A010-report.md`
 - **Closes assessment:** §5.4
 
------
+---
 
 #### Task A-011 — Switch `ci.yml` to `npm run test:ci` with coverage enforcement
 
@@ -454,21 +618,27 @@ Wave A must close before Wave B FIZ work begins.
 - **FIZ:** NO
 - **Depends-on:** A-002
 - **Scope:**
-  - In `.github/workflows/ci.yml`, change the “Test” step from `npm test` → `npm run test:ci`
-  - If `test:ci` not defined in `package.json`: add `"test:ci": "jest --coverage --ci"`
-  - Verify `jest.config.js` has `coverageThreshold` set; if absent: add `coverageThreshold: { global: { lines: 80, functions: 80, branches: 80, statements: 80 } }`
-  - If current coverage is below 80%: set threshold to the current passing value as a documented floor; note the gap in the report-back and file a follow-up task — do not silently remove the threshold
+  - In `.github/workflows/ci.yml`, change the “Test” step from `npm test` →
+    `npm run test:ci`
+  - If `test:ci` not defined in `package.json`: add
+    `"test:ci": "jest --coverage --ci"`
+  - Verify `jest.config.js` has `coverageThreshold` set; if absent: add
+    `coverageThreshold: { global: { lines: 80, functions: 80, branches: 80, statements: 80 } }`
+  - If current coverage is below 80%: set threshold to the current passing value
+    as a documented floor; note the gap in the report-back and file a follow-up
+    task — do not silently remove the threshold
 - **Out of scope:** writing new tests; any `src/` changes
 - **Acceptance:**
   - CI “Test” step calls `npm run test:ci`
   - Coverage report generated on every PR
   - Threshold set; CI passes on current `main`
   - If below 80%: PR description documents the gap and interim floor value
-- **Commit format:** `INFRA: ci.yml test step switches to npm run test:ci with coverage enforcement — RRR-WORK-001-A011`
+- **Commit format:**
+  `INFRA: ci.yml test step switches to npm run test:ci with coverage enforcement — RRR-WORK-001-A011`
 - **Report-back:** `PROGRAM_CONTROL/REPORT_BACK/RRR-WORK-001-A011-report.md`
 - **Closes assessment:** §4.4 (ci.yml coverage sub-task)
 
------
+---
 
 #### Task A-CLEAN — Wave A cleanup
 
@@ -476,15 +646,22 @@ Wave A must close before Wave B FIZ work begins.
 - **Agent:** claude-code
 - **Type:** CHORE
 - **FIZ:** NO
-- **Depends-on:** A-001, A-002, A-003, A-004, A-005, A-006, A-007, A-008, A-009, A-010, A-011
+- **Depends-on:** A-001, A-002, A-003, A-004, A-005, A-006, A-007, A-008, A-009,
+  A-010, A-011
 - **Scope:**
   - Lint pass + dead-code sweep across all files touched in Wave A
-  - Doc consistency check: no remaining references to archived files, retired workflow names, or RRR-GOV-002 as active charter
-  - `OQMI_SYSTEM_STATE_RRR.md` §3 DONE and §4 WIP updated to reflect all Wave A completions
+  - Doc consistency check: no remaining references to archived files, retired
+    workflow names, or RRR-GOV-002 as active charter
+  - `OQMI_SYSTEM_STATE_RRR.md` §3 DONE and §4 WIP updated to reflect all Wave A
+    completions
   - Charter §5.1 refreshed with Wave A completions
-  - Backfill RRR-GOV-002 §10 changelog gap: add the missing row for PR #235’s §3.5 item 18 amendment to the archived copy at `archive/governance/RRR-GOV-002_2026-04-21.md` as a historical correction, with CEO rationale
+  - Backfill RRR-GOV-002 §10 changelog gap: add the missing row for PR #235’s
+    §3.5 item 18 amendment to the archived copy at
+    `archive/governance/RRR-GOV-002_2026-04-21.md` as a historical correction,
+    with CEO rationale
   - Confirm `npm run test:ci` passes
-  - Report-back rollup: Wave A summary, any residual follow-ups, Wave B readiness declaration
+  - Report-back rollup: Wave A summary, any residual follow-ups, Wave B
+    readiness declaration
 - **Out of scope:** opening Wave B work; any FIZ tasks
 - **Acceptance:**
   - No lint regressions
@@ -492,20 +669,27 @@ Wave A must close before Wave B FIZ work begins.
   - `OQMI_SYSTEM_STATE_RRR.md` current
   - Charter §5 current
   - Wave B readiness declared in report-back
-- **Commit format:** `CHORE: Wave A cleanup, doc consistency, charter sync — RRR-WORK-001-A-CLEAN`
+- **Commit format:**
+  `CHORE: Wave A cleanup, doc consistency, charter sync — RRR-WORK-001-A-CLEAN`
 - **Report-back:** `PROGRAM_CONTROL/REPORT_BACK/RRR-WORK-001-A-CLEAN-report.md`
 
------
+---
 
 ### WAVE B — FIZ Wiring + Identity/Tenancy Data Layer
 
-Goal: close the three CRITICAL FIZ findings, install the identity/tenancy data layer, wire services to Config models, install CI guards and invariant tests.
+Goal: close the three CRITICAL FIZ findings, install the identity/tenancy data
+layer, wire services to Config models, install CI guards and invariant tests.
 
-**Dependency ordering:** B-001 and B-002 (CRITICAL controller wiring) must land before B-011 (reconciliation). B-006 (atomicity) must land before B-011. B-004 and B-005 (identity models) may run in parallel with the CRITICAL wiring. B-008, B-009, B-012 (CI guards + invariant tests) may run in parallel once A-CLEAN is done. B-015 and B-016 (type cleanup) can defer behind all FIZ tasks.
+**Dependency ordering:** B-001 and B-002 (CRITICAL controller wiring) must land
+before B-011 (reconciliation). B-006 (atomicity) must land before B-011. B-004
+and B-005 (identity models) may run in parallel with the CRITICAL wiring. B-008,
+B-009, B-012 (CI guards + invariant tests) may run in parallel once A-CLEAN is
+done. B-015 and B-016 (type cleanup) can defer behind all FIZ tasks.
 
-All `FIZ: YES` tasks require the 4-line commit format per `OQMI_GOVERNANCE.md §8` and do not auto-merge.
+All `FIZ: YES` tasks require the 4-line commit format per
+`OQMI_GOVERNANCE.md §8` and do not auto-merge.
 
------
+---
 
 #### Task B-001 — Wire `WalletController.creditPoints` to `PointAccrualService`
 
@@ -515,28 +699,35 @@ All `FIZ: YES` tasks require the 4-line commit format per `OQMI_GOVERNANCE.md §
 - **FIZ:** YES
 - **Depends-on:** A-CLEAN
 - **Scope:**
-  - Remove the fabricated-response stub from `creditPoints` in `src/api/wallet.controller.ts`
-  - Wire credit path to `this.pointAccrualService.credit(userId, request)` (or equivalent public method)
+  - Remove the fabricated-response stub from `creditPoints` in
+    `src/api/wallet.controller.ts`
+  - Wire credit path to `this.pointAccrualService.credit(userId, request)` (or
+    equivalent public method)
   - `LedgerEntry` must be created and `Wallet.balance` must be mutated
-  - Idempotency wrapper (`checkKey` / `recordKey`) must remain; now wraps the real mutation
-  - `previousBalance` and `newBalance` in the response must reflect post-mutation wallet state — not local computation
-- **Out of scope:** `deductPoints` (Task B-002); MongoDB transaction wrapping (Task B-006)
+  - Idempotency wrapper (`checkKey` / `recordKey`) must remain; now wraps the
+    real mutation
+  - `previousBalance` and `newBalance` in the response must reflect
+    post-mutation wallet state — not local computation
+- **Out of scope:** `deductPoints` (Task B-002); MongoDB transaction wrapping
+  (Task B-006)
 - **Acceptance:**
-  - `POST /wallets/:userId/credit` followed by `GET /wallets/:userId` returns updated balance
+  - `POST /wallets/:userId/credit` followed by `GET /wallets/:userId` returns
+    updated balance
   - A `LedgerEntry` with the correct delta exists after the call
   - 80% coverage on touched files
 - **Commit format** (FIZ 4-line):
-  
+
   ```
   FIZ: wire WalletController.creditPoints to PointAccrualService
-  
+
   Closes: RRR-WORK-001-B001
   FIZ-safe: LedgerEntry created, Wallet.balance mutated, idempotency wrapper retained
   ```
+
 - **Report-back:** `PROGRAM_CONTROL/REPORT_BACK/RRR-WORK-001-B001-report.md`
 - **Closes assessment:** §3.2 (credit wire)
 
------
+---
 
 #### Task B-002 — Wire `WalletController.deductPoints` to `PointRedemptionService`
 
@@ -546,29 +737,35 @@ All `FIZ: YES` tasks require the 4-line commit format per `OQMI_GOVERNANCE.md §
 - **FIZ:** YES
 - **Depends-on:** A-CLEAN
 - **Scope:**
-  - Remove the fabricated-response stub from `deductPoints` in `src/api/wallet.controller.ts`
-  - Wire deduct path to `this.pointRedemptionService.redeem(userId, request)` (or equivalent)
+  - Remove the fabricated-response stub from `deductPoints` in
+    `src/api/wallet.controller.ts`
+  - Wire deduct path to `this.pointRedemptionService.redeem(userId, request)`
+    (or equivalent)
   - `LedgerEntry` must be created and `Wallet.balance` must be mutated
   - Idempotency wrapper must remain; now wraps the real mutation
-  - Insufficient-balance response must come from the service, not be locally computed
-- **Out of scope:** `creditPoints` (Task B-001); MongoDB transaction wrapping (Task B-006)
+  - Insufficient-balance response must come from the service, not be locally
+    computed
+- **Out of scope:** `creditPoints` (Task B-001); MongoDB transaction wrapping
+  (Task B-006)
 - **Acceptance:**
-  - `POST /wallets/:userId/deduct` followed by `GET /wallets/:userId` returns updated balance
+  - `POST /wallets/:userId/deduct` followed by `GET /wallets/:userId` returns
+    updated balance
   - A `LedgerEntry` with the correct negative delta exists
   - Insufficient-balance case returns a correct rejection
   - 80% coverage on touched files
 - **Commit format** (FIZ 4-line):
-  
+
   ```
   FIZ: wire WalletController.deductPoints to PointRedemptionService
-  
+
   Closes: RRR-WORK-001-B002
   FIZ-safe: LedgerEntry created, Wallet.balance mutated, idempotency wrapper retained
   ```
+
 - **Report-back:** `PROGRAM_CONTROL/REPORT_BACK/RRR-WORK-001-B002-report.md`
 - **Closes assessment:** §3.2 (deduct wire)
 
------
+---
 
 #### Task B-003 — Integration tests: credit/deduct mutation and ledger verification
 
@@ -579,27 +776,32 @@ All `FIZ: YES` tasks require the 4-line commit format per `OQMI_GOVERNANCE.md §
 - **Depends-on:** B-001, B-002
 - **Scope:**
   - New test file (or addition to existing integration suite) covering:
-    - Credit then GET: balance increases by exact amount; ledger has one entry with correct delta
-    - Deduct then GET: balance decreases by exact amount; ledger has one entry with correct negative delta
-    - Idempotency replay: second call with same key returns cached response; ledger has exactly one entry (not two)
-    - Insufficient-balance deduct: returns rejection; balance unchanged; no ledger entry
+    - Credit then GET: balance increases by exact amount; ledger has one entry
+      with correct delta
+    - Deduct then GET: balance decreases by exact amount; ledger has one entry
+      with correct negative delta
+    - Idempotency replay: second call with same key returns cached response;
+      ledger has exactly one entry (not two)
+    - Insufficient-balance deduct: returns rejection; balance unchanged; no
+      ledger entry
   - Tests must hit the full controller stack (not mocked at service level)
 - **Out of scope:** testing atomicity (Task B-006); testing non-wallet endpoints
 - **Acceptance:**
   - All four scenario groups pass
   - Tests run under `npm run test:ci`
 - **Commit format** (FIZ 4-line):
-  
+
   ```
   TEST: integration tests — credit/deduct balance mutation and ledger entry verified
-  
+
   Closes: RRR-WORK-001-B003
   FIZ-safe: tests verify real mutation paths end-to-end, not mocked stubs
   ```
+
 - **Report-back:** `PROGRAM_CONTROL/REPORT_BACK/RRR-WORK-001-B003-report.md`
 - **Closes assessment:** §3.2 (integration test task hint)
 
------
+---
 
 #### Task B-004 — `Tenant` + `Merchant` models
 
@@ -609,19 +811,23 @@ All `FIZ: YES` tasks require the 4-line commit format per `OQMI_GOVERNANCE.md §
 - **FIZ:** NO
 - **Depends-on:** A-CLEAN
 - **Scope:**
-  - `src/db/models/Tenant.ts`: `_id`, `slug`, `name`, `created_at`, `status` (`active`/`suspended`); unique index on `slug`
-  - `src/db/models/Merchant.ts`: `_id`, `tenant_id` (ref Tenant), `slug`, `name`, `merchant_tier` (B2 — `PLATINUM|GOLD|SILVER|MEMBER|GUEST`), `phase` (`1` or `2` per B3), `status`; unique index on `(tenant_id, slug)`
+  - `src/db/models/Tenant.ts`: `_id`, `slug`, `name`, `created_at`, `status`
+    (`active`/`suspended`); unique index on `slug`
+  - `src/db/models/Merchant.ts`: `_id`, `tenant_id` (ref Tenant), `slug`,
+    `name`, `merchant_tier` (B2 — `PLATINUM|GOLD|SILVER|MEMBER|GUEST`), `phase`
+    (`1` or `2` per B3), `status`; unique index on `(tenant_id, slug)`
   - Mongoose schemas with TypeScript strict types
   - Unit tests: create, unique constraint enforcement, index lookup
 - **Out of scope:** any controller, service, or seed work
 - **Acceptance:**
   - Models compile under `tsc --noEmit`
   - Tests pass; 80% coverage on new files
-- **Commit format:** `DB: Tenant + Merchant models with phase and tier — RRR-WORK-001-B004`
+- **Commit format:**
+  `DB: Tenant + Merchant models with phase and tier — RRR-WORK-001-B004`
 - **Report-back:** `PROGRAM_CONTROL/REPORT_BACK/RRR-WORK-001-B004-report.md`
 - **Closes assessment:** ported from RRR-GOV-002 B-001
 
------
+---
 
 #### Task B-005 — `LoyaltyAccount` + `IdentityLink` models
 
@@ -631,16 +837,21 @@ All `FIZ: YES` tasks require the 4-line commit format per `OQMI_GOVERNANCE.md §
 - **FIZ:** NO
 - **Depends-on:** B-004
 - **Scope:**
-  - `src/db/models/LoyaltyAccount.ts`: `_id`, `tenant_id`, `external_user_id`, `rrr_member_tier` (nullable per B2), `created_at`, `status`; unique on `(tenant_id, external_user_id)`
-  - `src/db/models/IdentityLink.ts`: `_id`, `loyalty_account_id`, `merchant_id`, `external_account_ref`, `created_at`, `status`; unique on `(merchant_id, external_account_ref)`
+  - `src/db/models/LoyaltyAccount.ts`: `_id`, `tenant_id`, `external_user_id`,
+    `rrr_member_tier` (nullable per B2), `created_at`, `status`; unique on
+    `(tenant_id, external_user_id)`
+  - `src/db/models/IdentityLink.ts`: `_id`, `loyalty_account_id`, `merchant_id`,
+    `external_account_ref`, `created_at`, `status`; unique on
+    `(merchant_id, external_account_ref)`
   - Unit tests
 - **Out of scope:** Wallet linkage refactor (Wave C)
 - **Acceptance:** as B-004
-- **Commit format:** `DB: LoyaltyAccount + IdentityLink models — RRR-WORK-001-B005`
+- **Commit format:**
+  `DB: LoyaltyAccount + IdentityLink models — RRR-WORK-001-B005`
 - **Report-back:** `PROGRAM_CONTROL/REPORT_BACK/RRR-WORK-001-B005-report.md`
 - **Closes assessment:** ported from RRR-GOV-002 B-002
 
------
+---
 
 #### Task B-006 — Wrap multi-model wallet mutations in `mongoose.startSession` transactions
 
@@ -649,30 +860,39 @@ All `FIZ: YES` tasks require the 4-line commit format per `OQMI_GOVERNANCE.md §
 - **Type:** FIZ
 - **FIZ:** YES
 - **Depends-on:** A-CLEAN
-- **Note:** Must land before B-011 (reconciliation job). Existing `maxRetryAttempts: 3` / `retryBackoffMs: 100` retry logic must be preserved for MongoDB `WriteConflict` / `TransientTransactionError` — do not remove it.
+- **Note:** Must land before B-011 (reconciliation job). Existing
+  `maxRetryAttempts: 3` / `retryBackoffMs: 100` retry logic must be preserved
+  for MongoDB `WriteConflict` / `TransientTransactionError` — do not remove it.
 - **Scope:**
-  - Wrap all multi-model mutations in `src/wallets/wallet.service.ts` in `mongoose.startSession()` + `session.withTransaction()`
-  - Apply to: credit, deduct, escrow hold, escrow release — any operation writing to more than one of Wallet / EscrowItem / LedgerEntry
-  - Update `.env.example` to declare `MONGO_URI` with `?replicaSet=rs0` example and comment: “MongoDB replica-set required for multi-document transactions; standalone mongod will throw on session.withTransaction()”
-  - Add a test verifying transaction rollback on a simulated mid-operation failure
-- **Out of scope:** changing retry backoff constants; adding new wallet operations
+  - Wrap all multi-model mutations in `src/wallets/wallet.service.ts` in
+    `mongoose.startSession()` + `session.withTransaction()`
+  - Apply to: credit, deduct, escrow hold, escrow release — any operation
+    writing to more than one of Wallet / EscrowItem / LedgerEntry
+  - Update `.env.example` to declare `MONGO_URI` with `?replicaSet=rs0` example
+    and comment: “MongoDB replica-set required for multi-document transactions;
+    standalone mongod will throw on session.withTransaction()”
+  - Add a test verifying transaction rollback on a simulated mid-operation
+    failure
+- **Out of scope:** changing retry backoff constants; adding new wallet
+  operations
 - **Acceptance:**
   - All multi-model mutations use `session.withTransaction`
   - Rollback test passes
   - `.env.example` updated
   - 80% coverage on touched files
 - **Commit format** (FIZ 4-line):
-  
+
   ```
   FIZ: wrap multi-model wallet mutations in mongoose.startSession transactions
-  
+
   Closes: RRR-WORK-001-B006
   FIZ-safe: atomicity gap closed; retry logic preserved for WriteConflict/TransientTransactionError
   ```
+
 - **Report-back:** `PROGRAM_CONTROL/REPORT_BACK/RRR-WORK-001-B006-report.md`
 - **Closes assessment:** §3.3
 
------
+---
 
 #### Task B-007 — `MerchantPairConfig` model (D4/B4)
 
@@ -682,17 +902,24 @@ All `FIZ: YES` tasks require the 4-line commit format per `OQMI_GOVERNANCE.md §
 - **FIZ:** NO
 - **Depends-on:** B-004
 - **Scope:**
-  - `src/db/models/MerchantPairConfig.ts`: `_id`, `tenant_id`, `from_merchant_id`, `to_merchant_id`, `exchange_rate` (Decimal128 or string-backed numeric — match existing Config model convention), `effective_from`, `effective_to` (nullable), `created_at`
-  - Default rate 1:1 seeded only via explicit operator action, never auto-created
-  - Unique partial index on `(tenant_id, from_merchant_id, to_merchant_id, effective_from)` where `effective_to IS NULL`
+  - `src/db/models/MerchantPairConfig.ts`: `_id`, `tenant_id`,
+    `from_merchant_id`, `to_merchant_id`, `exchange_rate` (Decimal128 or
+    string-backed numeric — match existing Config model convention),
+    `effective_from`, `effective_to` (nullable), `created_at`
+  - Default rate 1:1 seeded only via explicit operator action, never
+    auto-created
+  - Unique partial index on
+    `(tenant_id, from_merchant_id, to_merchant_id, effective_from)` where
+    `effective_to IS NULL`
   - Unit tests: insert, range overlap rejection, 1:1 default lookup
 - **Out of scope:** the cross-merchant exchange service that consumes this model
 - **Acceptance:** as B-004
-- **Commit format:** `DB: MerchantPairConfig with effective-dating — RRR-WORK-001-B007`
+- **Commit format:**
+  `DB: MerchantPairConfig with effective-dating — RRR-WORK-001-B007`
 - **Report-back:** `PROGRAM_CONTROL/REPORT_BACK/RRR-WORK-001-B007-report.md`
 - **Closes assessment:** ported from RRR-GOV-002 B-003
 
------
+---
 
 #### Task B-008 — CI guard: no hardcoded balance values
 
@@ -702,28 +929,33 @@ All `FIZ: YES` tasks require the 4-line commit format per `OQMI_GOVERNANCE.md §
 - **FIZ:** YES
 - **Depends-on:** A-CLEAN
 - **Scope:**
-  - Add a Jest test or standalone CI script under `scripts/ci/` that greps `src/` for:
+  - Add a Jest test or standalone CI script under `scripts/ci/` that greps
+    `src/` for:
     - `previousBalance\s*=\s*\d`
     - `balance\s*=\s*\d{2,}`
-    - any literal numeric balance assignment outside `__tests__/` and `*.spec.ts`
+    - any literal numeric balance assignment outside `__tests__/` and
+      `*.spec.ts`
   - Fail the CI job on any match: `HARDCODED BALANCE: <file>:<line>`
   - Wire into `.github/workflows/ci.yml` as a required step
-- **Out of scope:** fixing existing violations (none expected; if any surface, file a follow-up FIZ task)
+- **Out of scope:** fixing existing violations (none expected; if any surface,
+  file a follow-up FIZ task)
 - **Acceptance:**
   - Guard fires on a deliberately-introduced bad fixture
   - CI green on current `main`
 - **Commit format** (FIZ 4-line):
-  
+
   ```
   FIZ: CI guard for hardcoded balance values in src/
-  
+
   Closes: RRR-WORK-001-B008
   FIZ-safe: prevents balance fixture leakage into production code paths
   ```
-- **Report-back:** `PROGRAM_CONTROL/REPORT_BACK/RRR-WORK-001-B008-report.md`
-- **Closes assessment:** ported from RRR-GOV-002 B-004; also corrects §3.1 invariant 5 (RRR-GOV-002 incorrectly cited B-003 for this guard)
 
------
+- **Report-back:** `PROGRAM_CONTROL/REPORT_BACK/RRR-WORK-001-B008-report.md`
+- **Closes assessment:** ported from RRR-GOV-002 B-004; also corrects §3.1
+  invariant 5 (RRR-GOV-002 incorrectly cited B-003 for this guard)
+
+---
 
 #### Task B-009 — CI guard: `tenant_id` scope on queries
 
@@ -733,19 +965,25 @@ All `FIZ: YES` tasks require the 4-line commit format per `OQMI_GOVERNANCE.md §
 - **FIZ:** NO
 - **Depends-on:** B-004
 - **Scope:**
-  - Add a Jest test or AST-based script under `scripts/ci/` that finds every `Model.find(`, `findOne(`, `updateOne(`, `updateMany(`, `deleteOne(` call in `src/services/`, `src/wallets/`, `src/ledger/`
+  - Add a Jest test or AST-based script under `scripts/ci/` that finds every
+    `Model.find(`, `findOne(`, `updateOne(`, `updateMany(`, `deleteOne(` call in
+    `src/services/`, `src/wallets/`, `src/ledger/`
   - Fail if the filter object does not include `tenant_id` as a key
-  - Allowlist file `scripts/ci/tenant-scope-allowlist.txt` for justified exceptions — entries must include a comment
+  - Allowlist file `scripts/ci/tenant-scope-allowlist.txt` for justified
+    exceptions — entries must include a comment
   - Wire into `.github/workflows/ci.yml` as a required step
-- **Out of scope:** fixing existing violations (produce a baseline list in the report-back as a follow-up backlog)
+- **Out of scope:** fixing existing violations (produce a baseline list in the
+  report-back as a follow-up backlog)
 - **Acceptance:**
   - Script runs in CI; allowlist mechanism documented
-  - Initial run produces a baseline list of current violations, attached to report-back
-- **Commit format:** `TEST: CI guard for tenant_id query scope — RRR-WORK-001-B009`
+  - Initial run produces a baseline list of current violations, attached to
+    report-back
+- **Commit format:**
+  `TEST: CI guard for tenant_id query scope — RRR-WORK-001-B009`
 - **Report-back:** `PROGRAM_CONTROL/REPORT_BACK/RRR-WORK-001-B009-report.md`
 - **Closes assessment:** ported from RRR-GOV-002 B-005
 
------
+---
 
 #### Task B-010 — Extend `IdempotencyService` coverage + add `idempotency.service.spec.ts`
 
@@ -755,27 +993,33 @@ All `FIZ: YES` tasks require the 4-line commit format per `OQMI_GOVERNANCE.md §
 - **FIZ:** YES
 - **Depends-on:** A-CLEAN
 - **Scope:**
-  - Extend `src/services/idempotency.service.ts` usage from credit/deduct to: redemption flow, expiration job, escrow hold, escrow release
-  - Each new call site must accept and persist `idempotency_key`; duplicate keys return prior result with same `correlation_id`
+  - Extend `src/services/idempotency.service.ts` usage from credit/deduct to:
+    redemption flow, expiration job, escrow hold, escrow release
+  - Each new call site must accept and persist `idempotency_key`; duplicate keys
+    return prior result with same `correlation_id`
   - New tests: replay each flow with same key; assert single ledger entry
-  - Also add `src/services/idempotency.service.spec.ts` for the service itself (currently missing — assessment §4.4)
-- **Out of scope:** refactoring `IdempotencyService` internals; adding TTL policy
+  - Also add `src/services/idempotency.service.spec.ts` for the service itself
+    (currently missing — assessment §4.4)
+- **Out of scope:** refactoring `IdempotencyService` internals; adding TTL
+  policy
 - **Acceptance:**
   - All four new flows covered by replay tests
   - `idempotency.service.spec.ts` present and passing
   - 80% coverage on touched files
 - **Commit format** (FIZ 4-line):
-  
+
   ```
   FIZ: extend IdempotencyService to redemption/expiration/escrow flows; add service spec
-  
+
   Closes: RRR-WORK-001-B010
   FIZ-safe: each call site persists idempotency_key; duplicate keys replay prior result
   ```
-- **Report-back:** `PROGRAM_CONTROL/REPORT_BACK/RRR-WORK-001-B010-report.md`
-- **Closes assessment:** ported from RRR-GOV-002 B-006; adds assessment §4.4 (idempotency.service spec)
 
------
+- **Report-back:** `PROGRAM_CONTROL/REPORT_BACK/RRR-WORK-001-B010-report.md`
+- **Closes assessment:** ported from RRR-GOV-002 B-006; adds assessment §4.4
+  (idempotency.service spec)
+
+---
 
 #### Task B-011 — Reconciliation job
 
@@ -786,26 +1030,30 @@ All `FIZ: YES` tasks require the 4-line commit format per `OQMI_GOVERNANCE.md §
 - **Depends-on:** B-006, B-010
 - **Scope:**
   - New service `src/services/ReconciliationService.ts`
-  - For each Wallet: assert `Wallet.balance == sum(active PointLot.remaining)` AND `Wallet.balance == sum(LedgerEntry.delta)`
+  - For each Wallet: assert `Wallet.balance == sum(active PointLot.remaining)`
+    AND `Wallet.balance == sum(LedgerEntry.delta)`
   - Job entry point: scriptable via `npm run reconcile -- --tenant <id>`
-  - Admin endpoint `POST /admin/reconcile` (auth-gated; auth is Wave C, so endpoint ships behind a feature flag here)
-  - On mismatch: emit `RECON_MISMATCH` event with wallet id, expected, actual, delta — **never auto-correct**
+  - Admin endpoint `POST /admin/reconcile` (auth-gated; auth is Wave C, so
+    endpoint ships behind a feature flag here)
+  - On mismatch: emit `RECON_MISMATCH` event with wallet id, expected, actual,
+    delta — **never auto-correct**
 - **Out of scope:** automatic correction; alerting integration
 - **Acceptance:**
   - Reconciliation passes on a clean seeded fixture
   - Reconciliation fails loudly on a deliberately-corrupted fixture
 - **Commit format** (FIZ 4-line):
-  
+
   ```
   FIZ: reconciliation job — Wallet.balance vs PointLot sum vs LedgerEntry sum
-  
+
   Closes: RRR-WORK-001-B011
   FIZ-safe: RECON_MISMATCH emitted on drift; no auto-correction ever
   ```
+
 - **Report-back:** `PROGRAM_CONTROL/REPORT_BACK/RRR-WORK-001-B011-report.md`
 - **Closes assessment:** ported from RRR-GOV-002 B-007
 
------
+---
 
 #### Task B-012 — `LedgerService` invariant tests
 
@@ -826,17 +1074,18 @@ All `FIZ: YES` tasks require the 4-line commit format per `OQMI_GOVERNANCE.md §
 - **Acceptance:**
   - New test file green; no `LedgerService` changes
 - **Commit format** (FIZ 4-line):
-  
+
   ```
   TEST: LedgerService invariant suite — append-only, monotonic sequence, balance projection
-  
+
   Closes: RRR-WORK-001-B012
   FIZ-safe: reflection guard catches any future update/delete method addition
   ```
+
 - **Report-back:** `PROGRAM_CONTROL/REPORT_BACK/RRR-WORK-001-B012-report.md`
 - **Closes assessment:** ported from RRR-GOV-002 B-008
 
------
+---
 
 #### Task B-013 — `admin-ops.service.spec.ts`
 
@@ -846,18 +1095,20 @@ All `FIZ: YES` tasks require the 4-line commit format per `OQMI_GOVERNANCE.md §
 - **FIZ:** NO
 - **Depends-on:** A-008 (admin-ops duplication resolved first)
 - **Scope:**
-  - New test file for `src/services/admin-ops.service.ts` (12.1 KB; no spec exists)
+  - New test file for `src/services/admin-ops.service.ts` (12.1 KB; no spec
+    exists)
   - Cover each public method, error paths, admin-adjustment flow
   - 80% coverage on the file
 - **Out of scope:** refactoring the service
 - **Acceptance:**
   - `admin-ops.service.spec.ts` present and passing
   - 80% coverage on `src/services/admin-ops.service.ts`
-- **Commit format:** `TEST: admin-ops.service.spec for src/services/admin-ops.service.ts — RRR-WORK-001-B013`
+- **Commit format:**
+  `TEST: admin-ops.service.spec for src/services/admin-ops.service.ts — RRR-WORK-001-B013`
 - **Report-back:** `PROGRAM_CONTROL/REPORT_BACK/RRR-WORK-001-B013-report.md`
 - **Closes assessment:** §4.4 (admin-ops.service spec gap)
 
------
+---
 
 #### Task B-014 — `src/ingest-worker/replay.ts` — replace `any` with `FilterQuery<>`
 
@@ -867,18 +1118,21 @@ All `FIZ: YES` tasks require the 4-line commit format per `OQMI_GOVERNANCE.md §
 - **FIZ:** NO
 - **Depends-on:** A-CLEAN
 - **Scope:**
-  - Verify `src/ingest-worker/replay.ts` still has `const query: any = {}` (confirm before acting)
-  - Replace with `FilterQuery<IngestEventDoc>` (or the appropriate Mongoose generic)
+  - Verify `src/ingest-worker/replay.ts` still has `const query: any = {}`
+    (confirm before acting)
+  - Replace with `FilterQuery<IngestEventDoc>` (or the appropriate Mongoose
+    generic)
   - Type fix only — no functional changes
 - **Out of scope:** refactoring replay logic; other files
 - **Acceptance:**
   - `tsc --noEmit` passes with no `any` in `replay.ts`
   - `npm run test:ci` still passes
-- **Commit format:** `SVC: replace any-typed query in ingest-worker/replay.ts with FilterQuery<> — RRR-WORK-001-B014`
+- **Commit format:**
+  `SVC: replace any-typed query in ingest-worker/replay.ts with FilterQuery<> — RRR-WORK-001-B014`
 - **Report-back:** `PROGRAM_CONTROL/REPORT_BACK/RRR-WORK-001-B014-report.md`
 - **Closes assessment:** §5.2
 
------
+---
 
 #### Task B-015 — Split oversized type modules
 
@@ -887,10 +1141,13 @@ All `FIZ: YES` tasks require the 4-line commit format per `OQMI_GOVERNANCE.md §
 - **Type:** CHORE
 - **FIZ:** NO
 - **Depends-on:** A-CLEAN
-- **Note:** Can defer behind all FIZ tasks. Do not block Wave B FIZ work on this.
+- **Note:** Can defer behind all FIZ tasks. Do not block Wave B FIZ work on
+  this.
 - **Scope:**
-  - `src/wallets/types.ts` (11,929 bytes): split by concern — wallet domain types / queue authorization types / service interface contracts
-  - `src/services/types.ts` (11,073 bytes): split by concern — service contracts / shared enums / financial types
+  - `src/wallets/types.ts` (11,929 bytes): split by concern — wallet domain
+    types / queue authorization types / service interface contracts
+  - `src/services/types.ts` (11,073 bytes): split by concern — service contracts
+    / shared enums / financial types
   - Update all import paths in `src/` to use the new split files
   - Shape-preserving refactor only — no type definition changes
 - **Out of scope:** changing type shapes; any logic changes
@@ -898,11 +1155,12 @@ All `FIZ: YES` tasks require the 4-line commit format per `OQMI_GOVERNANCE.md §
   - `tsc --noEmit` passes
   - `npm run test:ci` passes
   - No single type file exceeds 400 lines
-- **Commit format:** `CHORE: split src/services/types.ts and src/wallets/types.ts by concern — RRR-WORK-001-B015`
+- **Commit format:**
+  `CHORE: split src/services/types.ts and src/wallets/types.ts by concern — RRR-WORK-001-B015`
 - **Report-back:** `PROGRAM_CONTROL/REPORT_BACK/RRR-WORK-001-B015-report.md`
 - **Closes assessment:** §5.3
 
------
+---
 
 #### Task B-016 — Replace `any` with `unknown` + narrowing in `ledger.service` and `services/types`
 
@@ -911,18 +1169,22 @@ All `FIZ: YES` tasks require the 4-line commit format per `OQMI_GOVERNANCE.md §
 - **Type:** CHORE
 - **FIZ:** NO
 - **Depends-on:** B-015
-- **Note:** Can defer. Low production risk — these are enclosed in try/catch and Mongoose error-handling paths.
+- **Note:** Can defer. Low production risk — these are enclosed in try/catch and
+  Mongoose error-handling paths.
 - **Scope:**
-  - `src/ledger/ledger.service.ts` (lines 84, 104, 156, 198 per assessment): replace `any` with `unknown` + narrowing guard
-  - `src/services/types.ts` (`Record<string, any>`): replace with `Record<string, unknown>`
+  - `src/ledger/ledger.service.ts` (lines 84, 104, 156, 198 per assessment):
+    replace `any` with `unknown` + narrowing guard
+  - `src/services/types.ts` (`Record<string, any>`): replace with
+    `Record<string, unknown>`
   - No functional changes
 - **Acceptance:**
   - `tsc --noEmit` passes; no new `any` introduced
-- **Commit format:** `CHORE: replace any with unknown + narrowing in ledger.service and services/types — RRR-WORK-001-B016`
+- **Commit format:**
+  `CHORE: replace any with unknown + narrowing in ledger.service and services/types — RRR-WORK-001-B016`
 - **Report-back:** `PROGRAM_CONTROL/REPORT_BACK/RRR-WORK-001-B016-report.md`
 - **Closes assessment:** §6.3
 
------
+---
 
 #### Task B-CLEAN — Wave B cleanup
 
@@ -930,31 +1192,42 @@ All `FIZ: YES` tasks require the 4-line commit format per `OQMI_GOVERNANCE.md §
 - **Agent:** claude-code
 - **Type:** CHORE
 - **FIZ:** NO
-- **Depends-on:** B-001, B-002, B-003, B-004, B-005, B-006, B-007, B-008, B-009, B-010, B-011, B-012, B-013, B-014, B-015, B-016
+- **Depends-on:** B-001, B-002, B-003, B-004, B-005, B-006, B-007, B-008, B-009,
+  B-010, B-011, B-012, B-013, B-014, B-015, B-016
 - **Scope:**
   - Lint pass + dead-code sweep across all files touched in Wave B
-  - Triage the 8 pre-existing test failures: per-failure status of `fixed | still-failing-rationale | new-task-filed`
-  - `OQMI_SYSTEM_STATE_RRR.md` §3 DONE and §5 OUTSTANDING updated for all Wave B completions
+  - Triage the 8 pre-existing test failures: per-failure status of
+    `fixed | still-failing-rationale | new-task-filed`
+  - `OQMI_SYSTEM_STATE_RRR.md` §3 DONE and §5 OUTSTANDING updated for all Wave B
+    completions
   - Charter §5 updated with Wave B merges
-  - Confirm `npm run test:ci` pass count increased or held steady (no regression)
-  - Report-back rollup: Wave B summary, triage doc for pre-existing failures, Wave C readiness declaration
+  - Confirm `npm run test:ci` pass count increased or held steady (no
+    regression)
+  - Report-back rollup: Wave B summary, triage doc for pre-existing failures,
+    Wave C readiness declaration
 - **Out of scope:** opening Wave C work
 - **Acceptance:**
   - No lint regressions
   - Triage doc filed for 8 pre-existing failures
   - Charter §5 current
   - Wave C provisional themes confirmed or updated
-- **Commit format:** `CHORE: Wave B cleanup, test triage, charter sync — RRR-WORK-001-B-CLEAN`
+- **Commit format:**
+  `CHORE: Wave B cleanup, test triage, charter sync — RRR-WORK-001-B-CLEAN`
 - **Report-back:** `PROGRAM_CONTROL/REPORT_BACK/RRR-WORK-001-B-CLEAN-report.md`
 
------
+---
 
 ### WAVE C — and beyond
 
-Wave C scope is **not drafted at charter open**. It will be appended in-place after B-CLEAN closes, scoped against actual repo state at that point. Provisional Wave C themes (ported from RRR-GOV-002 §6 Wave C, in priority order):
+Wave C scope is **not drafted at charter open**. It will be appended in-place
+after B-CLEAN closes, scoped against actual repo state at that point.
+Provisional Wave C themes (ported from RRR-GOV-002 §6 Wave C, in priority
+order):
 
-1. Service ↔ Config wiring (PointAccrual ↔ EarnRateConfig; PointRedemption ↔ TierCapConfig + SpendOrderConfig; PointExpiration ↔ SpendOrderConfig)
-1. Auth / authz / tenant-isolation middleware (replaces Wave B feature flag on the reconcile endpoint)
+1. Service ↔ Config wiring (PointAccrual ↔ EarnRateConfig; PointRedemption ↔
+   TierCapConfig + SpendOrderConfig; PointExpiration ↔ SpendOrderConfig)
+1. Auth / authz / tenant-isolation middleware (replaces Wave B feature flag on
+   the reconcile endpoint)
 1. Webhook receive (D5 GGS-ready) + emit infrastructure
 1. Cross-merchant exchange service (consumes B-007 `MerchantPairConfig`)
 1. Tier evaluation service
@@ -962,65 +1235,77 @@ Wave C scope is **not drafted at charter open**. It will be appended in-place af
 1. Fraud signal service
 1. Wave C cleanup
 
-CEO authorization required to expand Wave C inline. Until then, agents do not claim Wave C work.
+CEO authorization required to expand Wave C inline. Until then, agents do not
+claim Wave C work.
 
------
+---
 
 ## §7 — KNOWN DEBT NOT YET TASKED
 
 Acknowledged but not scheduled. Will be folded into Wave C or later:
 
-- WalletService optimistic-lock retry-policy documentation (atomicity closed in B-006; the retry constant rationale has never been documented)
+- WalletService optimistic-lock retry-policy documentation (atomicity closed in
+  B-006; the retry constant rationale has never been documented)
 - Webhook signature verification utility
 - Observability: structured logger choice (pino vs winston) and instrumentation
-- OpenAPI spec freshness check in CI (`api/openapi.yaml` is 61 KB — unverified against current controllers)
-- `xxx-events.schema.json` in `docs/contracts/` — `xxx-` prefix is suspect under D2; verify or retire
+- OpenAPI spec freshness check in CI (`api/openapi.yaml` is 61 KB — unverified
+  against current controllers)
+- `xxx-events.schema.json` in `docs/contracts/` — `xxx-` prefix is suspect under
+  D2; verify or retire
 - Admin surfaces (rate adjust UI, reconciliation dashboard)
 - Reservation flow end-to-end test
 - Activity-feed rate-limit hardening
 - `infra/` ship-vs-delete (W4 — pending CEO deploy-target decision)
 
------
+---
 
 ## §8 — OUT OF SCOPE FOR THIS CHARTER
 
 - Authoring or modifying any directive outside `RRR-WORK-001-*` task IDs
 - Touching `src/` outside the scope explicitly named per task
-- Creating new `PROGRAM_CONTROL/DIRECTIVES/QUEUE/` files (this charter is the active queue)
-- Reintroducing CLAUDE.md, slot machine mechanics, XXXChatNow.com, or any retired decision from §4
+- Creating new `PROGRAM_CONTROL/DIRECTIVES/QUEUE/` files (this charter is the
+  active queue)
+- Reintroducing CLAUDE.md, slot machine mechanics, XXXChatNow.com, or any
+  retired decision from §4
 - Auto-correcting reconciliation mismatches
 - Building any settlement / payout path without explicit CEO directive
 - Authoring or modifying `OQMI_GOVERNANCE.md` (reference it; do not rewrite it)
-- Modifying the CNZ-scoped `OQMI_SYSTEM_STATE.md` at `PROGRAM_CONTROL/DIRECTIVES/QUEUE/OQMI_SYSTEM_STATE.md`
+- Modifying the CNZ-scoped `OQMI_SYSTEM_STATE.md` at
+  `PROGRAM_CONTROL/DIRECTIVES/QUEUE/OQMI_SYSTEM_STATE.md`
 - Resolving `infra/` ship-vs-delete (W4 — CEO decision pending)
 
------
+---
 
 ## §9 — AMENDMENT RULES
 
 Per `OQMI_GOVERNANCE.md §11`. RRR-specific additions:
 
-1. A task closes — `Status:` line updated, `Merge SHA:` and `DONE record:` appended, in the same PR as the work.
+1. A task closes — `Status:` line updated, `Merge SHA:` and `DONE record:`
+   appended, in the same PR as the work.
 1. A new wave opens — appended below the prior wave; CEO sign-off required.
-1. An invariant changes — CEO authorship required; prior version preserved in §10 changelog with date and rationale.
+1. An invariant changes — CEO authorship required; prior version preserved in
+   §10 changelog with date and rationale.
 1. ARCHITECT MODE proposes restructuring — CEO sign-off before merge.
 
-Any agent or session that attempts to amend this charter without following these rules HARD_STOPs.
+Any agent or session that attempts to amend this charter without following these
+rules HARD_STOPs.
 
------
+---
 
 ## §10 — CHANGELOG
 
-|Date      |Change                                                                                                                                                                                                                                                                                                                                                              |Author                                                             |Rationale                                                                                                                   |
-|:---------|:-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:------------------------------------------------------------------|:---------------------------------------------------------------------------------------------------------------------------|
-|2026-04-21|Charter opened. Supersedes RRR-GOV-002 (all Wave A tasks confirmed DONE on `main`). Absorbs Phase 1, Phase 2, and thread #5 tech debt assessment. Wave A = cleanup bundle (Path 2 transition). A-001 installs RRR-scoped `OQMI_SYSTEM_STATE_RRR.md` as first task (Q1 resolution). A-005 reissued as a clean task with CEO closing any in-flight PR (Q2 resolution).|Architecture Coordinator (Claude Chat Thread #6), per CEO direction|Successor charter with correct repo scoping, clean governance task reissue, and full FIZ wiring backlog from the assessment.|
-|2026-04-21|A-001 merged (PR #244, merge SHA `231665d`): `OQMI_SYSTEM_STATE_RRR.md` installed. A-002 ratification carried in this PR: charter file renamed from `RRR_WORK-001` (no extension, initial commit naming) to `RRR-WORK-001.md` so A-003's charter-integrity CI parses the correct path; RRR-GOV-002 retired to `archive/governance/RRR-GOV-002_2026-04-21.md`; `.github/copilot-instructions.md` **Active Charter** line swapped to RRR-WORK-001; `PROGRAM_CONTROL/HANDOFFS/` installed with thread-06 handoff; `docs/TECH_DEBT_ASSESSMENT.md` archived to `docs/history/TECH_DEBT_ASSESSMENT_2026-04-21.md`.|claude-code, per CEO direction|Ratifies the successor charter and closes out the thread-05 tech-debt assessment as a historical document. Enables Wave A parallel claims (A-003 through A-011, A-007 behind A-004).|
+| Date       | Change                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Author                                                              | Rationale                                                                                                                                                                            |
+| :--------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------ | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 2026-04-21 | Charter opened. Supersedes RRR-GOV-002 (all Wave A tasks confirmed DONE on `main`). Absorbs Phase 1, Phase 2, and thread #5 tech debt assessment. Wave A = cleanup bundle (Path 2 transition). A-001 installs RRR-scoped `OQMI_SYSTEM_STATE_RRR.md` as first task (Q1 resolution). A-005 reissued as a clean task with CEO closing any in-flight PR (Q2 resolution).                                                                                                                                                                                                                                         | Architecture Coordinator (Claude Chat Thread #6), per CEO direction | Successor charter with correct repo scoping, clean governance task reissue, and full FIZ wiring backlog from the assessment.                                                         |
+| 2026-04-21 | A-001 merged (PR #244, merge SHA `231665d`): `OQMI_SYSTEM_STATE_RRR.md` installed. A-002 ratification carried in this PR: charter file renamed from `RRR_WORK-001` (no extension, initial commit naming) to `RRR-WORK-001.md` so A-003's charter-integrity CI parses the correct path; RRR-GOV-002 retired to `archive/governance/RRR-GOV-002_2026-04-21.md`; `.github/copilot-instructions.md` **Active Charter** line swapped to RRR-WORK-001; `PROGRAM_CONTROL/HANDOFFS/` installed with thread-06 handoff; `docs/TECH_DEBT_ASSESSMENT.md` archived to `docs/history/TECH_DEBT_ASSESSMENT_2026-04-21.md`. | claude-code, per CEO direction                                      | Ratifies the successor charter and closes out the thread-05 tech-debt assessment as a historical document. Enables Wave A parallel claims (A-003 through A-011, A-007 behind A-004). |
 
------
+---
 
 ## §11 — DONE-RECORD TEMPLATE
 
-When a task in §6 merges, the executing agent writes a file at `PROGRAM_CONTROL/DIRECTIVES/DONE/RRR-WORK-001-<task-id>-DONE.md` using this template:
+When a task in §6 merges, the executing agent writes a file at
+`PROGRAM_CONTROL/DIRECTIVES/DONE/RRR-WORK-001-<task-id>-DONE.md` using this
+template:
 
 ```
 # RRR-WORK-001-<task-id> — DONE
@@ -1065,18 +1350,22 @@ The agent then amends §6 of this charter in the same PR:
 - `Status: QUEUED` → `Status: DONE`
 - Append `**Merge SHA:** <sha>` and `**DONE record:** RRR-WORK-001-<id>-DONE.md`
 
-*(Ported verbatim from RRR-GOV-002 §11. Only change: `Charter:` reference updated to RRR-WORK-001.)*
+_(Ported verbatim from RRR-GOV-002 §11. Only change: `Charter:` reference
+updated to RRR-WORK-001.)_
 
------
+---
 
 ## §12 — CHARTER RATIFICATION
 
 This charter takes effect when Task A-002 (ratification PR) merges to `main`.
 
-- **Depends-on:** Task A-001 (`OQMI_SYSTEM_STATE_RRR.md` install) must merge first
-- **PR title:** `GOV: ratify RRR-WORK-001, retire RRR-GOV-002 to archive — RRR-WORK-001-A002`
+- **Depends-on:** Task A-001 (`OQMI_SYSTEM_STATE_RRR.md` install) must merge
+  first
+- **PR title:**
+  `GOV: ratify RRR-WORK-001, retire RRR-GOV-002 to archive — RRR-WORK-001-A002`
 - **Auto-merge:** NO (GOV task; CEO review on the first charter PR is prudent)
 - **Reviewer:** Kevin B. Hartley (CEO)
-- **On merge:** Wave A opens; agents may begin claiming A-003 and all parallel Wave A tasks
+- **On merge:** Wave A opens; agents may begin claiming A-003 and all parallel
+  Wave A tasks
 
 — End of charter —

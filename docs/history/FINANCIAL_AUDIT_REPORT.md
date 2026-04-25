@@ -1,4 +1,5 @@
 # Financial Modules Audit Report
+
 ## RedRoomRewards - Ledger and Wallets Modules
 
 **Audit Date:** 2026-01-04  
@@ -10,7 +11,9 @@
 
 ## Executive Summary
 
-This audit assesses the financial integrity of the ledger and wallets modules in RedRoomRewards, focusing on four critical principles:
+This audit assesses the financial integrity of the ledger and wallets modules in
+RedRoomRewards, focusing on four critical principles:
+
 1. **Immutable Transactions** - Append-only logging
 2. **Idempotency** - Duplicate operation prevention
 3. **Traceability** - Complete audit trail
@@ -18,7 +21,10 @@ This audit assesses the financial integrity of the ledger and wallets modules in
 
 **Overall Assessment: STRONG with MINOR GAPS**
 
-The codebase demonstrates strong adherence to financial best practices with well-implemented optimistic locking, comprehensive audit trails, and idempotency mechanisms. However, several improvements are recommended to achieve complete compliance.
+The codebase demonstrates strong adherence to financial best practices with
+well-implemented optimistic locking, comprehensive audit trails, and idempotency
+mechanisms. However, several improvements are recommended to achieve complete
+compliance.
 
 ---
 
@@ -35,7 +41,8 @@ The codebase demonstrates strong adherence to financial best practices with well
 2. **Database Model** (`src/db/models/ledger-entry.model.ts`)
    - ✅ Unique index on `entryId` prevents duplicates
    - ✅ Unique index on `idempotencyKey` prevents duplicate inserts
-   - ✅ Comprehensive field tracking (balanceBefore, balanceAfter, stateTransition)
+   - ✅ Comprehensive field tracking (balanceBefore, balanceAfter,
+     stateTransition)
    - ✅ Timestamp field immutable after creation
 
 3. **Type System Enforcement**
@@ -58,7 +65,8 @@ The codebase demonstrates strong adherence to financial best practices with well
    - **Recommendation:** Add pre-update hooks that throw errors
 
 3. **Escrow Items Are Mutable**
-   - **Issue:** `EscrowItemModel.updateOne()` called to change status (lines 334, 464, 632 in wallet.service.ts)
+   - **Issue:** `EscrowItemModel.updateOne()` called to change status (lines
+     334, 464, 632 in wallet.service.ts)
    - **Risk:** Status changes violate true immutability
    - **Impact:** Medium - audit trail gaps for escrow state changes
    - **Recommendation:** Create new escrow state entries instead of updating
@@ -66,20 +74,26 @@ The codebase demonstrates strong adherence to financial best practices with well
 ### 📋 Recommendations
 
 **HIGH PRIORITY:**
+
 1. Add MongoDB collection validator to ledger_entries collection:
+
    ```javascript
    db.runCommand({
-     collMod: "ledger_entries",
+     collMod: 'ledger_entries',
      validator: { $jsonSchema: { readOnly: true } },
-     validationLevel: "strict"
-   })
+     validationLevel: 'strict',
+   });
    ```
 
 2. Add Mongoose pre-update hooks to prevent accidental updates:
+
    ```typescript
-   LedgerEntrySchema.pre(['updateOne', 'updateMany', 'findOneAndUpdate'], function() {
-     throw new Error('Ledger entries are immutable and cannot be updated');
-   });
+   LedgerEntrySchema.pre(
+     ['updateOne', 'updateMany', 'findOneAndUpdate'],
+     function () {
+       throw new Error('Ledger entries are immutable and cannot be updated');
+     },
+   );
    ```
 
 3. Refactor escrow status tracking to use append-only ledger:
@@ -87,9 +101,9 @@ The codebase demonstrates strong adherence to financial best practices with well
    - Keep `escrow_items` for initial state only
    - Derive current status from event history
 
-**MEDIUM PRIORITY:**
-4. Add database-level audit triggers for any attempted modifications
-5. Implement periodic integrity checks to detect unauthorized modifications
+**MEDIUM PRIORITY:** 4. Add database-level audit triggers for any attempted
+modifications 5. Implement periodic integrity checks to detect unauthorized
+modifications
 
 ---
 
@@ -110,9 +124,11 @@ The codebase demonstrates strong adherence to financial best practices with well
    - ✅ Proper field constraints (maxlength)
 
 3. **Wallet Service** (`src/wallets/wallet.service.ts`)
-   - ✅ Idempotency checks before all operations (lines 70-76, 254-261, 414-421, 543-550)
+   - ✅ Idempotency checks before all operations (lines 70-76, 254-261, 414-421,
+     543-550)
    - ✅ Throws error on duplicate key usage
-   - ✅ Separate idempotency keys for multi-step operations (e.g., `_debit`, `_credit`)
+   - ✅ Separate idempotency keys for multi-step operations (e.g., `_debit`,
+     `_credit`)
 
 4. **Point Accrual Service** (`src/services/point-accrual.service.ts`)
    - ✅ Idempotency check in `awardPoints()` (lines 127-134)
@@ -122,14 +138,16 @@ The codebase demonstrates strong adherence to financial best practices with well
 ### ⚠️ GAPS IDENTIFIED
 
 1. **Wallet Controller Missing Idempotency Enforcement**
-   - **Issue:** `src/api/wallet.controller.ts` accepts idempotencyKey but doesn't check it
+   - **Issue:** `src/api/wallet.controller.ts` accepts idempotencyKey but
+     doesn't check it
    - **Risk:** API layer allows duplicate requests
    - **Impact:** HIGH - direct API bypass of idempotency
    - **Locations:** Lines 111-141 (deductPoints), 151-181 (creditPoints)
    - **Recommendation:** Add idempotency check before wallet operations
 
 2. **Incomplete Idempotency Result Storage**
-   - **Issue:** `storeIdempotencyResult()` not called after successful operations
+   - **Issue:** `storeIdempotencyResult()` not called after successful
+     operations
    - **Risk:** Duplicate requests won't return cached results
    - **Impact:** Medium - causes unnecessary retries
    - **Locations:** wallet.service.ts, point-accrual.service.ts
@@ -150,7 +168,9 @@ The codebase demonstrates strong adherence to financial best practices with well
 ### 📋 Recommendations
 
 **HIGH PRIORITY:**
+
 1. Fix wallet controller idempotency:
+
    ```typescript
    async deductPoints(userId: string, request: DeductPointsRequest): Promise<TransactionResponse> {
      // Check idempotency first
@@ -173,14 +193,13 @@ The codebase demonstrates strong adherence to financial best practices with well
      'operation_type',
      response,
      200,
-     86400 // 24 hours
+     86400, // 24 hours
    );
    ```
 
-**MEDIUM PRIORITY:**
-3. Add idempotency key validation middleware
-4. Implement proper HTTP status codes for duplicate requests
-5. Add integration tests for idempotency at API layer
+**MEDIUM PRIORITY:** 3. Add idempotency key validation middleware 4. Implement
+proper HTTP status codes for duplicate requests 5. Add integration tests for
+idempotency at API layer
 
 ---
 
@@ -216,7 +235,8 @@ The codebase demonstrates strong adherence to financial best practices with well
 ### ⚠️ GAPS IDENTIFIED
 
 1. **Missing Audit Context**
-   - **Issue:** `AuditTrailEntry` interface includes ipAddress, userAgent, initiatedBy but not populated
+   - **Issue:** `AuditTrailEntry` interface includes ipAddress, userAgent,
+     initiatedBy but not populated
    - **Risk:** Incomplete audit trail for compliance
    - **Impact:** Medium - missing attribution data
    - **Locations:** ledger.service.ts line 331-335
@@ -226,7 +246,8 @@ The codebase demonstrates strong adherence to financial best practices with well
    - **Issue:** Ledger entries reference queue items, escrows, but no validation
    - **Risk:** Orphaned references or data inconsistencies
    - **Impact:** Low - query failures only
-   - **Recommendation:** Add foreign key validation or referential integrity checks
+   - **Recommendation:** Add foreign key validation or referential integrity
+     checks
 
 3. **Metadata Not Structured**
    - **Issue:** metadata field is free-form Record<string, any>
@@ -243,7 +264,9 @@ The codebase demonstrates strong adherence to financial best practices with well
 ### 📋 Recommendations
 
 **HIGH PRIORITY:**
+
 1. Populate audit context fields:
+
    ```typescript
    interface AuditContext {
      ipAddress: string;
@@ -251,7 +274,7 @@ The codebase demonstrates strong adherence to financial best practices with well
      initiatedBy: string;
      sessionId?: string;
    }
-   
+
    async createEntry(request: CreateLedgerEntryRequest, context: AuditContext): Promise<LedgerEntry> {
      // Include context in entry
    }
@@ -266,10 +289,9 @@ The codebase demonstrates strong adherence to financial best practices with well
    }
    ```
 
-**MEDIUM PRIORITY:**
-3. Implement structured metadata schemas
-4. Add referential integrity checks for foreign keys
-5. Create audit trail query endpoints with filtering
+**MEDIUM PRIORITY:** 3. Implement structured metadata schemas 4. Add referential
+integrity checks for foreign keys 5. Create audit trail query endpoints with
+filtering
 
 ---
 
@@ -279,7 +301,8 @@ The codebase demonstrates strong adherence to financial best practices with well
 
 1. **Optimistic Locking Implementation**
    - ✅ All wallet models have `version` field
-   - ✅ Update queries check current version (e.g., line 139 in wallet.service.ts)
+   - ✅ Update queries check current version (e.g., line 139 in
+     wallet.service.ts)
    - ✅ Version incremented atomically with updates
    - ✅ Failed updates detected by null return value
 
@@ -308,14 +331,16 @@ The codebase demonstrates strong adherence to financial best practices with well
 ### ⚠️ GAPS IDENTIFIED
 
 1. **Point Accrual Service Missing Proper Retry**
-   - **Issue:** Simple recursion in `awardPoints()` (line 169) without retry limit
+   - **Issue:** Simple recursion in `awardPoints()` (line 169) without retry
+     limit
    - **Risk:** Infinite loop on persistent conflicts
    - **Impact:** HIGH - service hang or crash
    - **Location:** point-accrual.service.ts line 169
    - **Recommendation:** Implement bounded retry with backoff
 
 2. **No Database Transaction Support**
-   - **Issue:** Multi-step operations (wallet + ledger) not in database transaction
+   - **Issue:** Multi-step operations (wallet + ledger) not in database
+     transaction
    - **Risk:** Partial failures leave inconsistent state
    - **Impact:** HIGH - data integrity issue
    - **Locations:** All wallet service methods
@@ -344,7 +369,9 @@ The codebase demonstrates strong adherence to financial best practices with well
 ### 📋 Recommendations
 
 **CRITICAL PRIORITY:**
+
 1. Wrap multi-model operations in MongoDB sessions:
+
    ```typescript
    async holdInEscrow(request: EscrowHoldRequest): Promise<EscrowHoldResponse> {
      const session = await mongoose.startSession();
@@ -366,51 +393,51 @@ The codebase demonstrates strong adherence to financial best practices with well
 2. Add optimistic lock to escrow status:
    ```typescript
    const escrow = await EscrowItemModel.findOneAndUpdate(
-     { 
+     {
        escrowId: { $eq: request.escrowId },
        status: { $eq: 'held' }, // Only process if still held
      },
      {
-       $set: { status: 'settling', settlingAt: new Date() }
+       $set: { status: 'settling', settlingAt: new Date() },
      },
-     { new: true }
+     { new: true },
    );
    if (!escrow) {
      throw new EscrowAlreadyProcessedError(request.escrowId);
    }
    ```
 
-**HIGH PRIORITY:**
-3. Fix point accrual retry logic:
-   ```typescript
-   async awardPoints(request: AwardPointsRequest, retries = 0): Promise<AwardPointsResponse> {
-     if (retries >= this.config.maxRetryAttempts) {
-       throw new OptimisticLockError('wallet', request.userId);
-     }
-     // ... implementation
-     if (!updated) {
-       await this.sleep(this.config.retryBackoffMs * Math.pow(2, retries));
-       return this.awardPoints(request, retries + 1);
-     }
-   }
-   ```
+**HIGH PRIORITY:** 3. Fix point accrual retry logic:
 
-**MEDIUM PRIORITY:**
-4. Implement wallet upsert to prevent creation races:
-   ```typescript
-   const wallet = await WalletModel.findOneAndUpdate(
-     { userId: { $eq: request.userId } },
-     {
-       $setOnInsert: {
-         availableBalance: 0,
-         escrowBalance: 0,
-         currency: this.config.defaultCurrency,
-         version: 0,
-       }
-     },
-     { upsert: true, new: true }
-   );
-   ```
+```typescript
+async awardPoints(request: AwardPointsRequest, retries = 0): Promise<AwardPointsResponse> {
+  if (retries >= this.config.maxRetryAttempts) {
+    throw new OptimisticLockError('wallet', request.userId);
+  }
+  // ... implementation
+  if (!updated) {
+    await this.sleep(this.config.retryBackoffMs * Math.pow(2, retries));
+    return this.awardPoints(request, retries + 1);
+  }
+}
+```
+
+**MEDIUM PRIORITY:** 4. Implement wallet upsert to prevent creation races:
+
+```typescript
+const wallet = await WalletModel.findOneAndUpdate(
+  { userId: { $eq: request.userId } },
+  {
+    $setOnInsert: {
+      availableBalance: 0,
+      escrowBalance: 0,
+      currency: this.config.defaultCurrency,
+      version: 0,
+    },
+  },
+  { upsert: true, new: true },
+);
+```
 
 5. Add circuit breaker for retry protection
 6. Add stress tests for high-concurrency scenarios
@@ -464,23 +491,27 @@ The codebase demonstrates strong adherence to financial best practices with well
 ## Summary of Findings
 
 ### Critical Issues (Must Fix)
+
 1. ❌ **Database transactions missing** - Multi-model operations not atomic
 2. ❌ **Escrow settlement race condition** - No optimistic lock on status
 3. ❌ **Wallet controller missing idempotency** - API layer bypasses checks
 
 ### High Priority Issues (Should Fix)
+
 4. ⚠️ **Point accrual unbounded retry** - Risk of infinite loops
 5. ⚠️ **Database-level immutability** - Schema doesn't prevent updates
 6. ⚠️ **Idempotency results not stored** - Cache misses cause issues
 7. ⚠️ **Audit context not populated** - Missing attribution data
 
 ### Medium Priority Issues (Could Fix)
+
 8. ⚠️ **Escrow status mutability** - Violates pure immutability
 9. ⚠️ **Wallet creation race** - Minor issue, easily resolved
 10. ⚠️ **No structured metadata** - Inconsistent audit data
 11. ⚠️ **No referential integrity** - Orphaned references possible
 
 ### Low Priority Issues (Nice to Have)
+
 12. ℹ️ **Missing circuit breaker** - Performance under extreme load
 13. ℹ️ **Rate limiting absent** - Potential abuse vector
 14. ℹ️ **Pagination limits too high** - Memory concerns
@@ -490,37 +521,41 @@ The codebase demonstrates strong adherence to financial best practices with well
 
 ## Compliance Matrix
 
-| Principle | Current State | Compliance Level | Priority |
-|-----------|--------------|------------------|----------|
-| **Immutable Transactions** | Mostly enforced at application layer | 85% | HIGH |
-| **Idempotency** | Implemented but gaps in API layer | 80% | CRITICAL |
-| **Traceability** | Strong audit trail, missing context | 90% | MEDIUM |
-| **Concurrency Handling** | Good optimistic locking, missing transactions | 75% | CRITICAL |
-| **Overall** | Strong foundation with critical gaps | 82.5% | - |
+| Principle                  | Current State                                 | Compliance Level | Priority |
+| -------------------------- | --------------------------------------------- | ---------------- | -------- |
+| **Immutable Transactions** | Mostly enforced at application layer          | 85%              | HIGH     |
+| **Idempotency**            | Implemented but gaps in API layer             | 80%              | CRITICAL |
+| **Traceability**           | Strong audit trail, missing context           | 90%              | MEDIUM   |
+| **Concurrency Handling**   | Good optimistic locking, missing transactions | 75%              | CRITICAL |
+| **Overall**                | Strong foundation with critical gaps          | 82.5%            | -        |
 
 ---
 
 ## Recommendations Priority
 
 ### Phase 1: Critical Fixes (Week 1)
+
 1. Implement MongoDB transaction support for multi-model operations
 2. Add optimistic lock to escrow settlement operations
 3. Fix wallet controller idempotency enforcement
 4. Fix point accrual unbounded retry
 
 ### Phase 2: High Priority (Week 2)
+
 5. Add database-level immutability constraints
 6. Store idempotency results after operations
 7. Populate audit context in ledger entries
 8. Implement wallet upsert pattern
 
 ### Phase 3: Medium Priority (Week 3-4)
+
 9. Refactor escrow status to append-only model
 10. Add structured metadata schemas
 11. Implement referential integrity checks
 12. Add comprehensive integration tests
 
 ### Phase 4: Enhancements (Ongoing)
+
 13. Circuit breaker implementation
 14. Rate limiting on financial endpoints
 15. Enhanced monitoring and alerting
@@ -530,17 +565,28 @@ The codebase demonstrates strong adherence to financial best practices with well
 
 ## Conclusion
 
-The RedRoomRewards financial modules demonstrate a **strong foundation** in financial transaction handling with well-thought-out architecture for immutability, idempotency, and concurrency control. The code shows clear understanding of financial best practices and includes comprehensive type safety, audit trails, and error handling.
+The RedRoomRewards financial modules demonstrate a **strong foundation** in
+financial transaction handling with well-thought-out architecture for
+immutability, idempotency, and concurrency control. The code shows clear
+understanding of financial best practices and includes comprehensive type
+safety, audit trails, and error handling.
 
-However, **critical gaps exist** that must be addressed before production deployment:
+However, **critical gaps exist** that must be addressed before production
+deployment:
 
-1. **Database transactions are essential** to ensure atomicity across wallet and ledger updates
-2. **Escrow settlement race conditions pose financial risk** and need immediate attention
-3. **API layer idempotency must be enforced** to prevent duplicate operations at the entry point
+1. **Database transactions are essential** to ensure atomicity across wallet and
+   ledger updates
+2. **Escrow settlement race conditions pose financial risk** and need immediate
+   attention
+3. **API layer idempotency must be enforced** to prevent duplicate operations at
+   the entry point
 
-With the recommended fixes implemented, particularly the Phase 1 critical items, the system will achieve strong compliance with all four principles and be suitable for handling real financial transactions.
+With the recommended fixes implemented, particularly the Phase 1 critical items,
+the system will achieve strong compliance with all four principles and be
+suitable for handling real financial transactions.
 
-**Recommended Action:** Implement Phase 1 fixes immediately before any production use of the financial modules.
+**Recommended Action:** Implement Phase 1 fixes immediately before any
+production use of the financial modules.
 
 ---
 

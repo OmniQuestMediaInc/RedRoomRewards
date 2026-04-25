@@ -5,6 +5,7 @@
 ## Purpose
 
 The ledger module is responsible for:
+
 - Recording all point transactions immutably
 - Maintaining comprehensive audit trails
 - Ensuring transaction integrity and atomicity
@@ -30,6 +31,7 @@ Core service implementing `ILedgerService` interface with operations:
 ### Types (`types.ts`)
 
 Comprehensive type definitions:
+
 - `LedgerEntry` - Immutable transaction record
 - `CreateLedgerEntryRequest` - Entry creation parameters
 - `LedgerQueryFilter` - Query filter options
@@ -42,26 +44,31 @@ Comprehensive type definitions:
 ## Key Features Implemented
 
 ### Immutability
+
 - All entries write-once, never modified
 - Corrections create new offsetting entries
 - Schema enforces immutability at database level
 
 ### Idempotency
+
 - Duplicate operations return cached results
 - Prevents double-posting transactions
 - TTL-based cleanup of idempotency records
 
 ### Audit Trail
+
 - Every entry includes full context
 - Metadata for additional tracking (no PII)
 - Correlation IDs for multi-entry transactions
 
 ### Balance Snapshots
+
 - Calculate balance at any point in time
 - Used for reconciliation and reporting
 - Efficient querying with indexes
 
 ### Reconciliation
+
 - Compare ledger to wallet balances
 - Detect and report discrepancies
 - Scheduled integrity checks
@@ -82,6 +89,7 @@ const ledgerService = new LedgerService({
 ## Database Models
 
 Uses `ledger-entry.model.ts` with:
+
 - Unique `entryId` for each entry
 - `transactionId` for grouping related entries
 - `idempotencyKey` with unique index
@@ -91,6 +99,7 @@ Uses `ledger-entry.model.ts` with:
 ## Testing
 
 Comprehensive test suite in `ledger.service.spec.ts`:
+
 - Entry creation and retrieval
 - Idempotency enforcement
 - Balance snapshot accuracy
@@ -107,6 +116,7 @@ Comprehensive test suite in `ledger.service.spec.ts`:
 
 ## Related Documentation
 
-- `/.github/copilot-instructions.md` §9 "Coding Doctrine" - ledger-specific rules
+- `/.github/copilot-instructions.md` §9 "Coding Doctrine" - ledger-specific
+  rules
 - `/docs/WALLET_ESCROW_ARCHITECTURE.md` - Architecture details
 - `/docs/TESTING_STRATEGY.md` - Testing requirements

@@ -1,15 +1,15 @@
 # BUILD CONTROL - REWARDS Feature Briefs
 
-**Authority:** Kevin B. Hartley, CEO — OmniQuest Media Inc.
-**Initialized:** 2026-04-18
+**Authority:** Kevin B. Hartley, CEO — OmniQuest Media Inc. **Initialized:**
+2026-04-18
 
 ---
 
 ## PURPOSE
 
-Specifications for features authorized by CEO but not yet converted into active directive
-series. When a brief matures, it moves into `02_DOMAIN_TAXONOMY.md` and individual
-directive files.
+Specifications for features authorized by CEO but not yet converted into active
+directive series. When a brief matures, it moves into `02_DOMAIN_TAXONOMY.md`
+and individual directive files.
 
 ---
 

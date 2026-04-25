@@ -10,11 +10,13 @@ This directory contains infrastructure configuration and database management.
 
 ## Status
 
-All subdirectories are currently **scaffolded only**. Implementation will be added in subsequent phases.
+All subdirectories are currently **scaffolded only**. Implementation will be
+added in subsequent phases.
 
 ## Purpose
 
 Infrastructure code manages:
+
 - Database schema migrations
 - Database connection pooling and configuration
 - Environment-specific configuration
@@ -23,6 +25,7 @@ Infrastructure code manages:
 ## Development Guidelines
 
 When implementing infrastructure:
+
 - Use environment variables for configuration
 - Never commit secrets or credentials
 - Version all database migrations

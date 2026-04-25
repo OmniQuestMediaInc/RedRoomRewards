@@ -2,39 +2,52 @@
 
 ## Overview
 
-RedRoomRewards implements robust idempotency and conflict handling to ensure reliable integration with merchant clients like ChatNow.Zone. This document defines the rules and behaviors for duplicate detection, conflict resolution, and replay protection.
+RedRoomRewards implements robust idempotency and conflict handling to ensure
+reliable integration with merchant clients like ChatNow.Zone. This document
+defines the rules and behaviors for duplicate detection, conflict resolution,
+and replay protection.
 
 ## Core Principles
 
-1. **Immutability**: Once a transaction is processed, its `transaction_id` becomes immutable and cannot be reused
-2. **Idempotency**: Duplicate requests return the same response without side effects
-3. **Conflict Detection**: System detects and reports conflicting transaction attempts
-4. **Replay Protection**: Checksum validation prevents malicious or accidental replays
+1. **Immutability**: Once a transaction is processed, its `transaction_id`
+   becomes immutable and cannot be reused
+2. **Idempotency**: Duplicate requests return the same response without side
+   effects
+3. **Conflict Detection**: System detects and reports conflicting transaction
+   attempts
+4. **Replay Protection**: Checksum validation prevents malicious or accidental
+   replays
 
 ---
 
 ## Idempotency Keys
 
 ### Purpose
-Idempotency keys allow clients to safely retry requests without creating duplicate transactions.
+
+Idempotency keys allow clients to safely retry requests without creating
+duplicate transactions.
 
 ### Requirements
+
 - **Required**: Every event must include an `idempotency_key` field
 - **Format**: String, 1-256 characters
 - **Uniqueness**: Must be unique per operation attempt
 - **Lifetime**: Keys are stored for 24+ hours after initial processing
 
 ### Best Practices
+
 ```
 idem_{user_id}_{timestamp}_{operation_type}
 ```
 
 **Examples:**
+
 - `idem_user12345_20240115_143000_purchase`
 - `idem_user67890_20240115_150000_membership`
 - `idem_user11223_20240115_163000_adjustment`
 
 ### Generation Guidelines
+
 1. Include user/member identifier for traceability
 2. Include timestamp for temporal ordering
 3. Include operation type for categorization
@@ -48,6 +61,7 @@ idem_{user_id}_{timestamp}_{operation_type}
 ### HTTP Status Codes
 
 #### 200 OK - Successful Duplicate
+
 **When**: Exact duplicate of previously processed request
 
 **Response**: Original transaction response
@@ -55,6 +69,7 @@ idem_{user_id}_{timestamp}_{operation_type}
 **Behavior**: No side effects; balance unchanged
 
 **Example**:
+
 ```json
 {
   "status": "success",
@@ -72,6 +87,7 @@ idem_{user_id}_{timestamp}_{operation_type}
 ```
 
 #### 409 Conflict - Valid Conflict
+
 **When**: Same `transaction_id` with different data
 
 **Response**: Error with conflict details
@@ -79,6 +95,7 @@ idem_{user_id}_{timestamp}_{operation_type}
 **Behavior**: Request rejected; no changes made
 
 **Example**:
+
 ```json
 {
   "status": "error",
@@ -102,13 +119,13 @@ IF idempotency_key exists:
     RETURN 200 OK with original response
   ELSE:
     RETURN 409 CONFLICT with conflict details
-    
+
 IF transaction_id exists:
   IF request_data matches stored_transaction_data:
     RETURN 200 OK with original response
   ELSE:
     RETURN 409 CONFLICT with conflict details
-    
+
 ELSE:
   Process new transaction
   Store idempotency record
@@ -120,31 +137,33 @@ ELSE:
 ## Checksum Validation
 
 ### Purpose
+
 Prevent replay attacks and detect data tampering during transmission.
 
 ### Implementation
 
 #### Checksum Generation
+
 ```javascript
 // Client-side: Generate SHA-256 hash of transaction data
 const crypto = require('crypto');
 
 function generateChecksum(transactionData) {
   // Sort keys for consistent hashing
-  const sortedData = JSON.stringify(transactionData, Object.keys(transactionData).sort());
-  
+  const sortedData = JSON.stringify(
+    transactionData,
+    Object.keys(transactionData).sort(),
+  );
+
   // Generate SHA-256 hash
-  return crypto
-    .createHash('sha256')
-    .update(sortedData)
-    .digest('hex');
+  return crypto.createHash('sha256').update(sortedData).digest('hex');
 }
 
 // Example
 const transaction = {
-  transaction_id: "txn_2024_purchase_abc123",
-  event_type: "token_purchase",
-  occurred_at: "2024-01-15T14:30:00.000Z",
+  transaction_id: 'txn_2024_purchase_abc123',
+  event_type: 'token_purchase',
+  occurred_at: '2024-01-15T14:30:00.000Z',
   // ... other fields
 };
 
@@ -153,19 +172,20 @@ const checksum = generateChecksum(transaction);
 ```
 
 #### Server-Side Validation
+
 ```javascript
 function validateChecksum(receivedData, receivedChecksum) {
   // Remove checksum field from data before validation
   const { checksum, ...dataWithoutChecksum } = receivedData;
-  
+
   // Recalculate checksum
   const calculatedChecksum = generateChecksum(dataWithoutChecksum);
-  
+
   // Compare
   if (calculatedChecksum !== receivedChecksum) {
     throw new Error('CHECKSUM_VALIDATION_FAILED');
   }
-  
+
   return true;
 }
 ```
@@ -175,6 +195,7 @@ function validateChecksum(receivedData, receivedChecksum) {
 **HTTP Status**: 400 Bad Request
 
 **Response**:
+
 ```json
 {
   "status": "error",
@@ -195,11 +216,13 @@ function validateChecksum(receivedData, receivedChecksum) {
 ### Client Retry Guidelines
 
 #### When to Retry
+
 - Network timeouts
 - HTTP 5xx server errors
 - HTTP 429 rate limit errors
 
 #### When NOT to Retry
+
 - HTTP 4xx client errors (except 429)
 - HTTP 409 conflict errors
 - HTTP 200/201 success responses
@@ -208,47 +231,46 @@ function validateChecksum(receivedData, receivedChecksum) {
 
 ```javascript
 async function submitEventWithRetry(eventData, options = {}) {
-  const {
-    maxAttempts = 3,
-    baseDelayMs = 1000,
-    maxDelayMs = 30000
-  } = options;
-  
+  const { maxAttempts = 3, baseDelayMs = 1000, maxDelayMs = 30000 } = options;
+
   for (let attempt = 1; attempt <= maxAttempts; attempt++) {
     try {
       const response = await submitEvent(eventData);
-      
+
       // Success - return response
       if (response.status >= 200 && response.status < 300) {
         return response;
       }
-      
+
       // Don't retry client errors (except rate limit)
-      if (response.status >= 400 && response.status < 500 && response.status !== 429) {
+      if (
+        response.status >= 400 &&
+        response.status < 500 &&
+        response.status !== 429
+      ) {
         throw new Error(`Client error: ${response.status}`);
       }
-      
+
       // Retry on 5xx or 429
       if (attempt < maxAttempts) {
         const delay = Math.min(
           baseDelayMs * Math.pow(2, attempt - 1),
-          maxDelayMs
+          maxDelayMs,
         );
         await sleep(delay);
         continue;
       }
-      
+
       throw new Error(`Max retry attempts reached: ${maxAttempts}`);
-      
     } catch (error) {
       if (attempt >= maxAttempts) {
         throw error;
       }
-      
+
       // Exponential backoff
       const delay = Math.min(
         baseDelayMs * Math.pow(2, attempt - 1),
-        maxDelayMs
+        maxDelayMs,
       );
       await sleep(delay);
     }
@@ -256,20 +278,20 @@ async function submitEventWithRetry(eventData, options = {}) {
 }
 
 function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 ```
 
 ### Exponential Backoff
 
-| Attempt | Delay      | Cumulative Time |
-|---------|------------|-----------------|
-| 1       | 0ms        | 0ms             |
-| 2       | 1000ms     | 1000ms          |
-| 3       | 2000ms     | 3000ms          |
-| 4       | 4000ms     | 7000ms          |
-| 5       | 8000ms     | 15000ms         |
-| 6+      | 30000ms    | varies          |
+| Attempt | Delay   | Cumulative Time |
+| ------- | ------- | --------------- |
+| 1       | 0ms     | 0ms             |
+| 2       | 1000ms  | 1000ms          |
+| 3       | 2000ms  | 3000ms          |
+| 4       | 4000ms  | 7000ms          |
+| 5       | 8000ms  | 15000ms         |
+| 6+      | 30000ms | varies          |
 
 ---
 
@@ -277,20 +299,24 @@ function sleep(ms) {
 
 ### Transaction Processing
 
-1. **Atomic Operations**: All database updates for a transaction occur atomically
+1. **Atomic Operations**: All database updates for a transaction occur
+   atomically
 2. **Ledger Immutability**: Once written, ledger entries are never modified
 3. **Balance Consistency**: User balances always reflect ledger entry totals
-4. **Idempotency Storage**: Idempotency records stored before processing transactions
+4. **Idempotency Storage**: Idempotency records stored before processing
+   transactions
 
 ### Failure Scenarios
 
 #### Network Failure Mid-Request
+
 - Client times out but server may have processed
 - Client retries with same `idempotency_key`
 - Server returns 200 with original response if processed
 - Server processes as new if not received
 
 #### Database Failure During Transaction
+
 - Transaction rolled back atomically
 - No partial updates applied
 - Client receives 500 error
@@ -298,6 +324,7 @@ function sleep(ms) {
 - Server processes as new transaction
 
 #### Concurrent Requests
+
 - Optimistic locking prevents duplicate processing
 - First request wins; second gets conflict error or duplicate response
 - Wallet version numbers prevent race conditions
@@ -310,20 +337,20 @@ async function updateWallet(userId, amount, currentVersion) {
   const result = await WalletModel.findOneAndUpdate(
     {
       userId: userId,
-      version: currentVersion  // Only update if version matches
+      version: currentVersion, // Only update if version matches
     },
     {
       $inc: { availableBalance: amount, version: 1 },
-      $set: { updatedAt: new Date() }
+      $set: { updatedAt: new Date() },
     },
-    { new: true }
+    { new: true },
   );
-  
+
   if (!result) {
     // Version mismatch - concurrent update detected
     throw new Error('CONCURRENT_MODIFICATION_DETECTED');
   }
-  
+
   return result;
 }
 ```
@@ -334,11 +361,13 @@ async function updateWallet(userId, amount, currentVersion) {
 
 ### For Merchant Clients
 
-1. **Always Include Idempotency Keys**: Never reuse keys across different operations
+1. **Always Include Idempotency Keys**: Never reuse keys across different
+   operations
 2. **Implement Retry Logic**: Use exponential backoff for transient failures
 3. **Handle 200 and 201 Identically**: Both indicate successful processing
 4. **Don't Retry 4xx Errors**: Fix the request instead
-5. **Log All Requests**: Include `transaction_id` and `idempotency_key` for debugging
+5. **Log All Requests**: Include `transaction_id` and `idempotency_key` for
+   debugging
 6. **Generate Checksums**: Include SHA-256 checksum for all events
 7. **Store Transaction IDs**: Keep local records for reconciliation
 
@@ -356,27 +385,28 @@ async function updateWallet(userId, amount, currentVersion) {
 
 ## Error Code Reference
 
-| Error Code | HTTP Status | Meaning | Retry? |
-|------------|-------------|---------|--------|
-| `SUCCESS` | 200 | Operation successful | No |
-| `DUPLICATE_REQUEST` | 200 | Idempotent duplicate | No |
-| `CREATED` | 201 | New transaction created | No |
-| `INVALID_REQUEST` | 400 | Validation failed | No |
-| `CHECKSUM_VALIDATION_FAILED` | 400 | Checksum mismatch | No |
-| `UNAUTHORIZED` | 401 | Authentication failed | No |
-| `FORBIDDEN` | 403 | Authorization failed | No |
-| `NOT_FOUND` | 404 | Resource not found | No |
-| `TRANSACTION_CONFLICT` | 409 | Transaction ID conflict | No |
-| `RATE_LIMIT_EXCEEDED` | 429 | Too many requests | Yes |
-| `INTERNAL_SERVER_ERROR` | 500 | Server error | Yes |
-| `SERVICE_UNAVAILABLE` | 503 | Service down/overloaded | Yes |
-| `GATEWAY_TIMEOUT` | 504 | Upstream timeout | Yes |
+| Error Code                   | HTTP Status | Meaning                 | Retry? |
+| ---------------------------- | ----------- | ----------------------- | ------ |
+| `SUCCESS`                    | 200         | Operation successful    | No     |
+| `DUPLICATE_REQUEST`          | 200         | Idempotent duplicate    | No     |
+| `CREATED`                    | 201         | New transaction created | No     |
+| `INVALID_REQUEST`            | 400         | Validation failed       | No     |
+| `CHECKSUM_VALIDATION_FAILED` | 400         | Checksum mismatch       | No     |
+| `UNAUTHORIZED`               | 401         | Authentication failed   | No     |
+| `FORBIDDEN`                  | 403         | Authorization failed    | No     |
+| `NOT_FOUND`                  | 404         | Resource not found      | No     |
+| `TRANSACTION_CONFLICT`       | 409         | Transaction ID conflict | No     |
+| `RATE_LIMIT_EXCEEDED`        | 429         | Too many requests       | Yes    |
+| `INTERNAL_SERVER_ERROR`      | 500         | Server error            | Yes    |
+| `SERVICE_UNAVAILABLE`        | 503         | Service down/overloaded | Yes    |
+| `GATEWAY_TIMEOUT`            | 504         | Upstream timeout        | Yes    |
 
 ---
 
 ## Examples
 
 ### Example 1: First Request (Success)
+
 ```http
 POST /api/events/ingest
 Content-Type: application/json
@@ -407,6 +437,7 @@ Response: 201 Created
 ```
 
 ### Example 2: Duplicate Request (Idempotent)
+
 ```http
 POST /api/events/ingest
 [Same payload as Example 1]
@@ -426,6 +457,7 @@ Response: 200 OK
 ```
 
 ### Example 3: Conflict (Different Data)
+
 ```http
 POST /api/events/ingest
 {
@@ -481,6 +513,7 @@ Response: 409 Conflict
 ### Audit Trail Requirements
 
 Every transaction must log:
+
 1. Original request payload
 2. Idempotency key
 3. Transaction ID
@@ -499,9 +532,9 @@ Every transaction must log:
 
 ## Version History
 
-| Version | Date | Changes |
-|---------|------|---------|
-| 1.0 | 2024-01-15 | Initial release |
+| Version | Date       | Changes         |
+| ------- | ---------- | --------------- |
+| 1.0     | 2024-01-15 | Initial release |
 
 ---
 

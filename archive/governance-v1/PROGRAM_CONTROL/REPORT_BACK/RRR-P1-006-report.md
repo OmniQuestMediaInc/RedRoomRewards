@@ -1,10 +1,8 @@
 # Report-Back: RRR-P1-006
 
-STATUS: SUCCESS
-DIRECTIVE: RRR-P1-006 — Rename XXXChatNow.com → ChatNow.Zone repo-wide
-DATE: 2026-04-17
-AGENT: Copilot Task Agent
-PR_NUMBER: (pending — branch copilot/chorerrr-p1-006)
+STATUS: SUCCESS DIRECTIVE: RRR-P1-006 — Rename XXXChatNow.com → ChatNow.Zone
+repo-wide DATE: 2026-04-17 AGENT: Copilot Task Agent PR_NUMBER: (pending —
+branch copilot/chorerrr-p1-006)
 
 ---
 
@@ -76,7 +74,8 @@ Exit code: 0 — PASS
 
 ## GIT_GREP_FINAL
 
-Final `git grep -n -i "xxxchatnow" -- ':!archive/xxxchatnow-seed'` filtered for non-archive hits:
+Final `git grep -n -i "xxxchatnow" -- ':!archive/xxxchatnow-seed'` filtered for
+non-archive hits:
 
 ```
 PROGRAM_CONTROL/REPORT_BACK/RRR-P1-006-report.md  (lines 4,93-96,104)
@@ -96,24 +95,38 @@ All non-report-back, non-archive-path occurrences: **zero**.
 ## NOTES
 
 **Replacement rules applied:**
+
 - `XXXChatNow.com` → `ChatNow.Zone`
 - `xxxchatnow.com` → `chatnow.zone`
 - `XXXChatNow` → `ChatNow.Zone`
-- `xxxchatnow` (non-path, non-archive) → `chatnow.zone` (data identifiers) or `ChatNow.Zone` (text)
+- `xxxchatnow` (non-path, non-archive) → `chatnow.zone` (data identifiers) or
+  `ChatNow.Zone` (text)
 
 **Exclusions honoured:**
+
 - `archive/xxxchatnow-seed/` path — not touched (handled by RRR-P1-007)
 - `package-lock.json` — not touched
 - No file or folder renamed
 
 **Post-replacement cleanup (manual fixes to avoid nonsensical text):**
-- `CLAUDE.md` line 105: `(not ChatNow.Zone)` parenthetical removed; was `(not XXXChatNow.com)` — now redundant
-- `docs/DOMAIN_GLOSSARY.md`: `(formerly ChatNow.Zone)` redundancy removed; `RETIRED: ChatNow.Zone` row dropped (was documenting the retired old name; row would have incorrectly labelled the live platform as retired)
-- `docs/history/BOOTSTRAP_INSTRUCTIONS.md`: same glossary cleanup applied
-- `docs/RRR_CEO_DECISIONS_FINAL_2026-04-17.md` D2 text: "ChatNow.Zone was the prior platform name" reworded to "ChatNow.Zone is the canonical platform name"
-- `docs/REQUIREMENTS_MASTER.md` RRR-P1-006 row: description rephrased as "legacy platform name → ChatNow.Zone" to avoid self-referential redundancy
 
-- `docs/UNIVERSAL_ARCHITECTURE.md` line 80: `chatnow.zone-seed/` directory name reverted to `xxxchatnow-seed/` — archive folder path is excluded per directive; the rename script had incorrectly renamed the folder name in the tree diagram
-- `docs/history/BOOTSTRAP_INSTRUCTIONS.md` line 955: RRR-P1-006 table row description rephrased from self-referential "ChatNow.Zone to ChatNow.Zone" to "legacy platform name → ChatNow.Zone"
+- `CLAUDE.md` line 105: `(not ChatNow.Zone)` parenthetical removed; was
+  `(not XXXChatNow.com)` — now redundant
+- `docs/DOMAIN_GLOSSARY.md`: `(formerly ChatNow.Zone)` redundancy removed;
+  `RETIRED: ChatNow.Zone` row dropped (was documenting the retired old name; row
+  would have incorrectly labelled the live platform as retired)
+- `docs/history/BOOTSTRAP_INSTRUCTIONS.md`: same glossary cleanup applied
+- `docs/RRR_CEO_DECISIONS_FINAL_2026-04-17.md` D2 text: "ChatNow.Zone was the
+  prior platform name" reworded to "ChatNow.Zone is the canonical platform name"
+- `docs/REQUIREMENTS_MASTER.md` RRR-P1-006 row: description rephrased as "legacy
+  platform name → ChatNow.Zone" to avoid self-referential redundancy
+
+- `docs/UNIVERSAL_ARCHITECTURE.md` line 80: `chatnow.zone-seed/` directory name
+  reverted to `xxxchatnow-seed/` — archive folder path is excluded per
+  directive; the rename script had incorrectly renamed the folder name in the
+  tree diagram
+- `docs/history/BOOTSTRAP_INSTRUCTIONS.md` line 955: RRR-P1-006 table row
+  description rephrased from self-referential "ChatNow.Zone to ChatNow.Zone" to
+  "legacy platform name → ChatNow.Zone"
 
 Human review required before merge. Do NOT auto-merge.

@@ -9,15 +9,19 @@
 
 ## Overview
 
-This document defines how the Performance Queue service integrates with the RedRoomRewards wallet and escrow system. The queue is the **sole authority** for settlement and refund decisions.
+This document defines how the Performance Queue service integrates with the
+RedRoomRewards wallet and escrow system. The queue is the **sole authority** for
+settlement and refund decisions.
 
-**Reference**: See `/docs/WALLET_ESCROW_ARCHITECTURE.md` Section 4 for architecture details.
+**Reference**: See `/docs/WALLET_ESCROW_ARCHITECTURE.md` Section 4 for
+architecture details.
 
 ---
 
 ## Queue Authority Model
 
 ### What Queue CAN Do
+
 - ✅ Decide when to settle escrow
 - ✅ Decide when to refund escrow
 - ✅ Decide partial settlement amounts
@@ -26,13 +30,15 @@ This document defines how the Performance Queue service integrates with the RedR
 - ✅ Issue refund authorization tokens
 
 ### What Queue CANNOT Do
+
 - ❌ Deduct user balance directly
 - ❌ Credit model balance directly
 - ❌ Modify wallet balances
 - ❌ Create ledger entries
 - ❌ Execute financial transactions
 
-**Principle**: Queue makes decisions (WHAT), Wallet Service executes transactions (HOW).
+**Principle**: Queue makes decisions (WHAT), Wallet Service executes
+transactions (HOW).
 
 ---
 
@@ -43,11 +49,12 @@ This document defines how the Performance Queue service integrates with the RedR
 **Trigger**: Feature module holds funds in escrow
 
 **Input**: Queue intake event from feature
+
 ```typescript
 interface QueueIntakeRequest {
   userId: string;
   modelId: string;
-  escrowId: string;  // Critical: links queue to escrow
+  escrowId: string; // Critical: links queue to escrow
   amount: number;
   featureType: string;
   priority?: number;
@@ -56,6 +63,7 @@ interface QueueIntakeRequest {
 ```
 
 **Process**:
+
 1. Feature holds funds in escrow
 2. Feature emits queue intake request
 3. Queue validates request
@@ -63,6 +71,7 @@ interface QueueIntakeRequest {
 5. Queue links to escrow via escrowId
 
 **Implementation**:
+
 ```typescript
 async function enqueue(request: QueueIntakeRequest): Promise<QueueItem> {
   // Validate escrow exists and is in "held" status
@@ -70,7 +79,7 @@ async function enqueue(request: QueueIntakeRequest): Promise<QueueItem> {
   if (!escrow || escrow.status !== EscrowStatus.HELD) {
     throw new Error('Invalid escrow for queue');
   }
-  
+
   // Create queue item
   const queueItem: QueueItem = {
     queueItemId: generateId(),
@@ -84,9 +93,9 @@ async function enqueue(request: QueueIntakeRequest): Promise<QueueItem> {
     createdAt: new Date(),
     startedAt: null,
     completedAt: null,
-    metadata: request.metadata
+    metadata: request.metadata,
   };
-  
+
   await queueRepository.insert(queueItem);
   return queueItem;
 }
@@ -99,22 +108,24 @@ async function enqueue(request: QueueIntakeRequest): Promise<QueueItem> {
 **Trigger**: Model begins performance
 
 **Process**:
+
 1. Queue marks item as "in_progress"
 2. Queue updates startedAt timestamp
 3. No wallet interaction yet
 
 **Implementation**:
+
 ```typescript
 async function startPerformance(queueItemId: string): Promise<QueueItem> {
   const item = await queueRepository.findById(queueItemId);
-  
+
   if (item.status !== QueueItemStatus.QUEUED) {
     throw new Error('Item not in queued status');
   }
-  
+
   item.status = QueueItemStatus.IN_PROGRESS;
   item.startedAt = new Date();
-  
+
   await queueRepository.update(item);
   return item;
 }
@@ -127,6 +138,7 @@ async function startPerformance(queueItemId: string): Promise<QueueItem> {
 **Trigger**: Performance successfully completed
 
 **Process**:
+
 1. Queue decides to settle
 2. Queue generates settlement authorization token
 3. Queue calls Wallet Service to settle escrow
@@ -134,10 +146,11 @@ async function startPerformance(queueItemId: string): Promise<QueueItem> {
 5. Queue updates completedAt timestamp
 
 **Authorization Token**:
+
 ```typescript
 interface QueueSettlementAuthorization {
   queueItemId: string;
-  token: string;  // Signed JWT
+  token: string; // Signed JWT
   escrowId: string;
   modelId: string;
   amount: number;
@@ -148,9 +161,10 @@ interface QueueSettlementAuthorization {
 ```
 
 **Token Generation**:
+
 ```typescript
 function generateSettlementToken(
-  queueItem: QueueItem
+  queueItem: QueueItem,
 ): QueueSettlementAuthorization {
   const payload = {
     queueItemId: queueItem.queueItemId,
@@ -159,33 +173,34 @@ function generateSettlementToken(
     amount: queueItem.amount,
     reason: TransactionReason.PERFORMANCE_COMPLETED,
     issuedAt: new Date(),
-    expiresAt: new Date(Date.now() + 5 * 60 * 1000) // 5 minutes
+    expiresAt: new Date(Date.now() + 5 * 60 * 1000), // 5 minutes
   };
-  
+
   const token = jwt.sign(payload, config.queueAuthSecret, {
     algorithm: 'HS256',
-    expiresIn: '5m'
+    expiresIn: '5m',
   });
-  
+
   return { ...payload, token };
 }
 ```
 
 **Settlement Call**:
+
 ```typescript
 async function finishPerformance(
   queueItemId: string,
-  modelId: string
+  modelId: string,
 ): Promise<{ queueItem: QueueItem; settlement: EscrowSettleResponse }> {
   const item = await queueRepository.findById(queueItemId);
-  
+
   if (item.status !== QueueItemStatus.IN_PROGRESS) {
     throw new Error('Item not in progress');
   }
-  
+
   // Generate authorization
   const authorization = generateSettlementToken(item);
-  
+
   // Call wallet service to settle
   const settlementRequest: EscrowSettleRequest = {
     escrowId: item.escrowId,
@@ -198,20 +213,20 @@ async function finishPerformance(
     requestId: generateRequestId(),
     metadata: {
       featureType: item.featureType,
-      performanceDuration: Date.now() - item.startedAt!.getTime()
-    }
+      performanceDuration: Date.now() - item.startedAt!.getTime(),
+    },
   };
-  
+
   const settlement = await walletService.settleEscrow(
     settlementRequest,
-    authorization
+    authorization,
   );
-  
+
   // Update queue item
   item.status = QueueItemStatus.FINISHED;
   item.completedAt = new Date();
   await queueRepository.update(item);
-  
+
   return { queueItem: item, settlement };
 }
 ```
@@ -223,6 +238,7 @@ async function finishPerformance(
 **Trigger**: Performance cancelled or abandoned
 
 **Process**:
+
 1. Queue decides to refund
 2. Queue generates refund authorization token
 3. Queue calls Wallet Service to refund escrow
@@ -230,26 +246,28 @@ async function finishPerformance(
 5. Queue updates completedAt timestamp
 
 **Refund Scenarios**:
+
 - User disconnects before performance starts
 - Model declines performance
 - Rope-drop timeout expires
 - Admin cancels performance
 
 **Refund Call**:
+
 ```typescript
 async function abandonPerformance(
   queueItemId: string,
-  reason: TransactionReason
+  reason: TransactionReason,
 ): Promise<{ queueItem: QueueItem; refund: EscrowRefundResponse }> {
   const item = await queueRepository.findById(queueItemId);
-  
+
   if (item.status === QueueItemStatus.FINISHED) {
     throw new Error('Cannot abandon finished performance');
   }
-  
+
   // Generate authorization
   const authorization = generateRefundToken(item, reason);
-  
+
   // Call wallet service to refund
   const refundRequest: EscrowRefundRequest = {
     escrowId: item.escrowId,
@@ -262,21 +280,18 @@ async function abandonPerformance(
     requestId: generateRequestId(),
     metadata: {
       featureType: item.featureType,
-      abandonReason: reason
-    }
+      abandonReason: reason,
+    },
   };
-  
-  const refund = await walletService.refundEscrow(
-    refundRequest,
-    authorization
-  );
-  
+
+  const refund = await walletService.refundEscrow(refundRequest, authorization);
+
   // Update queue item
   item.status = QueueItemStatus.ABANDONED;
   item.statusReason = reason;
   item.completedAt = new Date();
   await queueRepository.update(item);
-  
+
   return { queueItem: item, refund };
 }
 ```
@@ -288,6 +303,7 @@ async function abandonPerformance(
 **Trigger**: Partial performance delivered
 
 **Process**:
+
 1. Queue decides to split settlement
 2. Queue calculates refund and settle amounts
 3. Queue generates partial settlement authorization
@@ -295,11 +311,13 @@ async function abandonPerformance(
 5. Queue marks item as "partial"
 
 **Use Cases**:
+
 - Performance interrupted mid-way
 - Quality issues
 - Partial fulfillment
 
 **Validation**:
+
 ```typescript
 // refundAmount + settleAmount MUST equal original escrow amount
 if (refundAmount + settleAmount !== item.amount) {
@@ -312,28 +330,32 @@ if (refundAmount < 0 || settleAmount < 0) {
 ```
 
 **Partial Settlement Call**:
+
 ```typescript
 async function partialCompletion(
   queueItemId: string,
   refundAmount: number,
   settleAmount: number,
-  reason: TransactionReason
-): Promise<{ queueItem: QueueItem; partialSettle: EscrowPartialSettleResponse }> {
+  reason: TransactionReason,
+): Promise<{
+  queueItem: QueueItem;
+  partialSettle: EscrowPartialSettleResponse;
+}> {
   const item = await queueRepository.findById(queueItemId);
-  
+
   // Validate amounts
   if (refundAmount + settleAmount !== item.amount) {
     throw new Error('Amounts must sum to escrow total');
   }
-  
+
   // Generate authorization
   const authorization = generatePartialSettlementToken(
     item,
     refundAmount,
     settleAmount,
-    reason
+    reason,
   );
-  
+
   // Call wallet service
   const partialRequest: EscrowPartialSettleRequest = {
     escrowId: item.escrowId,
@@ -348,21 +370,21 @@ async function partialCompletion(
     requestId: generateRequestId(),
     metadata: {
       featureType: item.featureType,
-      partialReason: reason
-    }
+      partialReason: reason,
+    },
   };
-  
+
   const partialSettle = await walletService.partialSettleEscrow(
     partialRequest,
-    authorization
+    authorization,
   );
-  
+
   // Update queue item
   item.status = QueueItemStatus.PARTIAL;
   item.statusReason = reason;
   item.completedAt = new Date();
   await queueRepository.update(item);
-  
+
   return { queueItem: item, partialSettle };
 }
 ```
@@ -372,6 +394,7 @@ async function partialCompletion(
 ## Authorization Token Security
 
 ### Token Structure
+
 ```json
 {
   "queueItemId": "queue-123",
@@ -385,38 +408,40 @@ async function partialCompletion(
 ```
 
 ### Token Signing
+
 - Algorithm: HS256 (HMAC with SHA-256)
 - Secret: Shared secret between queue and wallet service
 - Expiry: 5 minutes (short-lived)
 
 ### Token Validation (Wallet Service)
+
 ```typescript
 function validateQueueAuthorization(
   token: string,
-  request: EscrowSettleRequest
+  request: EscrowSettleRequest,
 ): boolean {
   try {
     // Verify JWT signature
     const payload = jwt.verify(token, config.queueAuthSecret) as any;
-    
+
     // Check expiry
     if (new Date(payload.expiresAt) < new Date()) {
       throw new Error('Token expired');
     }
-    
+
     // Validate request matches token
     if (payload.queueItemId !== request.queueItemId) {
       throw new Error('Queue item ID mismatch');
     }
-    
+
     if (payload.escrowId !== request.escrowId) {
       throw new Error('Escrow ID mismatch');
     }
-    
+
     if (payload.amount !== request.amount) {
       throw new Error('Amount mismatch');
     }
-    
+
     return true;
   } catch (error) {
     throw new InvalidAuthorizationError(error.message);
@@ -429,12 +454,13 @@ function validateQueueAuthorization(
 ## Error Handling
 
 ### Queue Errors
+
 ```typescript
 class QueueError extends Error {
   constructor(
     message: string,
     public code: string,
-    public queueItemId?: string
+    public queueItemId?: string,
   ) {
     super(message);
     this.name = 'QueueError';
@@ -442,27 +468,30 @@ class QueueError extends Error {
 }
 
 class InvalidQueueStateError extends QueueError {
-  constructor(queueItemId: string, currentState: string, expectedState: string) {
+  constructor(
+    queueItemId: string,
+    currentState: string,
+    expectedState: string,
+  ) {
     super(
       `Invalid queue state. Expected ${expectedState}, got ${currentState}`,
       'INVALID_QUEUE_STATE',
-      queueItemId
+      queueItemId,
     );
   }
 }
 
 class EscrowLinkageError extends QueueError {
   constructor(escrowId: string) {
-    super(
-      `Escrow not found or invalid: ${escrowId}`,
-      'ESCROW_LINKAGE_ERROR'
-    );
+    super(`Escrow not found or invalid: ${escrowId}`, 'ESCROW_LINKAGE_ERROR');
   }
 }
 ```
 
 ### Wallet Service Errors
+
 Handle all wallet service errors:
+
 - `InsufficientBalanceError` (402)
 - `EscrowNotFoundError` (404)
 - `EscrowAlreadyProcessedError` (409)
@@ -470,31 +499,32 @@ Handle all wallet service errors:
 - `OptimisticLockError` (409)
 
 ### Retry Strategy
+
 ```typescript
 async function settleWithRetry(
   request: EscrowSettleRequest,
   authorization: QueueSettlementAuthorization,
-  maxRetries: number = 3
+  maxRetries: number = 3,
 ): Promise<EscrowSettleResponse> {
   let lastError: Error;
-  
+
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
       return await walletService.settleEscrow(request, authorization);
     } catch (error) {
       lastError = error;
-      
+
       // Retry on transient errors only
       if (error instanceof OptimisticLockError && attempt < maxRetries - 1) {
         await sleep(Math.pow(2, attempt) * 100); // Exponential backoff
         continue;
       }
-      
+
       // Don't retry on permanent errors
       throw error;
     }
   }
-  
+
   throw lastError!;
 }
 ```
@@ -504,11 +534,13 @@ async function settleWithRetry(
 ## Idempotency
 
 ### Queue Operations
+
 Queue must generate unique idempotency keys:
+
 ```typescript
 function generateIdempotencyKey(
   queueItemId: string,
-  operation: 'settle' | 'refund' | 'partial'
+  operation: 'settle' | 'refund' | 'partial',
 ): string {
   // Format: queue-{queueItemId}-{operation}
   return `queue-${queueItemId}-${operation}`;
@@ -516,6 +548,7 @@ function generateIdempotencyKey(
 ```
 
 ### Duplicate Settlement Protection
+
 - Same queueItemId cannot be settled twice
 - Wallet service enforces this with idempotency
 - Queue should also track processed items
@@ -525,6 +558,7 @@ function generateIdempotencyKey(
 ## Monitoring and Alerts
 
 ### Key Metrics
+
 - Queue processing time (queued → finished)
 - Settlement success rate
 - Refund rate
@@ -532,6 +566,7 @@ function generateIdempotencyKey(
 - Escrow orphans (held but no queue item)
 
 ### Alerts
+
 - **Critical**: Escrow held without queue item (>5 minutes)
 - **Warning**: High refund rate (>20% of items)
 - **Warning**: Authorization failures (>1% of calls)
@@ -542,6 +577,7 @@ function generateIdempotencyKey(
 ## Testing Requirements
 
 ### Unit Tests
+
 - [ ] Queue item creation
 - [ ] Performance start/finish
 - [ ] Settlement authorization generation
@@ -550,6 +586,7 @@ function generateIdempotencyKey(
 - [ ] Error handling for all scenarios
 
 ### Integration Tests
+
 - [ ] End-to-end escrow flow (hold → settle)
 - [ ] End-to-end refund flow (hold → refund)
 - [ ] Partial settlement flow
@@ -558,6 +595,7 @@ function generateIdempotencyKey(
 - [ ] Error propagation
 
 ### Edge Cases
+
 - [ ] User disconnects during performance
 - [ ] Queue item abandoned after settlement call
 - [ ] Authorization token expired
@@ -569,6 +607,7 @@ function generateIdempotencyKey(
 ## Deployment Checklist
 
 Before deploying queue service:
+
 - [ ] Shared secret configured between queue and wallet service
 - [ ] Authorization token expiry appropriate (5 minutes)
 - [ ] Retry logic configured

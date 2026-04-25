@@ -10,47 +10,63 @@
 
 ## Executive Summary
 
-This document defines the wallet and escrow architecture for RedRoomRewards, based on established patterns and requirements from ChatNow.Zone. This architecture ensures financial integrity, audit compliance, and proper separation of concerns between feature modules, performance queues, and wallet services.
+This document defines the wallet and escrow architecture for RedRoomRewards,
+based on established patterns and requirements from ChatNow.Zone. This
+architecture ensures financial integrity, audit compliance, and proper
+separation of concerns between feature modules, performance queues, and wallet
+services.
 
 ---
 
 ## 1. Platform Context
 
 RedRoomRewards is designed to be a loyalty and rewards system that is:
+
 - **Separate from ChatNow.Zone**: Not tied exclusively to any single platform
 - **Not a UI feature**: Server-side authority for all financial operations
 - **Auditable first**: Compliance and correctness over raw speed
 
-**Integration Context**: While initially integrating with ChatNow.Zone (an adult live-streaming platform with interactive paid features), RedRoomRewards maintains clear boundaries and can support multiple platforms.
+**Integration Context**: While initially integrating with ChatNow.Zone (an adult
+live-streaming platform with interactive paid features), RedRoomRewards
+maintains clear boundaries and can support multiple platforms.
 
 ---
 
 ## 2. Wallet States (Conceptual Ledger Buckets)
 
-All funds in the system exist in one of four distinct states. These states are **explicitly tracked**, not inferred:
+All funds in the system exist in one of four distinct states. These states are
+**explicitly tracked**, not inferred:
 
 ### 2.1 User Available Balance
+
 - **Definition**: Points that a user can freely spend
-- **Operations**: Can be deducted for purchases, transferred (admin-mediated only)
+- **Operations**: Can be deducted for purchases, transferred (admin-mediated
+  only)
 - **Visibility**: Shown to user as "available balance"
 
 ### 2.2 Escrow / Held Balance
+
 - **Definition**: Points deducted from user but not yet credited to recipient
-- **Purpose**: Enable instant refunds, prevent premature settlement, support disputes
+- **Purpose**: Enable instant refunds, prevent premature settlement, support
+  disputes
 - **Duration**: Temporary state until settlement or refund
 - **Visibility**: Shown to user as "pending" or "held"
 
 ### 2.3 Model Earned Balance
-- **Definition**: Points credited to a model's account after performance completion
+
+- **Definition**: Points credited to a model's account after performance
+  completion
 - **Settlement Source**: Always from escrow, never directly from user
 - **Visibility**: Model earnings, available for withdrawal/redemption
 
 ### 2.4 Refunded Balance
+
 - **Definition**: Points returned to user from escrow
 - **Tracking**: Separate category for audit and analytics
 - **Result**: Returns to User Available Balance
 
-**Critical Rule**: These states are distinct ledger buckets, not derived calculations. Every point has a clear state at all times.
+**Critical Rule**: These states are distinct ledger buckets, not derived
+calculations. Every point has a clear state at all times.
 
 ---
 
@@ -59,16 +75,19 @@ All funds in the system exist in one of four distinct states. These states are *
 ### 3.1 Core Principles
 
 **Immediate Deduction**:
+
 - Funds are deducted from user's available balance at the moment of purchase
 - User cannot spend the same points twice
 - Balance check happens atomically with deduction
 
 **Escrow Hold**:
+
 - Deducted funds are placed into escrow, not directly credited to model
 - Escrow is the default for ALL interactive purchases
 - Escrow is NOT optional
 
 **Settlement Authority**:
+
 - Only the Performance Queue can authorize settlement
 - Feature modules cannot settle funds
 - Wallet service executes settlement but doesn't decide it
@@ -84,6 +103,7 @@ All funds in the system exist in one of four distinct states. These states are *
 ### 3.3 Escrow Operations
 
 **Hold (Deduct to Escrow)**:
+
 ```
 User Available Balance: -X points
 Escrow Balance: +X points
@@ -91,6 +111,7 @@ Result: User cannot re-spend, model hasn't received yet
 ```
 
 **Settle (Escrow to Earned)**:
+
 ```
 Escrow Balance: -X points
 Model Earned Balance: +X points
@@ -98,6 +119,7 @@ Result: Model has earned the points, irreversible
 ```
 
 **Refund (Escrow to Available)**:
+
 ```
 Escrow Balance: -X points
 User Available Balance: +X points
@@ -105,6 +127,7 @@ Result: User gets points back, model never receives
 ```
 
 **Partial Refund**:
+
 ```
 Escrow Balance: -X points
 User Available Balance: +Y points
@@ -121,6 +144,7 @@ Result: Split between refund and settlement
 The system enforces strict boundaries:
 
 **Feature Modules** (slot, menu, spin wheel, etc.)
+
 - **Allowed Actions**:
   - Request escrow hold
   - Emit queue intake event
@@ -132,6 +156,7 @@ The system enforces strict boundaries:
   - Make settlement decisions
 
 **Performance Queue**
+
 - **Allowed Actions**:
   - Decide settle/refund/abandon
   - Authorize settlement
@@ -143,6 +168,7 @@ The system enforces strict boundaries:
   - Modify wallet balances
 
 **Wallet Service**
+
 - **Allowed Actions**:
   - Execute atomic ledger changes
   - Deduct to escrow
@@ -155,17 +181,20 @@ The system enforces strict boundaries:
   - Determine refund amounts
   - Apply feature-specific rules
 
-**Critical Principle**: Business logic is separate from financial execution. The queue decides WHAT to do; the wallet does HOW to do it.
+**Critical Principle**: Business logic is separate from financial execution. The
+queue decides WHAT to do; the wallet does HOW to do it.
 
 ### 4.2 Settlement Rules
 
 **Escrow → Earned (Settlement)** occurs ONLY when:
+
 - Performance Queue marks item as **Finished**
 - Performance was actually delivered
 - No disputes are pending
 - Settlement request includes valid authorization
 
 **Escrow → Refund (Refund)** occurs when:
+
 - Performance Queue marks item as **Abandoned**
 - User disconnects before performance starts
 - Model initiates refund
@@ -173,6 +202,7 @@ The system enforces strict boundaries:
 - Admin authorizes refund
 
 **Partial Refunds**:
+
 - Expressed as **token values**, never percentages
 - Must specify both refund amount and settle amount
 - Sum must equal original escrow amount
@@ -181,6 +211,7 @@ The system enforces strict boundaries:
 ### 4.3 Idempotency & Authorization
 
 Every settlement or refund request MUST include:
+
 - **Idempotency Key**: Prevents duplicate settlements
 - **Queue Item ID**: Links to performance record
 - **Authorization Token**: Proves queue authority
@@ -194,17 +225,20 @@ Every settlement or refund request MUST include:
 ### 5.1 Fully Compliant Features
 
 **Chip Menu**:
+
 - ✅ Deducts to escrow atomically
 - ✅ Emits standardized queue intake event
 - ✅ Never settles directly
 - ✅ Follows escrow semantics
 
 **Performance Queue**:
+
 - ✅ Sole authority for settlement/refunds
 - ✅ Does not touch wallet balances directly
 - ✅ Properly authorizes wallet operations
 
 **Wallet Service**:
+
 - ✅ Atomic transaction execution
 - ✅ Idempotent operations
 - ✅ No embedded business logic
@@ -213,6 +247,7 @@ Every settlement or refund request MUST include:
 ### 5.2 Legacy / Contained
 
 **Spin Wheel** (Archived):
+
 - ❌ Used direct deduction and settlement
 - ❌ Lacked escrow mechanism
 - ❌ No idempotency support
@@ -228,6 +263,7 @@ Every settlement or refund request MUST include:
 ### 6.1 Idempotency Requirements
 
 **All wallet operations MUST**:
+
 - Accept an idempotency key (UUID recommended)
 - Check for duplicate requests before processing
 - Return the same result for duplicate keys
@@ -235,6 +271,7 @@ Every settlement or refund request MUST include:
 - Be safe to retry without side effects
 
 **Idempotency Key Scope**:
+
 - Unique per operation type (deduct, settle, refund)
 - Client-generated, server-validated
 - Persisted with transaction record
@@ -243,6 +280,7 @@ Every settlement or refund request MUST include:
 ### 6.2 Audit Trail Requirements
 
 **Every transaction MUST record**:
+
 - Transaction ID (unique, immutable)
 - User ID (or model ID)
 - Amount (positive for credit, negative for debit)
@@ -256,12 +294,14 @@ Every settlement or refund request MUST include:
 - Metadata (contextual info)
 
 **Audit Log Restrictions**:
+
 - **NO PII** beyond user/model identifiers
 - No secrets, tokens, or credentials
 - No personally identifiable information
 - Structured data only (JSON)
 
 **Retention**:
+
 - Minimum **7 years** for compliance
 - Immutable once written
 - Queryable by admin for audit/disputes
@@ -282,6 +322,7 @@ Every settlement or refund request MUST include:
 Financial state changes trigger **template-based** chat messages:
 
 **Compliant Approach**:
+
 ```json
 {
   "event": "escrow_held",
@@ -294,6 +335,7 @@ Financial state changes trigger **template-based** chat messages:
 ```
 
 **Non-Compliant** (Legacy):
+
 ```javascript
 // DO NOT DO THIS
 sendChat(`You spent ${amount} chips on ${action}!`);
@@ -321,6 +363,7 @@ sendChat(`You spent ${amount} chips on ${action}!`);
 ### 8.1 Escrow Operations
 
 **Hold Funds in Escrow**:
+
 ```http
 POST /wallets/{userId}/escrow/hold
 X-Idempotency-Key: {uuid}
@@ -348,6 +391,7 @@ Response 201 Created:
 ```
 
 **Settle Escrow (Queue Authority)**:
+
 ```http
 POST /wallets/escrow/{escrowId}/settle
 X-Idempotency-Key: {uuid}
@@ -371,6 +415,7 @@ Response 200 OK:
 ```
 
 **Refund Escrow (Queue Authority)**:
+
 ```http
 POST /wallets/escrow/{escrowId}/refund
 X-Idempotency-Key: {uuid}
@@ -394,6 +439,7 @@ Response 200 OK:
 ```
 
 **Partial Refund**:
+
 ```http
 POST /wallets/escrow/{escrowId}/partial-settle
 X-Idempotency-Key: {uuid}
@@ -423,6 +469,7 @@ Response 200 OK:
 ### 8.2 Balance Queries
 
 **Get User Balance (All States)**:
+
 ```http
 GET /wallets/{userId}/balance
 
@@ -437,6 +484,7 @@ Response 200 OK:
 ```
 
 **Get Escrow Details**:
+
 ```http
 GET /wallets/{userId}/escrow
 
@@ -464,6 +512,7 @@ Response 200 OK:
 ### 9.1 Database Schema Considerations
 
 **Wallets Collection**:
+
 - User ID (indexed, unique)
 - Available balance (decimal)
 - Escrow balance (decimal)
@@ -472,6 +521,7 @@ Response 200 OK:
 - Updated timestamp
 
 **Escrow Items Collection**:
+
 - Escrow ID (unique)
 - User ID (indexed)
 - Amount (decimal)
@@ -482,6 +532,7 @@ Response 200 OK:
 - Reason code
 
 **Transactions Collection** (Immutable Ledger):
+
 - Transaction ID (unique)
 - User ID or Model ID (indexed)
 - Amount (decimal, signed)
@@ -497,6 +548,7 @@ Response 200 OK:
 ### 9.2 Atomic Operations
 
 **Deduct to Escrow**:
+
 1. Start database transaction
 2. Check user available balance ≥ amount
 3. Lock wallet row (optimistic lock via version)
@@ -507,6 +559,7 @@ Response 200 OK:
 8. If conflict, retry with exponential backoff
 
 **Settle Escrow**:
+
 1. Start database transaction
 2. Verify escrow exists and status is "held"
 3. Verify queue authorization token
@@ -518,6 +571,7 @@ Response 200 OK:
 9. Commit transaction
 
 **Refund Escrow**:
+
 1. Start database transaction
 2. Verify escrow exists and status is "held"
 3. Verify queue authorization token
@@ -531,24 +585,29 @@ Response 200 OK:
 ### 9.3 Error Handling
 
 **Insufficient Balance**:
+
 - HTTP 402 Payment Required
 - Message: "Insufficient available balance"
 - Include current balance in response
 
 **Escrow Not Found**:
+
 - HTTP 404 Not Found
 - Message: "Escrow item not found"
 
 **Already Settled/Refunded**:
+
 - HTTP 409 Conflict
 - Message: "Escrow already processed"
 - Include current status
 
 **Invalid Authorization**:
+
 - HTTP 403 Forbidden
 - Message: "Invalid queue authorization"
 
 **Optimistic Lock Conflict**:
+
 - Retry operation automatically (up to 3 times)
 - If retries exhausted, HTTP 503 Service Unavailable
 
@@ -556,9 +615,11 @@ Response 200 OK:
 
 ## 10. Open Design Questions
 
-The following items are **intentionally undecided** and require further exploration:
+The following items are **intentionally undecided** and require further
+exploration:
 
 ### 10.1 Physical Escrow Location
+
 - Should escrow physically reside in:
   - ChatNow.Zone database?
   - RedRoomRewards database?
@@ -566,27 +627,33 @@ The following items are **intentionally undecided** and require further explorat
 - Decision impacts: API latency, consistency model, deployment complexity
 
 ### 10.2 Ledger Sharing
+
 - Should tokens and loyalty points share a single ledger?
 - Or separate ledgers with cross-references?
 - Decision impacts: Audit complexity, query performance, reporting
 
 ### 10.3 Cross-Platform Aggregation
+
 - How are rewards aggregated across multiple consuming platforms?
 - Single loyalty account or per-platform accounts?
 - Decision impacts: User experience, data model, privacy
 
 ### 10.4 Chargeback Propagation
+
 - How do payment chargebacks affect loyalty points?
 - Immediate deduction or dispute period?
 - Decision impacts: User experience, fraud prevention
 
 ### 10.5 Promotions & Bonus Credits
+
 - How are promotional points tracked separately from earned points?
 - Do they have different expiry rules?
 - Can they be refunded?
 - Decision impacts: Wallet complexity, business rules
 
-**Status**: These questions are documented but not blocking current implementation. Default to simplest approach that maintains architectural flexibility.
+**Status**: These questions are documented but not blocking current
+implementation. Default to simplest approach that maintains architectural
+flexibility.
 
 ---
 
@@ -595,28 +662,33 @@ The following items are **intentionally undecided** and require further explorat
 The following assumptions guide RedRoomRewards design:
 
 ### 11.1 Ownership
+
 - RedRoomRewards **owns or coordinates** loyalty balances
 - Not exclusively tied to ChatNow.Zone
 - Designed for multi-platform support
 
 ### 11.2 Priorities
+
 1. **Auditable**: Compliance first
 2. **Correct**: Proper accounting over speed
 3. **Secure**: No financial errors tolerated
 4. **Fast**: Performance important but third priority
 
 ### 11.3 User Model
+
 - Users create RedRoomRewards account
 - Link to ChatNow.Zone (and other platform) credentials
 - Single loyalty identity across platforms
 
 ### 11.4 Transaction SLA
+
 - **Posting**: Up to 48 hours is acceptable
 - **Best effort**: Faster posting when possible
 - **Real-time**: Balance checks are real-time
 - **Settlement**: Async processing acceptable for non-urgent operations
 
 ### 11.5 Wallet Operations
+
 - **Safe first**: No double-spend, no lost funds
 - **Auditable second**: Every operation logged
 - **Fast third**: Optimize after correctness ensured
@@ -626,6 +698,7 @@ The following assumptions guide RedRoomRewards design:
 ## 12. Migration from Legacy
 
 ### 12.1 Legacy Spin Wheel Status
+
 - Fully inventoried and understood
 - Feature-flagged / gated (not default)
 - Does NOT follow escrow semantics
@@ -633,7 +706,9 @@ The following assumptions guide RedRoomRewards design:
 - Existing installations contained, not upgraded
 
 ### 12.2 Compliant Feature Pattern
+
 All new features MUST:
+
 1. Use Wallet Service for all balance operations
 2. Deduct to escrow, never directly to model
 3. Emit queue intake events
@@ -643,7 +718,9 @@ All new features MUST:
 7. Use template-based messaging
 
 ### 12.3 Feature Certification
+
 Before production deployment, features must demonstrate:
+
 - ✅ Escrow-first flow
 - ✅ Idempotent operations
 - ✅ Proper error handling
@@ -662,12 +739,14 @@ Before production deployment, features must demonstrate:
 **Review Schedule**: Quarterly or when architectural changes occur
 
 **Change Process**:
+
 1. Propose changes via PR
 2. Document rationale in commit message
 3. Update version and date
 4. Notify dependent teams
 
 **Related Documents**:
+
 - `/docs/UNIVERSAL_ARCHITECTURE.md` - Overall architecture
 - `.github/copilot-instructions.md` - Development rules (see §9 Coding Doctrine)
 - `/api/openapi.yaml` - API contract
@@ -675,4 +754,5 @@ Before production deployment, features must demonstrate:
 
 ---
 
-**This architecture document is authoritative for RedRoomRewards wallet and escrow implementation. All code must comply with these specifications.**
+**This architecture document is authoritative for RedRoomRewards wallet and
+escrow implementation. All code must comply with these specifications.**

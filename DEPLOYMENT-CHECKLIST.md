@@ -1,6 +1,7 @@
 # RedRoom Rewards™ — Production Deployment Checklist
 
 ## Pre-deploy verification
+
 - [ ] `npm run build` succeeds
 - [ ] `npm test` passes (259+ tests)
 - [ ] `npm test -- --coverage` passes (thresholds met)
@@ -10,6 +11,7 @@
 - [ ] Health check at `/health` returns 200
 
 ## Staging deployment steps
+
 1. `npm run build`
 2. Set environment variables from `.env.example`
 3. `npm run start:prod`
@@ -20,6 +22,7 @@
    - Burn & reporting endpoints work
 
 ## Production go-live
+
 - Update PRODUCTION_SCHEDULE.md with final SHA
 - Enable branch protection (require up-to-date, require CI)
 - Set up monitoring / logging

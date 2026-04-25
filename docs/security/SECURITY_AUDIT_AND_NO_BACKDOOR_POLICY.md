@@ -9,9 +9,13 @@
 
 ## Executive Summary
 
-This document establishes the security principles, audit requirements, and no-backdoor policies for the RedRoomRewards platform. All code, configurations, and operational practices must comply with these security standards without exception.
+This document establishes the security principles, audit requirements, and
+no-backdoor policies for the RedRoomRewards platform. All code, configurations,
+and operational practices must comply with these security standards without
+exception.
 
-**Core Principle**: Assume all third-party and legacy code is untrusted until proven secure through audit and review.
+**Core Principle**: Assume all third-party and legacy code is untrusted until
+proven secure through audit and review.
 
 ---
 
@@ -22,6 +26,7 @@ This document establishes the security principles, audit requirements, and no-ba
 **Principle**: Never trust, always verify.
 
 **Requirements**:
+
 - ✅ Authenticate every request
 - ✅ Authorize every operation
 - ✅ Validate all inputs server-side
@@ -32,6 +37,7 @@ This document establishes the security principles, audit requirements, and no-ba
 - ❌ No disabled security checks
 
 **Enforcement**:
+
 - All API endpoints require authentication (except `/health`)
 - Role-based access control (RBAC) for all operations
 - Request signing for sensitive operations
@@ -42,11 +48,13 @@ This document establishes the security principles, audit requirements, and no-ba
 **Principle**: Multiple layers of security controls.
 
 **Security Layers**:
+
 1. **Network**: TLS 1.3, firewall rules, IP whitelisting
 2. **Application**: Input validation, output encoding, rate limiting
 3. **Authentication**: JWT tokens, session management, MFA for admin
 4. **Authorization**: RBAC, least privilege, operation-specific permissions
-5. **Data**: Encryption at rest, encryption in transit, field-level encryption for PII
+5. **Data**: Encryption at rest, encryption in transit, field-level encryption
+   for PII
 6. **Audit**: Immutable logs, tamper detection, 7+ year retention
 7. **Monitoring**: Real-time alerts, anomaly detection, security dashboards
 
@@ -57,6 +65,7 @@ This document establishes the security principles, audit requirements, and no-ba
 **Principle**: Security is the default state, not an option.
 
 **Default Security Posture**:
+
 - Authentication required by default
 - Minimum privileges by default
 - Encryption enabled by default
@@ -65,6 +74,7 @@ This document establishes the security principles, audit requirements, and no-ba
 - Secrets never in code by default
 
 **Overrides**: Any security control override requires:
+
 - Explicit documentation
 - Security review and approval
 - Time-limited exception (with expiry)
@@ -76,9 +86,11 @@ This document establishes the security principles, audit requirements, and no-ba
 
 ### 2.1 Untrusted Until Proven Secure
 
-**Policy**: All third-party dependencies and legacy code are considered untrusted.
+**Policy**: All third-party dependencies and legacy code are considered
+untrusted.
 
 **Third-Party Dependencies**:
+
 - ✅ Security audit before adoption
 - ✅ Vulnerability scanning (Dependabot, Snyk)
 - ✅ License compliance verification
@@ -89,6 +101,7 @@ This document establishes the security principles, audit requirements, and no-ba
 - ❌ No dependencies from untrusted sources
 
 **Audit Requirements**:
+
 1. Review package source code for backdoors
 2. Verify package signatures and checksums
 3. Check for known vulnerabilities in CVE databases
@@ -101,23 +114,27 @@ This document establishes the security principles, audit requirements, and no-ba
 **ABSOLUTE PROHIBITION**: No code from `/archive/xxxchatnow-seed/` may be used.
 
 **Rationale**:
+
 - Legacy code contains known security vulnerabilities
 - Legacy code uses deprecated and insecure patterns
 - Legacy code violates current architectural principles
 - Legacy code lacks proper security controls
 
 **Prohibited Actions**:
+
 - ❌ Copying code from archive
 - ❌ Adapting patterns from archive
 - ❌ Referencing archived implementations
 - ❌ Using archived libraries or dependencies
 
 **Permitted Actions**:
+
 - ✅ Viewing for historical context only
 - ✅ Learning what NOT to do
 - ✅ Understanding past mistakes
 
 **Enforcement**:
+
 - Code reviews will reject any legacy patterns
 - Automated scanning for legacy code signatures
 - PR rejection for any archive references
@@ -125,6 +142,7 @@ This document establishes the security principles, audit requirements, and no-ba
 ### 2.3 Code Review Requirements
 
 **Mandatory Reviews**:
+
 - All new dependencies before adoption
 - All security-sensitive code changes
 - All authentication/authorization modifications
@@ -132,6 +150,7 @@ This document establishes the security principles, audit requirements, and no-ba
 - All financial logic changes
 
 **Review Checklist**:
+
 - [ ] No hardcoded secrets or credentials
 - [ ] No backdoors or debug endpoints
 - [ ] No security control bypasses
@@ -151,6 +170,7 @@ This document establishes the security principles, audit requirements, and no-ba
 **ABSOLUTE PROHIBITION**: No secrets in source code.
 
 **Prohibited**:
+
 - ❌ API keys in code
 - ❌ Passwords in code
 - ❌ Private keys in code
@@ -162,6 +182,7 @@ This document establishes the security principles, audit requirements, and no-ba
 - ❌ Secrets in comments
 
 **Required**:
+
 - ✅ Secrets in environment variables (production)
 - ✅ Secrets in secure vault (AWS Secrets Manager, HashiCorp Vault)
 - ✅ Secrets rotation policy (quarterly minimum)
@@ -172,18 +193,21 @@ This document establishes the security principles, audit requirements, and no-ba
 ### 3.2 Secret Types and Handling
 
 **Database Credentials**:
+
 - Stored in: AWS Secrets Manager
 - Rotation: Quarterly or on compromise
 - Access: Database service only
 - Format: Strong passwords (32+ chars, high entropy)
 
 **API Keys**:
+
 - Stored in: Environment variables (production) / Secrets Manager
 - Rotation: Per vendor requirements (minimum quarterly)
 - Access: Service-specific
 - Scope: Minimum required permissions
 
 **JWT Signing Keys**:
+
 - Stored in: Secure vault with versioning
 - Rotation: Quarterly or on compromise
 - Access: Authentication service only
@@ -191,6 +215,7 @@ This document establishes the security principles, audit requirements, and no-ba
 - Key Length: 512 bits minimum for HS256
 
 **Queue Authorization Secret**:
+
 - Stored in: Secrets Manager
 - Rotation: Quarterly
 - Access: Queue service and Wallet service only
@@ -199,16 +224,19 @@ This document establishes the security principles, audit requirements, and no-ba
 ### 3.3 Secret Detection and Prevention
 
 **Pre-Commit Hooks**:
+
 - Scan for common secret patterns
 - Block commits containing secrets
 - Educate developers on violation
 
 **Automated Scanning**:
+
 - GitHub secret scanning enabled
 - CodeQL security analysis
 - Third-party secret detection tools
 
 **Incident Response**:
+
 - Immediate secret rotation on detection
 - Audit logs review for unauthorized access
 - Notification to security team
@@ -223,6 +251,7 @@ This document establishes the security principles, audit requirements, and no-ba
 **Policy**: JWTs for stateless authentication with short expiry.
 
 **Token Configuration**:
+
 - Algorithm: HS256 or RS256 (HMAC SHA-256 or RSA SHA-256)
 - Expiry: 5-15 minutes for access tokens
 - Refresh: Separate refresh tokens (7-30 days)
@@ -230,6 +259,7 @@ This document establishes the security principles, audit requirements, and no-ba
 - Signature: Always verify
 
 **Security Controls**:
+
 - ✅ Token expiry enforced
 - ✅ Signature validation required
 - ✅ Algorithm validation (prevent none attack)
@@ -244,6 +274,7 @@ This document establishes the security principles, audit requirements, and no-ba
 **Policy**: Short-lived tokens for settlement/refund authorization.
 
 **Token Characteristics**:
+
 - Purpose: Authorize queue service to settle/refund escrow
 - Expiry: 5 minutes
 - Single-use: Enforced via idempotency
@@ -251,6 +282,7 @@ This document establishes the security principles, audit requirements, and no-ba
 - Validation: Full parameter matching required
 
 **Security**:
+
 - Token bound to specific escrow and queue item
 - Amount validation prevents tampering
 - Expiry prevents replay attacks
@@ -261,6 +293,7 @@ This document establishes the security principles, audit requirements, and no-ba
 **Policy**: API keys for external system integration.
 
 **Requirements**:
+
 - Unique key per external system
 - Scope limitation (minimum permissions)
 - Rate limiting per key
@@ -268,6 +301,7 @@ This document establishes the security principles, audit requirements, and no-ba
 - Usage monitoring and alerting
 
 **Security**:
+
 - Keys transmitted via secure headers only
 - Keys hashed in storage
 - Key compromise protocol documented
@@ -282,6 +316,7 @@ This document establishes the security principles, audit requirements, and no-ba
 **Principle**: Collect and store only essential data.
 
 **Prohibited in Financial Records**:
+
 - ❌ Full names
 - ❌ Email addresses
 - ❌ Phone numbers
@@ -292,6 +327,7 @@ This document establishes the security principles, audit requirements, and no-ba
 - ❌ Biometric data
 
 **Permitted**:
+
 - ✅ User IDs (pseudonymous identifiers)
 - ✅ Model IDs
 - ✅ Transaction amounts and types
@@ -302,6 +338,7 @@ This document establishes the security principles, audit requirements, and no-ba
 ### 5.2 PII Handling Requirements
 
 **If PII Must Be Stored** (for specific features):
+
 - Encryption at rest (field-level)
 - Encryption in transit (TLS 1.3)
 - Access logging for all PII access
@@ -313,6 +350,7 @@ This document establishes the security principles, audit requirements, and no-ba
 ### 5.3 Logging and Monitoring
 
 **Prohibited in Logs**:
+
 - ❌ Passwords or secrets
 - ❌ Full credit card numbers
 - ❌ Social security numbers
@@ -321,6 +359,7 @@ This document establishes the security principles, audit requirements, and no-ba
 - ❌ Unencrypted sensitive data
 
 **Required in Logs**:
+
 - ✅ Request IDs (X-Request-ID)
 - ✅ User IDs (for audit)
 - ✅ Timestamps (ISO 8601 UTC)
@@ -330,6 +369,7 @@ This document establishes the security principles, audit requirements, and no-ba
 - ✅ Performance metrics
 
 **Log Security**:
+
 - Logs are append-only (immutable)
 - Log tampering detection (integrity checks)
 - Log retention: 7+ years for financial operations
@@ -345,6 +385,7 @@ This document establishes the security principles, audit requirements, and no-ba
 **Principle**: Balances must always be accurate and consistent.
 
 **Requirements**:
+
 - All balance changes via ledger transactions
 - Atomic updates (balance + ledger)
 - Optimistic locking for concurrency
@@ -352,12 +393,14 @@ This document establishes the security principles, audit requirements, and no-ba
 - No direct balance manipulation
 
 **Prohibited**:
+
 - ❌ Balance updates without ledger entry
 - ❌ Ledger entries without balance update
 - ❌ Manual balance modifications in production
 - ❌ Database direct edits for corrections
 
 **Corrections**:
+
 - Use compensating transactions
 - Full audit trail of correction reason
 - Approval workflow for adjustments
@@ -368,18 +411,21 @@ This document establishes the security principles, audit requirements, and no-ba
 **Principle**: Know total outstanding liability at all times.
 
 **Liability Components**:
+
 - User available balances (redeemable)
 - Escrow balances (held for features)
 - Pending settlements (in-flight)
 - Earned but not withdrawn (model wallets)
 
 **Monitoring**:
+
 - Real-time liability calculation
 - Daily reconciliation reports
 - Alerts on unexpected changes
 - Audit trail for all liability movements
 
 **Compliance**:
+
 - Accurate financial reporting
 - Reserve requirements (if applicable)
 - Regulatory reporting capabilities
@@ -390,6 +436,7 @@ This document establishes the security principles, audit requirements, and no-ba
 **Principle**: No point can be spent twice.
 
 **Controls**:
+
 - Idempotency keys mandatory
 - Optimistic locking on balances
 - Transaction isolation levels
@@ -397,6 +444,7 @@ This document establishes the security principles, audit requirements, and no-ba
 - Escrow state management
 
 **Detection**:
+
 - Real-time duplicate request detection
 - Idempotency key cache (24+ hours)
 - Balance reconciliation checks
@@ -408,9 +456,11 @@ This document establishes the security principles, audit requirements, and no-ba
 
 ### 7.1 Absolute Prohibition
 
-**Policy**: No backdoors, debug endpoints, or bypass mechanisms in production code.
+**Policy**: No backdoors, debug endpoints, or bypass mechanisms in production
+code.
 
 **Prohibited**:
+
 - ❌ Debug endpoints in production
 - ❌ Bypass flags for security controls
 - ❌ Hardcoded master passwords
@@ -421,6 +471,7 @@ This document establishes the security principles, audit requirements, and no-ba
 - ❌ God mode or superuser bypasses
 
 **Rationale**:
+
 - Backdoors are security vulnerabilities
 - Backdoors can be exploited by attackers
 - Backdoors violate zero trust principle
@@ -431,6 +482,7 @@ This document establishes the security principles, audit requirements, and no-ba
 **Policy**: Debug features only in development environments.
 
 **Development Environment**:
+
 - ✅ Debug endpoints allowed with authentication
 - ✅ Verbose logging permitted
 - ✅ Test data generation tools
@@ -438,6 +490,7 @@ This document establishes the security principles, audit requirements, and no-ba
 - ✅ Mock services for external dependencies
 
 **Production Environment**:
+
 - ❌ Debug endpoints removed or disabled
 - ❌ Debug flags ignored
 - ❌ Verbose logging disabled (unless specifically needed)
@@ -445,6 +498,7 @@ This document establishes the security principles, audit requirements, and no-ba
 - ❌ Mock services not accessible
 
 **Environment Detection**:
+
 - Explicit environment variable (NODE_ENV)
 - Build-time feature removal for production
 - Runtime checks to prevent debug in production
@@ -455,6 +509,7 @@ This document establishes the security principles, audit requirements, and no-ba
 **Policy**: Structured emergency access for critical incidents.
 
 **Break-Glass Procedures**:
+
 1. Incident declared by authorized personnel
 2. Emergency access credentials retrieved from secure vault
 3. Access logged with detailed justification
@@ -463,6 +518,7 @@ This document establishes the security principles, audit requirements, and no-ba
 6. Credentials rotated immediately after use
 
 **Controls**:
+
 - Multi-person authorization required
 - Time-limited access (expires after incident)
 - Full audit trail of actions
@@ -478,6 +534,7 @@ This document establishes the security principles, audit requirements, and no-ba
 **Principle**: Every financial operation must be fully auditable.
 
 **Audit Information**:
+
 - Transaction ID (unique identifier)
 - User ID (who)
 - Action type (what)
@@ -489,12 +546,14 @@ This document establishes the security principles, audit requirements, and no-ba
 - Idempotency key (duplicate prevention)
 
 **Immutability**:
+
 - Audit logs are append-only
 - No updates or deletes permitted
 - Tamper detection via integrity checks
 - Write-once storage for logs
 
 **Retention**:
+
 - Financial transactions: 7+ years
 - Security events: 1+ year
 - Access logs: 90+ days
@@ -503,12 +562,14 @@ This document establishes the security principles, audit requirements, and no-ba
 ### 8.2 Security Audits
 
 **Regular Audits**:
+
 - **Quarterly**: Internal security review
 - **Semi-Annual**: Dependency vulnerability scan
 - **Annual**: Third-party security assessment
 - **Ad-Hoc**: After significant changes or incidents
 
 **Audit Scope**:
+
 - Code review for security vulnerabilities
 - Configuration review for misconfigurations
 - Access control verification
@@ -517,6 +578,7 @@ This document establishes the security principles, audit requirements, and no-ba
 - Penetration testing (annual)
 
 **Audit Artifacts**:
+
 - Findings report with severity ratings
 - Remediation plan with timelines
 - Verification of fixes
@@ -525,6 +587,7 @@ This document establishes the security principles, audit requirements, and no-ba
 ### 8.3 Compliance Requirements
 
 **GDPR Compliance** (if applicable):
+
 - Right to access (data export)
 - Right to erasure (account deletion)
 - Right to rectification (data correction)
@@ -533,6 +596,7 @@ This document establishes the security principles, audit requirements, and no-ba
 - Privacy by design
 
 **Financial Compliance**:
+
 - Accurate transaction records
 - Reconciliation capabilities
 - Audit trail completeness
@@ -540,6 +604,7 @@ This document establishes the security principles, audit requirements, and no-ba
 - Regulatory reporting (if required)
 
 **Industry Best Practices**:
+
 - OWASP Top 10 mitigation
 - CIS Benchmarks compliance
 - NIST Cybersecurity Framework alignment
@@ -554,11 +619,13 @@ This document establishes the security principles, audit requirements, and no-ba
 **Policy**: Responsible disclosure program for security researchers.
 
 **Reporting Channels**:
+
 - Email: security@omniquestmedia.com
 - Encrypted: PGP key available on website
 - Bug Bounty: (if program established)
 
 **Response SLA**:
+
 - Acknowledgment: Within 48 hours
 - Initial assessment: Within 7 days
 - Fix timeline: Based on severity
@@ -570,11 +637,13 @@ This document establishes the security principles, audit requirements, and no-ba
 ### 9.2 Dependency Vulnerabilities
 
 **Automated Scanning**:
+
 - Dependabot enabled for all dependencies
 - CodeQL scanning on every PR
 - Snyk or similar for runtime scanning
 
 **Response Process**:
+
 1. Vulnerability detected by automated tool
 2. Severity assessment (CVSS score)
 3. Patch availability check
@@ -584,6 +653,7 @@ This document establishes the security principles, audit requirements, and no-ba
 7. Documentation in changelog
 
 **Exemptions**:
+
 - Documented only if no patch available
 - Compensating controls implemented
 - Quarterly review of exemptions
@@ -592,6 +662,7 @@ This document establishes the security principles, audit requirements, and no-ba
 ### 9.3 Incident Response
 
 **Security Incident Types**:
+
 - Unauthorized access
 - Data breach
 - Service compromise
@@ -600,6 +671,7 @@ This document establishes the security principles, audit requirements, and no-ba
 - Insider threat
 
 **Response Steps**:
+
 1. Detection and alerting
 2. Containment (isolate affected systems)
 3. Investigation (root cause analysis)
@@ -608,6 +680,7 @@ This document establishes the security principles, audit requirements, and no-ba
 6. Post-incident review (lessons learned)
 
 **Notification**:
+
 - Internal: Immediate notification to security team
 - External: Notification to affected users (if required)
 - Regulatory: Notification to authorities (if required by law)
@@ -619,12 +692,14 @@ This document establishes the security principles, audit requirements, and no-ba
 ### 10.1 Automated Security Testing
 
 **CI/CD Pipeline**:
+
 - Static analysis (CodeQL, ESLint security rules)
 - Dependency scanning (Dependabot)
 - Secret detection (git-secrets, GitHub scanning)
 - License compliance (FOSSA or similar)
 
 **Required for PR Merge**:
+
 - All security scans pass
 - No critical vulnerabilities introduced
 - No secrets detected
@@ -633,12 +708,14 @@ This document establishes the security principles, audit requirements, and no-ba
 ### 10.2 Manual Security Testing
 
 **Pre-Production**:
+
 - Security code review for sensitive changes
 - Manual testing of authentication/authorization
 - Input validation testing (fuzzing)
 - Security boundary testing
 
 **Pre-Release**:
+
 - Full security regression testing
 - Penetration testing (annual or major releases)
 - Load testing (for DoS resilience)
@@ -647,6 +724,7 @@ This document establishes the security principles, audit requirements, and no-ba
 ### 10.3 Test Requirements
 
 **Security Test Coverage**:
+
 - Authentication bypass attempts
 - Authorization privilege escalation
 - Input injection (SQL, NoSQL, XSS)
@@ -656,6 +734,7 @@ This document establishes the security principles, audit requirements, and no-ba
 - Concurrent operation safety
 
 **Test Data**:
+
 - No production data in test environments
 - Synthetic data for testing
 - PII scrubbing if production data used
@@ -671,6 +750,7 @@ This document establishes the security principles, audit requirements, and no-ba
 **Scope**: All security incidents, vulnerabilities, and policy questions
 
 **Response Times**:
+
 - Critical incidents: 1 hour
 - High severity: 4 hours
 - Medium severity: 1 business day
@@ -678,15 +758,14 @@ This document establishes the security principles, audit requirements, and no-ba
 
 ### 11.2 Escalation Path
 
-**Level 1**: Development Team Lead
-**Level 2**: Engineering Manager
-**Level 3**: Chief Technology Officer (CTO)
-**Level 4**: Chief Information Security Officer (CISO) if applicable
+**Level 1**: Development Team Lead **Level 2**: Engineering Manager **Level 3**:
+Chief Technology Officer (CTO) **Level 4**: Chief Information Security Officer
+(CISO) if applicable
 
 ### 11.3 Security Champions
 
-**Program**: Designate security champions in each team
-**Responsibilities**:
+**Program**: Designate security champions in each team **Responsibilities**:
+
 - Stay current on security best practices
 - Review code for security issues
 - Advocate for security in design
@@ -699,6 +778,7 @@ This document establishes the security principles, audit requirements, and no-ba
 ### 12.1 Policy Violations
 
 **Consequences**:
+
 - PR rejection for policy violations
 - Required rework and re-review
 - Escalation for repeated violations
@@ -707,6 +787,7 @@ This document establishes the security principles, audit requirements, and no-ba
 ### 12.2 Policy Exceptions
 
 **Process**:
+
 1. Request submitted with justification
 2. Security review and risk assessment
 3. Approval by security team and management
@@ -719,6 +800,7 @@ This document establishes the security principles, audit requirements, and no-ba
 **Review Schedule**: Quarterly or after significant incidents
 
 **Update Process**:
+
 1. Propose changes via PR
 2. Security team review
 3. Stakeholder consultation
@@ -733,6 +815,7 @@ This document establishes the security principles, audit requirements, and no-ba
 ### 13.1 Developer Training
 
 **Required Training**:
+
 - Secure coding practices (annual)
 - OWASP Top 10 (annual)
 - Secret management (onboarding + annual)
@@ -742,6 +825,7 @@ This document establishes the security principles, audit requirements, and no-ba
 ### 13.2 Security Awareness
 
 **Regular Communications**:
+
 - Security bulletins for new threats
 - Post-mortem sharing (lessons learned)
 - Security tips and best practices
@@ -750,8 +834,10 @@ This document establishes the security principles, audit requirements, and no-ba
 ### 13.3 Documentation
 
 **Required Reading**:
+
 - This document (Security Audit and No Backdoor Policy)
-- `.github/copilot-instructions.md` - Development rules and coding standards (see §9 Coding Doctrine)
+- `.github/copilot-instructions.md` - Development rules and coding standards
+  (see §9 Coding Doctrine)
 - `/docs/UNIVERSAL_ARCHITECTURE.md` - Architecture
 - `/SECURITY.md` - Security policy
 
@@ -759,7 +845,8 @@ This document establishes the security principles, audit requirements, and no-ba
 
 ## Summary
 
-**Security is not optional.** Every developer, every commit, and every deployment must adhere to these principles:
+**Security is not optional.** Every developer, every commit, and every
+deployment must adhere to these principles:
 
 1. **Zero Trust**: Verify everything, trust nothing
 2. **Defense in Depth**: Multiple security layers
