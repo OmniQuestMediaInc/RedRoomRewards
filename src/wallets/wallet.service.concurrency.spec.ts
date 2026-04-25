@@ -70,11 +70,11 @@ class InMemoryLedgerService {
   private idempotencyKeys = new Set<string>();
   private claimedKeys = new Set<string>();
 
-  async checkIdempotency(key: string, operationType: string): Promise<boolean> {
+  async checkIdempotency(key: string, operationType: string, _tenantId: string): Promise<boolean> {
     return this.claimedKeys.has(`${operationType}:${key}`);
   }
 
-  async claimIdempotency(key: string, operationType: string): Promise<boolean> {
+  async claimIdempotency(key: string, operationType: string, _tenantId?: string): Promise<boolean> {
     const composite = `${operationType}:${key}`;
     if (this.claimedKeys.has(composite)) {
       return false;

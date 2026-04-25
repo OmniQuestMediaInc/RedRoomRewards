@@ -32,6 +32,9 @@ export interface AwardPointsRequest {
   /** Request ID for tracing */
   requestId: string;
 
+  /** Tenant identifier for multi-tenant scoping */
+  tenantId: string;
+
   /** Additional metadata (no PII) */
   metadata?: Record<string, unknown>;
 
@@ -145,6 +148,7 @@ export class PointAccrualService {
       const exists = await this.ledgerService.checkIdempotency(
         request.idempotencyKey,
         'award_points',
+        request.tenantId,
       );
 
       if (exists) {
@@ -227,12 +231,14 @@ export class PointAccrualService {
    * @param userId User ID
    * @param bonusAmount Bonus amount
    * @param requestId Request ID
+   * @param tenantId Tenant identifier
    * @returns Award response
    */
   async awardSignupBonus(
     userId: string,
     bonusAmount: number,
     requestId: string,
+    tenantId: string,
   ): Promise<AwardPointsResponse> {
     return this.awardPoints({
       userId,
@@ -240,6 +246,7 @@ export class PointAccrualService {
       reason: TransactionReason.USER_SIGNUP_BONUS,
       idempotencyKey: `signup-bonus-${userId}`,
       requestId,
+      tenantId,
       metadata: {
         bonusType: 'signup',
       },
@@ -253,6 +260,7 @@ export class PointAccrualService {
    * @param referredUserId User who was referred
    * @param bonusAmount Bonus amount
    * @param requestId Request ID
+   * @param tenantId Tenant identifier
    * @returns Award response
    */
   async awardReferralBonus(
@@ -260,6 +268,7 @@ export class PointAccrualService {
     referredUserId: string,
     bonusAmount: number,
     requestId: string,
+    tenantId: string,
   ): Promise<AwardPointsResponse> {
     return this.awardPoints({
       userId: referrerId,
@@ -267,6 +276,7 @@ export class PointAccrualService {
       reason: TransactionReason.REFERRAL_BONUS,
       idempotencyKey: `referral-bonus-${referrerId}-${referredUserId}`,
       requestId,
+      tenantId,
       metadata: {
         bonusType: 'referral',
         referredUserId,
@@ -281,6 +291,7 @@ export class PointAccrualService {
    * @param amount Amount to award
    * @param promotionId Promotion identifier
    * @param requestId Request ID
+   * @param tenantId Tenant identifier
    * @param expiresAt Optional expiration date
    * @returns Award response
    */
@@ -289,6 +300,7 @@ export class PointAccrualService {
     amount: number,
     promotionId: string,
     requestId: string,
+    tenantId: string,
     expiresAt?: Date,
   ): Promise<AwardPointsResponse> {
     return this.awardPoints({
@@ -297,6 +309,7 @@ export class PointAccrualService {
       reason: TransactionReason.PROMOTIONAL_AWARD,
       idempotencyKey: `promo-${promotionId}-${userId}`,
       requestId,
+      tenantId,
       expiresAt,
       metadata: {
         promotionId,
@@ -313,6 +326,7 @@ export class PointAccrualService {
    * @param adminId Admin performing the action
    * @param reason Description of why credit is being made
    * @param requestId Request ID
+   * @param tenantId Tenant identifier
    * @returns Award response
    */
   async adminCreditPoints(
@@ -321,6 +335,7 @@ export class PointAccrualService {
     adminId: string,
     reason: string,
     requestId: string,
+    tenantId: string,
   ): Promise<AwardPointsResponse> {
     // Use deterministic idempotency key based on admin, user, and request
     const idempotencyKey = `admin-credit-${adminId}-${userId}-${requestId}`;
@@ -331,6 +346,7 @@ export class PointAccrualService {
       reason: TransactionReason.ADMIN_CREDIT,
       idempotencyKey,
       requestId,
+      tenantId,
       metadata: {
         adminId,
         adminReason: reason,
@@ -371,6 +387,7 @@ export class PointAccrualService {
       const exists = await this.ledgerService.checkIdempotency(
         request.idempotencyKey,
         'deduct_points',
+        request.tenantId,
       );
       if (exists) {
         throw new Error('Idempotency key already used');

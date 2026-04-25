@@ -4,51 +4,33 @@
   "allow": [
     {
       "file": "src/ledger/ledger.service.ts",
-      "line": 143,
+      "line": 152,
       "model": "LedgerEntryModel",
       "method": "findOne"
     },
     {
       "file": "src/ledger/ledger.service.ts",
-      "line": 220,
+      "line": 229,
       "model": "LedgerEntryModel",
       "method": "find"
     },
     {
       "file": "src/ledger/ledger.service.ts",
-      "line": 221,
+      "line": 230,
       "model": "LedgerEntryModel",
       "method": "countDocuments"
     },
     {
       "file": "src/ledger/ledger.service.ts",
-      "line": 239,
+      "line": 248,
       "model": "LedgerEntryModel",
       "method": "findOne"
     },
     {
       "file": "src/ledger/ledger.service.ts",
-      "line": 268,
+      "line": 277,
       "model": "LedgerEntryModel",
       "method": "find"
-    },
-    {
-      "file": "src/ledger/ledger.service.ts",
-      "line": 320,
-      "model": "LedgerEntryModel",
-      "method": "find"
-    },
-    {
-      "file": "src/ledger/ledger.service.ts",
-      "line": 379,
-      "model": "LedgerEntryModel",
-      "method": "find"
-    },
-    {
-      "file": "src/ledger/ledger.service.ts",
-      "line": 398,
-      "model": "IdempotencyRecordModel",
-      "method": "findOne"
     },
     {
       "file": "src/services/admin-ops.service.ts",
@@ -70,25 +52,25 @@
     },
     {
       "file": "src/services/point-accrual.service.ts",
-      "line": 156,
+      "line": 160,
       "model": "WalletModel",
       "method": "findOne"
     },
     {
       "file": "src/services/point-accrual.service.ts",
-      "line": 172,
+      "line": 176,
       "model": "WalletModel",
       "method": "findOneAndUpdate"
     },
     {
       "file": "src/services/point-accrual.service.ts",
-      "line": 380,
+      "line": 397,
       "model": "WalletModel",
       "method": "findOne"
     },
     {
       "file": "src/services/point-accrual.service.ts",
-      "line": 395,
+      "line": 412,
       "model": "WalletModel",
       "method": "findOneAndUpdate"
     },

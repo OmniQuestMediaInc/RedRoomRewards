@@ -15,6 +15,7 @@ export interface IIdempotencyRecord extends Document {
   storedResult?: Record<string, unknown>;
   retentionUntil?: Date;
   expiresAt?: Date;
+  tenant_id?: string;
 }
 
 const IdempotencyRecordSchema = new Schema<IIdempotencyRecord>(
@@ -47,6 +48,13 @@ const IdempotencyRecordSchema = new Schema<IIdempotencyRecord>(
     expiresAt: {
       type: Date,
       required: false,
+    },
+    tenant_id: {
+      type: String,
+      required: false,
+      trim: true,
+      maxlength: 128,
+      index: true,
     },
   },
   {

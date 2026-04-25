@@ -179,6 +179,9 @@ export interface LedgerQueryFilter {
 
   /** Sort direction */
   sortOrder?: 'asc' | 'desc';
+
+  /** Tenant identifier for multi-tenant scoping */
+  tenantId?: string;
 }
 
 /**
@@ -329,17 +332,18 @@ export interface ILedgerService {
     accountId: string,
     accountType: 'user' | 'model',
     dateRange: { start: Date; end: Date },
+    tenantId: string,
   ): Promise<ReconciliationReport>;
 
   /**
    * Get audit trail for a transaction
    */
-  getAuditTrail(transactionId: string): Promise<AuditTrailEntry[]>;
+  getAuditTrail(transactionId: string, tenantId: string): Promise<AuditTrailEntry[]>;
 
   /**
    * Verify idempotency key hasn't been used
    */
-  checkIdempotency(key: string, operationType: string): Promise<boolean>;
+  checkIdempotency(key: string, operationType: string, tenantId: string): Promise<boolean>;
 
   /**
    * Atomically claim an idempotency key. Returns true if this caller is the
@@ -348,7 +352,7 @@ export interface ILedgerService {
    * simultaneous requests with the same idempotency key proceeds to mutate
    * state.
    */
-  claimIdempotency(key: string, operationType: string): Promise<boolean>;
+  claimIdempotency(key: string, operationType: string, tenantId?: string): Promise<boolean>;
 
   /**
    * Store idempotency result

@@ -29,6 +29,7 @@ export interface ILedgerEntry extends Document {
   queueItemId?: string;
   featureType?: string;
   correlationId?: string;
+  tenant_id?: string;
 }
 
 const LedgerEntrySchema = new Schema<ILedgerEntry>(
@@ -152,6 +153,13 @@ const LedgerEntrySchema = new Schema<ILedgerEntry>(
       maxlength: 128,
       index: true,
     },
+    tenant_id: {
+      type: String,
+      required: false,
+      trim: true,
+      maxlength: 128,
+      index: true,
+    },
   },
   {
     timestamps: false, // We use our own timestamp field
@@ -179,6 +187,9 @@ LedgerEntrySchema.index({ queueItemId: 1 }, { sparse: true });
 
 // Index for correlation tracking
 LedgerEntrySchema.index({ correlationId: 1 }, { sparse: true });
+
+// Compound index for tenant-scoped queries
+LedgerEntrySchema.index({ tenant_id: 1, accountId: 1, timestamp: -1 });
 
 // Index for time-based queries and retention
 LedgerEntrySchema.index({ timestamp: 1 });

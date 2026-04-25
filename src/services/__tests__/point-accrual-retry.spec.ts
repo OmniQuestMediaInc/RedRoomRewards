@@ -60,6 +60,7 @@ describe('Point Accrual Retry Logic', () => {
         reason: TransactionReason.USER_SIGNUP_BONUS,
         idempotencyKey: 'idem-retry-1',
         requestId: 'req-retry-1',
+        tenantId: 'tenant-test',
       };
 
       // Should eventually succeed after retries
@@ -92,6 +93,7 @@ describe('Point Accrual Retry Logic', () => {
         reason: TransactionReason.USER_SIGNUP_BONUS,
         idempotencyKey: 'idem-retry-2',
         requestId: 'req-retry-2',
+        tenantId: 'tenant-test',
       };
 
       // Should throw after max attempts
@@ -130,6 +132,7 @@ describe('Point Accrual Retry Logic', () => {
         reason: TransactionReason.USER_SIGNUP_BONUS,
         idempotencyKey: 'idem-retry-3',
         requestId: 'req-retry-3',
+        tenantId: 'tenant-test',
       };
 
       await accrualService.awardPoints(request);
@@ -221,6 +224,7 @@ describe('Point Accrual Retry Logic', () => {
         reason: TransactionReason.USER_SIGNUP_BONUS,
         idempotencyKey: 'idem-error-1',
         requestId: 'req-error-1',
+        tenantId: 'tenant-test',
       };
 
       await expect(accrualService.awardPoints(request)).rejects.toThrow(
@@ -240,6 +244,7 @@ describe('Point Accrual Retry Logic', () => {
         reason: TransactionReason.USER_SIGNUP_BONUS,
         idempotencyKey: 'idem-error-2',
         requestId: 'req-error-2',
+        tenantId: 'tenant-test',
       };
 
       await expect(accrualService.awardPoints(request)).rejects.toThrow('Database connection lost');
@@ -278,6 +283,7 @@ describe('Point Accrual Retry Logic', () => {
         reason: TransactionReason.USER_SIGNUP_BONUS,
         idempotencyKey: 'idem-success-1',
         requestId: 'req-success-1',
+        tenantId: 'tenant-test',
       };
 
       await accrualService.awardPoints(request);
@@ -319,6 +325,7 @@ describe('Point Accrual Retry Logic', () => {
         reason: TransactionReason.PROMOTIONAL_AWARD,
         idempotencyKey: 'idem-success-2',
         requestId: 'req-success-2',
+        tenantId: 'tenant-test',
       };
 
       const result = await accrualService.awardPoints(request);

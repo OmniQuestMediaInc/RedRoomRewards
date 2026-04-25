@@ -324,6 +324,7 @@ export class LedgerService implements ILedgerService {
     accountId: string,
     accountType: 'user' | 'model',
     dateRange: { start: Date; end: Date },
+    tenantId: string,
   ): Promise<ReconciliationReport> {
     // Get starting balance (before start date)
     const startSnapshot = await this.getBalanceSnapshot(accountId, accountType, dateRange.start);
@@ -332,6 +333,7 @@ export class LedgerService implements ILedgerService {
     // a deterministic tie-breaker so the reconciliation output is stable and
     // auditable even when multiple entries share a timestamp.
     const entries = await LedgerEntryModel.find({
+      tenant_id: { $eq: tenantId },
       accountId: { $eq: accountId },
       accountType: { $eq: accountType },
       timestamp: { $gte: dateRange.start, $lte: dateRange.end },
@@ -389,8 +391,9 @@ export class LedgerService implements ILedgerService {
   /**
    * Get audit trail for a transaction
    */
-  async getAuditTrail(transactionId: string): Promise<AuditTrailEntry[]> {
+  async getAuditTrail(transactionId: string, tenantId: string): Promise<AuditTrailEntry[]> {
     const entries = await LedgerEntryModel.find({
+      tenant_id: { $eq: tenantId },
       transactionId: { $eq: transactionId },
     })
       .sort({ timestamp: 1 })
@@ -407,8 +410,9 @@ export class LedgerService implements ILedgerService {
   /**
    * Check if idempotency key has been used
    */
-  async checkIdempotency(key: string, operationType: string): Promise<boolean> {
+  async checkIdempotency(key: string, operationType: string, tenantId: string): Promise<boolean> {
     const existing = await IdempotencyRecordModel.findOne({
+      tenant_id: { $eq: tenantId },
       pointsIdempotencyKey: { $eq: key },
       eventScope: { $eq: operationType },
     })
@@ -425,7 +429,7 @@ export class LedgerService implements ILedgerService {
    * claimed the same key. This is the concurrency gate that ensures only one
    * of N simultaneous requests with the same idempotency key proceeds.
    */
-  async claimIdempotency(key: string, operationType: string): Promise<boolean> {
+  async claimIdempotency(key: string, operationType: string, tenantId?: string): Promise<boolean> {
     try {
       await IdempotencyRecordModel.create({
         pointsIdempotencyKey: key,
@@ -435,6 +439,7 @@ export class LedgerService implements ILedgerService {
         // Short-lived claim; finalized by storeIdempotencyResult on success.
         expiresAt: new Date(Date.now() + 60_000),
         retentionUntil: new Date(Date.now() + 60_000),
+        ...(tenantId !== undefined ? { tenant_id: tenantId } : {}),
       });
       return true;
     } catch (error: unknown) {

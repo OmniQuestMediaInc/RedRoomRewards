@@ -69,6 +69,7 @@ describe('PointAccrualService', () => {
         reason: TransactionReason.USER_SIGNUP_BONUS,
         idempotencyKey: 'key-1',
         requestId: 'req-1',
+        tenantId: 'tenant-test',
         balanceBefore: 0,
         balanceAfter: amount,
         timestamp: new Date(),
@@ -82,6 +83,7 @@ describe('PointAccrualService', () => {
         reason: TransactionReason.USER_SIGNUP_BONUS,
         idempotencyKey: 'key-1',
         requestId: 'req-1',
+        tenantId: 'tenant-test',
       });
 
       // Assert
@@ -125,6 +127,7 @@ describe('PointAccrualService', () => {
         reason: TransactionReason.PROMOTIONAL_AWARD,
         idempotencyKey: 'key-2',
         requestId: 'req-2',
+        tenantId: 'tenant-test',
       });
 
       // Assert
@@ -146,6 +149,7 @@ describe('PointAccrualService', () => {
           reason: TransactionReason.USER_SIGNUP_BONUS,
           idempotencyKey: 'key-3',
           requestId: 'req-3',
+          tenantId: 'tenant-test',
         }),
       ).rejects.toThrow('Amount must be at least 1');
     });
@@ -159,6 +163,7 @@ describe('PointAccrualService', () => {
           reason: TransactionReason.USER_SIGNUP_BONUS,
           idempotencyKey: 'key-4',
           requestId: 'req-4',
+          tenantId: 'tenant-test',
         }),
       ).rejects.toThrow('Amount cannot exceed');
     });
@@ -172,6 +177,7 @@ describe('PointAccrualService', () => {
           reason: TransactionReason.CHIP_MENU_PURCHASE,
           idempotencyKey: 'key-5',
           requestId: 'req-5',
+          tenantId: 'tenant-test',
         }),
       ).rejects.toThrow('Invalid earning reason');
     });
@@ -188,6 +194,7 @@ describe('PointAccrualService', () => {
           reason: TransactionReason.USER_SIGNUP_BONUS,
           idempotencyKey: 'duplicate-key',
           requestId: 'req-6',
+          tenantId: 'tenant-test',
         }),
       ).rejects.toThrow('Idempotency key already used');
     });
@@ -213,7 +220,7 @@ describe('PointAccrualService', () => {
       mockLedgerService.createEntry.mockResolvedValue({} as any); // eslint-disable-line @typescript-eslint/no-explicit-any
 
       // Act
-      const result = await service.awardSignupBonus('user-new', 500, 'req-signup');
+      const result = await service.awardSignupBonus('user-new', 500, 'req-signup', 'tenant-test');
 
       // Assert
       expect(result.amountAwarded).toBe(500);
@@ -247,6 +254,7 @@ describe('PointAccrualService', () => {
         'referred-user',
         100,
         'req-referral',
+        'tenant-test',
       );
 
       // Assert
@@ -287,6 +295,7 @@ describe('PointAccrualService', () => {
         100,
         'promo-2025',
         'req-promo',
+        'tenant-test',
         expiresAt,
       );
 
@@ -327,6 +336,7 @@ describe('PointAccrualService', () => {
         'admin-001',
         'Compensation for service issue',
         'req-admin',
+        'tenant-test',
       );
 
       // Assert
