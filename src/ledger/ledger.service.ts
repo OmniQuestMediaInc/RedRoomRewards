@@ -155,8 +155,7 @@ export class LedgerService implements ILedgerService {
           .lean()
           .exec();
         if (existing) {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          return this.mapToDomain(existing as any);
+          return this.mapToDomain(existing as ILedgerEntry);
         }
       }
       throw error;
@@ -168,8 +167,17 @@ export class LedgerService implements ILedgerService {
    */
   async queryEntries(filter: LedgerQueryFilter): Promise<LedgerQueryResult> {
     // Build query
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const query: any = {};
+    const query: {
+      accountId?: { $eq: string };
+      accountType?: { $eq: string };
+      type?: { $eq: string };
+      reason?: { $eq: string };
+      balanceState?: { $eq: string };
+      escrowId?: { $eq: string };
+      queueItemId?: { $eq: string };
+      featureType?: { $eq: string };
+      timestamp?: { $gte?: Date; $lte?: Date };
+    } = {};
 
     if (filter.accountId) {
       query.accountId = { $eq: filter.accountId };
@@ -205,13 +213,10 @@ export class LedgerService implements ILedgerService {
 
     // Date range filter
     if (filter.startDate || filter.endDate) {
-      query.timestamp = {};
-      if (filter.startDate) {
-        query.timestamp.$gte = filter.startDate;
-      }
-      if (filter.endDate) {
-        query.timestamp.$lte = filter.endDate;
-      }
+      query.timestamp = {
+        ...(filter.startDate ? { $gte: filter.startDate } : {}),
+        ...(filter.endDate ? { $lte: filter.endDate } : {}),
+      };
     }
 
     // Pagination
@@ -221,8 +226,7 @@ export class LedgerService implements ILedgerService {
     // Sorting
     const sortField = filter.sortBy || 'timestamp';
     const sortOrder = filter.sortOrder === 'asc' ? 1 : -1;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sort: any = { [sortField]: sortOrder };
+    const sort: Record<string, 1 | -1> = { [sortField]: sortOrder };
 
     // Execute query
     const [entries, totalCount] = await Promise.all([
@@ -232,8 +236,7 @@ export class LedgerService implements ILedgerService {
 
     // Map results
     return {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      entries: entries.map((e) => this.mapToDomain(e as any)),
+      entries: entries.map((e) => this.mapToDomain(e as ILedgerEntry)),
       totalCount,
       offset,
       limit,
@@ -251,8 +254,7 @@ export class LedgerService implements ILedgerService {
       .lean()
       .exec();
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return entry ? this.mapToDomain(entry as any) : null;
+    return entry ? this.mapToDomain(entry as ILedgerEntry) : null;
   }
 
   /**
@@ -263,8 +265,11 @@ export class LedgerService implements ILedgerService {
     accountType: 'user' | 'model',
     asOf?: Date,
   ): Promise<BalanceSnapshot> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const query: any = {
+    const query: {
+      accountId: { $eq: string };
+      accountType: { $eq: string };
+      timestamp?: { $lte: Date };
+    } = {
       accountId: { $eq: accountId },
       accountType: { $eq: accountType },
     };
@@ -394,8 +399,7 @@ export class LedgerService implements ILedgerService {
 
     return entries.map((entry) => ({
       auditId: entry.entryId,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      ledgerEntry: this.mapToDomain(entry as any),
+      ledgerEntry: this.mapToDomain(entry as ILedgerEntry),
       auditedAt: entry.timestamp,
     }));
   }
@@ -675,12 +679,10 @@ export class LedgerService implements ILedgerService {
       accountId: doc.accountId,
       accountType: doc.accountType,
       amount: doc.amount,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      type: doc.type as any,
+      type: doc.type as TransactionType,
       balanceState: doc.balanceState,
       stateTransition: doc.stateTransition,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      reason: doc.reason as any,
+      reason: doc.reason as TransactionReason,
       idempotencyKey: doc.idempotencyKey,
       requestId: doc.requestId,
       balanceBefore: doc.balanceBefore,

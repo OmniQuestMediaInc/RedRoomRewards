@@ -2,8 +2,8 @@
 
 **Document:** `PROGRAM_CONTROL/DIRECTIVES/QUEUE/OQMI_SYSTEM_STATE_RRR.md`
 **Repo:** OmniQuestMediaInc/RedRoomRewards
-**Version:** v2.0 (A-CLEAN — Wave A closed, Wave B open)
-**Last Updated:** 2026-04-24
+**Version:** v3.0 (B-CLEAN — Wave B closed, Wave C open)
+**Last Updated:** 2026-04-25
 **Owner:** Kevin B. Hartley, CEO — OmniQuest Media Inc.
 **Active Charter:** `.github/PRODUCTION_SCHEDULE.md` (waveform schedule, parsed by CI)
 **Governance Companion:** `PROGRAM_CONTROL/DIRECTIVES/QUEUE/RRR-GOV-002.md`
@@ -61,7 +61,7 @@ live in `.github/PRODUCTION_SCHEDULE.md`. This file mirrors both.
 | `IdempotencyService`    | `src/services/idempotency.service.ts`      | Wrapper landed on credit/deduct. Extension to redemption/expiration/escrow pending (B-010).                                            |
 | `WalletController`      | `src/api/wallet.controller.ts`             | **FLAGGED:** `creditPoints` / `deductPoints` return fabricated responses without invoking the real services or writing to the ledger. |
 | `RedRoomLedgerService`  | `src/ledger/red-room-ledger.service.ts`    | Wave A FIZ wiring landed (#284).                                                                                                       |
-| `AdminOpsService`       | `src/services/admin-ops.service.ts`        | Consolidated stub (A-008). Full coverage spec pending (B-013).                                                                         |
+| `AdminOpsService`       | `src/services/admin-ops.service.ts`        | Consolidated stub (A-008). Full coverage spec added (B-013 — 26 tests).                                                               |
 | `ZkOracleService`       | `src/zk-oracle/zk-oracle.service.ts`       | Research spike (WO-011). 16 tests cover proof generation, tamper detection, audit log.                                                 |
 
 ### Data models confirmed on `main`
@@ -124,31 +124,24 @@ Merged on `main` and verified by `git log` + the schedule's Merge SHA column.
 
 ---
 
-## §5 — OUTSTANDING (Wave B — opens after A-CLEAN merges)
+## §5 — OUTSTANDING (Wave C — opens after B-CLEAN merges)
 
-CRITICAL items first. Order within a critical band is set by dependency
-graph in `.github/PRODUCTION_SCHEDULE.md`.
+All Wave B tasks are now DONE. Wave C is open.
 
-### CRITICAL #1 — append-only ledger invariant tests
-
-- **B-012** — `LedgerService` invariant tests (append-only reflection,
-  monotonic sequence, balance projection, non-null `correlation_id` +
-  `reason_code`).
-
-### CRITICAL #2 — wire controllers to real services (B-001 / B-002 / B-003)
+### CRITICAL #1 — wire controllers to real services (B-001 / B-002 / B-003)
 
 - **B-001** — `WalletController.creditPoints` → `PointAccrualService`
 - **B-002** — `WalletController.deductPoints` → `PointRedemptionService`
 - **B-003** — Integration tests covering credit/deduct + idempotency
   replay + insufficient-balance rejection. **Depends on B-001+B-002.**
 
-### CRITICAL #3 — transactional multi-model wallet mutations
+### CRITICAL #2 — transactional multi-model wallet mutations
 
 - **B-006** — Wrap credit / deduct / escrow hold / escrow release in
   `mongoose.startSession`. `.env.example` replica-set note. Rollback
   test.
 
-### CRITICAL #4 — idempotency coverage extension
+### CRITICAL #3 — idempotency coverage extension
 
 - **B-010** — Extend `IdempotencyService` to redemption, expiration,
   escrow hold/release. Add `idempotency.service.spec.ts`.
@@ -159,43 +152,33 @@ graph in `.github/PRODUCTION_SCHEDULE.md`.
   `phase` 1 or 2; indexes; unit tests).
 - **B-005** — `LoyaltyAccount` + `IdentityLink` models.
   **Depends on B-004.**
-- **B-007** — `MerchantPairConfig` model (effective-dating; unique
-  partial index; 1:1 default). **Depends on B-004.**
-
-### CI guardrails
-
-- **B-008** — CI guard: no hardcoded balance values in `src/`.
-- **B-009** — CI guard: `tenant_id` scope on all model queries in
-  services / wallets / ledger. **Depends on B-004.**
 
 ### Reconciliation + invariant projection
 
 - **B-011** — `ReconciliationService` + `npm run reconcile` +
   feature-flagged admin endpoint. **Depends on B-006 + B-010.**
 
-### Type-safety / refactor follow-ups
+### Wave C provisional tasks
 
-- **B-013** — `admin-ops.service.spec.ts` full coverage.
-  **Depends on A-008** (✅ shipped).
-- **B-014** — Replace `any` with `FilterQuery<>` in
-  `src/ingest-worker/replay.ts`.
-- **B-015** — Split `src/wallets/types.ts` + `src/services/types.ts` by
-  concern.
-- **B-016** — Replace `any` with `unknown` + narrowing in
-  `ledger.service.ts` + `services/types.ts`. **Depends on B-015.**
-- **B-CLEAN** — Wave B cleanup, test triage, declare Wave C open.
+- Service ↔ Config wiring (PointAccrual ↔ EarnRateConfig; PointRedemption ↔
+  TierCapConfig + SpendOrderConfig)
+- Auth / authz / tenant-isolation middleware
+- Webhook receive (GGS-ready) + emit infrastructure
+- Cross-merchant exchange service (uses MerchantPairConfig)
+- Tier evaluation service
+- Settlement service
+- Fraud signal service
 
 ---
 
 ## §6 — BLOCKERS
 
-None at A-CLEAN time.
+None at B-CLEAN time.
 
 Pre-existing type-check error in `src/api/receipt-endpoint.example.ts:144`
 (discriminated-union narrowing under TS 6.x) is non-blocking — it is an
 illustrative example file, excluded from the runtime build target, and CI
-does not run `tsc --noEmit`. Tracked for fix-up alongside B-014/B-016
-type-safety work.
+does not run `tsc --noEmit`. Tracked for fix-up in a Wave C follow-up.
 
 ---
 
