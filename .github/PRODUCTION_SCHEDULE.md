@@ -61,24 +61,27 @@
 | B-010   | Extend `IdempotencyService` to redemption, expiration, escrow hold/release; add `idempotency.service.spec.ts`. FIZ commit format.                                                                                                                                       | WIP    | —         |
 | B-011   | Reconciliation job — `ReconciliationService`; `Wallet.balance == sum(PointLot.remaining) == sum(LedgerEntry.delta)`; emit `RECON_MISMATCH` never auto-correct; `npm run reconcile`; admin endpoint behind feature flag. FIZ commit format. **Depends on B-006, B-010.** | WIP    | —         |
 | B-012   | LedgerService invariant tests — append-only reflection check; monotonic sequence; balance projection; non-null correlation_id + reason_code. FIZ commit format.                                                                                                         | WIP    | —         |
-| B-013   | `admin-ops.service.spec.ts` — full coverage of `src/services/admin-ops.service.ts`. **Depends on A-008.**                                                                                                                                                               | DONE    | pending   |
-| B-014   | `src/ingest-worker/replay.ts` — replace `any` with `FilterQuery<>`                                                                                                                                                                                                      | DONE    | pending   |
-| B-015   | Split `src/wallets/types.ts` + `src/services/types.ts` by concern; update all imports; no shape changes                                                                                                                                                                 | DONE    | pending   |
-| B-016   | Replace `any` with `unknown` + narrowing in `ledger.service.ts` + `services/types.ts`. **Depends on B-015.**                                                                                                                                                            | DONE    | pending   |
-| B-CLEAN | Wave B cleanup — lint, test triage (8 pre-existing failures), update state file, declare Wave C open                                                                                                                                                                    | DONE    | pending   |
+| B-013   | `admin-ops.service.spec.ts` — full coverage of `src/services/admin-ops.service.ts`. **Depends on A-008.**                                                                                                                                                               | DONE    | 9788b3b   |
+| B-014   | `src/ingest-worker/replay.ts` — replace `any` with `FilterQuery<>`                                                                                                                                                                                                      | DONE    | 9788b3b   |
+| B-015   | Split `src/wallets/types.ts` + `src/services/types.ts` by concern; update all imports; no shape changes                                                                                                                                                                 | DONE    | 9788b3b   |
+| B-016   | Replace `any` with `unknown` + narrowing in `ledger.service.ts` + `services/types.ts`. **Depends on B-015.**                                                                                                                                                            | DONE    | 9788b3b   |
+| B-CLEAN | Wave B cleanup — lint, test triage (8 pre-existing failures), update state file, declare Wave C open                                                                                                                                                                    | DONE    | 9788b3b   |
 
 ---
 
-## WAVE C — Provisional (drafted after B-CLEAN)
+## WAVE C — Config Wiring + Auth + Infrastructure
 
-1. Service ↔ Config wiring (PointAccrual ↔ EarnRateConfig; PointRedemption ↔
-   TierCapConfig + SpendOrderConfig)
-1. Auth / authz / tenant-isolation middleware
-1. Webhook receive (GGS-ready) + emit infrastructure
-1. Cross-merchant exchange service (uses MerchantPairConfig)
-1. Tier evaluation service
-1. Settlement service
-1. Fraud signal service
+| ID      | Task                                                                                                                                                                                                                                  | Status | Merge SHA |
+| :------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :----- | :-------- |
+| C-001   | `PointAccrualService.calculateEarnRate` — query active `EarnRateConfig` (tenant/merchant/tier/event); apply `base_points_per_unit * inferno_multiplier * amount`; enforce CEO D3 zero-earn for Diamond Concierge                      | WIP    | —         |
+| C-002   | `PointRedemptionService.validateTierCap` — query active `TierCapConfig` (tenant/merchant/tier); validate `redemptionAmount ≤ (redemption_cap_pct / 100) * transactionValue`; no platform defaults (CEO B5)                            | WIP    | —         |
+| C-003   | Integrate earn-rate calculation into `awardPoints` flow; integrate tier-cap validation into `redeemPoints` flow; add `tenantId`/`merchantId` to request shapes                                                                        | QUEUED | —         |
+| C-004   | JWT `AuthMiddleware` — extract Bearer token via `jsonwebtoken`; populate `req.tenantId` + `req.userId`; register in `AppModule.configure()`; wire with `TenantScopeMiddleware`                                                       | WIP    | —         |
+| C-005   | Webhook receive (GGS-ready) + emit infrastructure                                                                                                                                                                                     | QUEUED | —         |
+| C-006   | Cross-merchant exchange service wiring (already delivered in B-014 early drop; wire controller + module)                                                                                                                              | QUEUED | —         |
+| C-007   | Tier evaluation service                                                                                                                                                                                                               | QUEUED | —         |
+| C-008   | Settlement service                                                                                                                                                                                                                    | QUEUED | —         |
+| C-009   | Fraud signal service                                                                                                                                                                                                                  | QUEUED | —         |
 
 ---
 

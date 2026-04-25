@@ -149,3 +149,20 @@
   Coding doctrine §9.2 requires all endpoints to have authentication per the OpenAPI spec;
   §9.4 prohibits creating endpoints not described in the spec. The file was not installed.
   The endpoint must be specced in `api/openapi.yaml` with appropriate auth before implementation.
+
+## Wave C — Payload #19 (C-007 + C-008)
+
+- C-007 webhook receive infrastructure added: `src/webhooks/webhook-receive.controller.ts`,
+  `src/webhooks/webhook-receive.service.ts`. `POST /webhooks/receive` accepts inbound events,
+  verifies HMAC-SHA256 signature (stub returns true when `RRR_WEBHOOK_SECRET` is unset),
+  and deduplicates via `IdempotencyService` using operation `'webhook_receive'` and tenant
+  scope `'system'`. Real ingest-worker queue wiring is deferred to a future payload.
+- C-008 webhook emit service stubbed: `src/webhooks/webhook-emit.service.ts` logs and returns
+  true. Full outbound POST + HMAC + retry logic deferred to the next payload.
+- `WebhookModule` registered in `AppModule`. `IdempotencyService` provided via `useFactory`
+  (no `@Injectable()` on the class) per the existing F-017 factory pattern.
+## Wave C Start (Payload #17 — C-001, C-002, C-004)
+
+- C-001: `calculateEarnRate` added to `PointAccrualService` — queries active `EarnRateConfigModel` row for the given tenant/merchant/tier/event combination; applies `base_points_per_unit * inferno_multiplier * amount`; honours CEO Decision D3 (Diamond Concierge zero-earn). Existing `awardPoints`/`deductFromAvailable` methods are unchanged.
+- C-002: `validateTierCap` added to `PointRedemptionService` — queries active `TierCapConfigModel` row; validates that `redemptionAmount ≤ (redemption_cap_pct / 100) * transactionValue`; no platform defaults per CEO Decision B5. Existing `redeemPoints` escrow flow is unchanged.
+- C-004: `AuthMiddleware` added at `src/middleware/auth.middleware.ts` — NestJS `NestMiddleware`; extracts Bearer JWT via `jsonwebtoken`; populates `req.tenantId` and `req.userId`; leaves unauthenticated requests for downstream guards to reject. Uses `JWT_SECRET` env var (same key as `AuthService`). Not yet registered in `AppModule.configure()` — see F-039.

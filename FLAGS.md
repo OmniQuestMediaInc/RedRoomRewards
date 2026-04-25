@@ -96,7 +96,7 @@
 | F-037 | FilterQuery / Mongoose 9 | `FilterQuery<T>` is not exported by Mongoose 9.x. B-014 and B-016 queries were typed with explicit inline object types instead. | Yes | No action needed — typed correctly for Mongoose 9 |
 | F-038 | FeatureActionData index signature | Changed `[key: string]: any` to `[key: string]: unknown` in FeatureActionData (services/types/service.types.ts) as part of B-016. Callers that relied on the any escape hatch may need explicit casts if they add non-unknown index properties. | Yes | Confirm no downstream breakage |
 
-## Wave C Continuation — Payload #18 (C-003, C-005, C-006)
+## Wave C Start (Payload #17 — C-001, C-002, C-004)
 
 | ID | Category | Description | Default Used | CEO Action |
 |----|----------|-------------|--------------|------------|

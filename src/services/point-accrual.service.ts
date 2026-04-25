@@ -11,6 +11,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { ILedgerService } from '../ledger/types';
 import { WalletModel } from '../db/models/wallet.model';
+import { EarnRateConfigModel } from '../db/models/earn-rate-config.model';
 import { TransactionType, TransactionReason } from '../wallets/types';
 
 /**
@@ -353,6 +354,53 @@ export class PointAccrualService {
         operationType: 'admin_credit',
       },
     });
+  }
+
+  /**
+   * Calculate the earn rate for a given tier, event class, and spend amount (C-001).
+   *
+   * Looks up the active `EarnRateConfig` row for the tenant/merchant/tier/event
+   * combination and applies `base_points_per_unit * inferno_multiplier * amount`.
+   * Diamond Concierge purchases earn 0 when `diamond_concierge_zero_earn` is true
+   * (CEO Decision D3).
+   *
+   * @param tenantId   Tenant identifier
+   * @param merchantId Merchant identifier
+   * @param merchantTier Merchant loyalty tier (e.g. "GOLD")
+   * @param eventClass Event class (e.g. "PURCHASE")
+   * @param amount     Spend amount (units) to convert to points
+   * @param isDiamondConcierge Whether the purchase is a Diamond Concierge purchase (CEO D3)
+   * @returns Calculated points to award
+   * @throws Error when no active earn-rate config exists for the given parameters
+   */
+  async calculateEarnRate(
+    tenantId: string,
+    merchantId: string,
+    merchantTier: string,
+    eventClass: string,
+    amount: number,
+    isDiamondConcierge: boolean = false,
+  ): Promise<number> {
+    const config = await EarnRateConfigModel.findOne({
+      tenant_id: { $eq: tenantId },
+      merchant_id: { $eq: merchantId },
+      merchant_tier: { $eq: merchantTier },
+      event_class: { $eq: eventClass },
+      superseded_at: null,
+    }).sort({ effective_at: -1 });
+
+    if (!config) {
+      throw new Error(
+        `No active earn-rate config for tenant=${tenantId} merchant=${merchantId} tier=${merchantTier} event=${eventClass}`,
+      );
+    }
+
+    // CEO Decision D3: Diamond Concierge earns 0 unless explicitly overridden
+    if (isDiamondConcierge && config.diamond_concierge_zero_earn) {
+      return 0;
+    }
+
+    return config.base_points_per_unit * config.inferno_multiplier * amount;
   }
 
   /**
