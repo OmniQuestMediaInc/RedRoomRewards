@@ -291,8 +291,8 @@ export class PointAccrualService {
    * @param amount Amount to award
    * @param promotionId Promotion identifier
    * @param requestId Request ID
-   * @param expiresAt Optional expiration date
    * @param tenantId Tenant identifier
+   * @param expiresAt Optional expiration date
    * @returns Award response
    */
   async awardPromotionalPoints(
@@ -300,8 +300,8 @@ export class PointAccrualService {
     amount: number,
     promotionId: string,
     requestId: string,
+    tenantId: string,
     expiresAt?: Date,
-    tenantId?: string,
   ): Promise<AwardPointsResponse> {
     return this.awardPoints({
       userId,
@@ -309,7 +309,7 @@ export class PointAccrualService {
       reason: TransactionReason.PROMOTIONAL_AWARD,
       idempotencyKey: `promo-${promotionId}-${userId}`,
       requestId,
-      tenantId: tenantId ?? 'default',
+      tenantId,
       expiresAt,
       metadata: {
         promotionId,
@@ -335,7 +335,7 @@ export class PointAccrualService {
     adminId: string,
     reason: string,
     requestId: string,
-    tenantId?: string,
+    tenantId: string,
   ): Promise<AwardPointsResponse> {
     // Use deterministic idempotency key based on admin, user, and request
     const idempotencyKey = `admin-credit-${adminId}-${userId}-${requestId}`;
@@ -346,7 +346,7 @@ export class PointAccrualService {
       reason: TransactionReason.ADMIN_CREDIT,
       idempotencyKey,
       requestId,
-      tenantId: tenantId ?? 'default',
+      tenantId,
       metadata: {
         adminId,
         adminReason: reason,

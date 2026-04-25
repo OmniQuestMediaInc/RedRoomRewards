@@ -295,6 +295,7 @@ describe('PointAccrualService', () => {
         100,
         'promo-2025',
         'req-promo',
+        'tenant-test',
         expiresAt,
       );
 
@@ -335,6 +336,7 @@ describe('PointAccrualService', () => {
         'admin-001',
         'Compensation for service issue',
         'req-admin',
+        'tenant-test',
       );
 
       // Assert
