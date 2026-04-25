@@ -103,3 +103,9 @@
 | F-039 | Wave C | AuthMiddleware created but not yet registered in `AppModule.configure()`. Wire after confirming which routes need JWT auth — avoids breaking unauthenticated health/docs endpoints. | Yes | Register in AppModule once route scope is confirmed |
 | F-040 | Wave C | C-001 `calculateEarnRate` does not mutate the existing `awardPoints` flow. Callers that want earn-rate-derived point awards must call `calculateEarnRate` first, then pass the result into `awardPoints`/`awardPromotionalPoints`. Integration wiring deferred to next Wave C task. | Yes | Review |
 | F-041 | Wave C | C-002 `validateTierCap` is a standalone validator — not yet called inside `redeemPoints`. Controllers or orchestration services should call it before invoking `redeemPoints` until it is integrated into the redemption flow. | Yes | Review |
+
+## Wave D Start (Payload #22 — D-001, D-005)
+
+| ID | Category | Description | Default Used | CEO Action |
+|----|----------|-------------|--------------|------------|
+| F-042 | Wave D | D-001 + D-005 started — structured Pino logger and enhanced health check delivered. Wave D observability layer in progress. | Yes | Review |
