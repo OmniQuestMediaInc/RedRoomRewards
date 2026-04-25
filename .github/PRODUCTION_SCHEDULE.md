@@ -86,6 +86,19 @@
 
 ---
 
+## WAVE D — Observability + Final Production Hardening
+
+| ID      | Task                                                                                                                                         | Status | Merge SHA |
+| :------ | :------------------------------------------------------------------------------------------------------------------------------------------- | :----- | :-------- |
+| D-001   | Structured logging — replace ad-hoc `console.*` with `pino` logger; `src/lib/logger.ts`; wired into app bootstrap                           | DONE   | 954bc1c   |
+| D-002   | Rate-limit middleware — `express-rate-limit` ^8; per-tenant configurable; wired into `AppModule`                                             | DONE   | 954bc1c   |
+| D-003   | Tenant-scope CI guard — `scripts/ci/tenant-id-scope-check.js`; allowlist at `scripts/ci/tenant-id-allowlist.json`; wired into `ci.yml`      | DONE   | 954bc1c   |
+| D-005   | Health check enhancement — `/health` returns DB connectivity + version; liveness + readiness probes                                          | DONE   | 954bc1c   |
+| D-006   | FraudSignalService + WebhookEmitService — final Wave C deliverables landed; Wave C closed                                                   | DONE   | 6018f1d   |
+| D-FINAL | Payload #26 — FINAL PRODUCTION DEPLOYMENT: fix garbled `webhook-emit.service.ts`; exclude example file from tsc; `npm run build` clean; 449 tests / 46 suites all pass | DONE   | 55384c9   |
+
+---
+
 ## INVARIANTS (non-negotiable, always enforced)
 
 - LedgerService is append-only — no update/delete primitives ever
@@ -116,3 +129,13 @@
 | B3  | Phase 1 merchants: RedRoomPleasures + Cyrano. Phase 2: ChatNow.Zone                   |
 | B4  | Cross-merchant rate 1:1 default via MerchantPairConfig                                |
 | B5  | Tier caps: PLATINUM 50 / GOLD 35 / SILVER 20 / MEMBER 10 / GUEST 5                    |
+
+---
+
+## WAVE D — Observability + Rate-Limiting + API Hardening
+
+| ID    | Task                                                                                                                                                                        | Status | Merge SHA |
+| :---- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----- | :-------- |
+| D-002 | OpenAPI drift check — `scripts/ci/openapi-drift-check.js` verifies `api/openapi.yaml` exists; full schema-diff deferred until controller surface is stable                 | WIP    | —         |
+| D-003 | Reservation flow E2E — hold → settle → refund lifecycle test at `src/__tests__/e2e/reservation.e2e.spec.ts`; uses WalletService mocks; full DB test deferred to B-006       | WIP    | —         |
+| D-006 | Rate-limit middleware — `src/middleware/rate-limit.middleware.ts`; 60 req/60 s per IP; `express-rate-limit` ^8.4.1; wire into AppModule once route scope confirmed           | WIP    | —         |

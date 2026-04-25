@@ -3,7 +3,7 @@
  *
  * Outbound webhook emission stub — sends structured event payloads to
  * registered webhook endpoints.  Full implementation (signature, retry,
- * idempotency) is deferred to Wave C C-005 wiring.
+ * idempotency) is deferred to a future wave.
  *
  * See src/webhooks/README.md for design notes.
  */
@@ -34,7 +34,7 @@ export class WebhookEmitService {
       data,
     };
 
-    // TODO (C-005): Fan-out to registered webhook endpoints with HMAC signing,
+    // TODO (C-005 / next wave): Fan-out to registered webhook endpoints with HMAC signing,
     // exponential-backoff retry, and idempotency key tracking.
     // For now, log the emission so it is visible in structured logs.
     console.log(JSON.stringify({ event: 'WEBHOOK_EMIT', payload }));
