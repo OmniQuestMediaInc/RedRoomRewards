@@ -41,8 +41,15 @@ export class AuthMiddleware implements NestMiddleware {
         : undefined;
 
     if (token) {
+      const secret = process.env.JWT_SECRET;
+      if (!secret) {
+        // JWT_SECRET is not configured — cannot verify tokens safely.
+        // Leave tenantId/userId unset; guards will reject if auth is required.
+        next();
+        return;
+      }
+
       try {
-        const secret = process.env.JWT_SECRET ?? '';
         const payload = jwt.verify(token, secret) as RrrJwtPayload;
 
         if (typeof payload.tenantId === 'string') {
