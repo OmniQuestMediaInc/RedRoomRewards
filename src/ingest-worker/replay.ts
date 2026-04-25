@@ -33,7 +33,11 @@ export class ReplayController {
     });
 
     // Build query based on options
-    const query: any = {};
+    const query: {
+      eventId?: string;
+      eventType?: string;
+      movedToDLQAt?: { $gte?: Date; $lte?: Date };
+    } = {};
 
     if (options.eventId) {
       query.eventId = options.eventId;

@@ -356,7 +356,7 @@ export interface ILedgerService {
   storeIdempotencyResult(
     key: string,
     operationType: string,
-    result: any, // eslint-disable-line @typescript-eslint/no-explicit-any
+    result: unknown,
     statusCode: number,
     ttlSeconds: number,
   ): Promise<void>;
