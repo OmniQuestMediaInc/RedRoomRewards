@@ -117,8 +117,67 @@
 - Items C-003, C-005 through C-008 were closed via stub / scaffold implementations delivered across Waves B and C. Human review is recommended before production use of those surfaces.
 - Wave C is now fully closed. See FLAGS.md F-042.
 
+## Wave C Continuation — Payload #20 (C-009, C-010, C-011)
+
+- C-009 `CrossMerchantExchangeService`: Payload #20 proposed a stub using the `MerchantPairConfig`
+  model with camelCase field names. A production-quality implementation already exists at
+  `src/services/cross-merchant-exchange.service.ts` (correct snake_case fields, `.lean()`,
+  `superseded_at: null` active-row filter, CEO Decision B4 1:1 default). The existing service and
+  its comprehensive spec at `src/services/cross-merchant-exchange.service.spec.ts` fully satisfy
+  the C-009 charter task. The payload stub was not installed.
+
+- C-010 `TierEvaluationService`: Payload #20 cannot be installed as specified — three blocking
+  model conflicts exist: (1) `LoyaltyAccount` has no `lifetime_points` (or `lifetimePoints`) field;
+  (2) `rrr_member_tier` is typed as `RrrMemberTier` (`PLATINUM | GOLD | SILVER | MEMBER | GUEST`),
+  incompatible with the `RED_*` tier values used in the payload; (3) `WebhookEmitService` does not
+  exist in the repository. Per coding doctrine §9.4, these gaps require a spec change before
+  implementation. See FLAG F-042.
+
+- C-011 `SettlementService`: Payload #20 proposed a stub that creates a `SettlementRecord`.
+  A proper `SettlementRecord` model was added at `src/db/models/settlement-record.model.ts`
+  and the service installed at `src/services/settlement.service.ts`. `total_redeemed` aggregation
+  is stubbed at 0 pending the B-011 reconciliation job wiring. Unit tests added.
+
+## Wave C Continuation — Payload #18 (C-003, C-005, C-006)
+
+- C-003 `PointExpirationService` + `SpendOrderConfig` wiring: Payload #18 proposed a stub replacement
+  (`console.log` only). The existing `src/services/point-expiration.service.ts` is a complete
+  production implementation with ledger integration, optimistic-locking wallet debit, idempotency
+  keys, and batch processing. The stub was not installed to avoid downgrading the implementation.
+  `src/services/__tests__/point-expiration.service.comprehensive.spec.ts` covers the existing service.
+
+- C-005 `TenantScopeMiddleware`: Payload #18 proposed a stub using untyped `any` parameters.
+  `src/middleware/tenant-scope.middleware.ts` already has a properly-typed implementation
+  (`Request & { tenantId?: string; queryOptions?: Record<string, unknown> }`, `Response`,
+  `NextFunction`). The stub was not installed. Registration in `AppModule.configure()` is still
+  deferred until the auth guard that populates `req.tenantId` is in place (see F-034).
+
+- C-006 `ReconcileController` (remove feature flag, use auth middleware): Payload #18 proposed
+  a `@Post('admin/reconcile')` endpoint with no auth guard and no entry in `api/openapi.yaml`.
+  Coding doctrine §9.2 requires all endpoints to have authentication per the OpenAPI spec;
+  §9.4 prohibits creating endpoints not described in the spec. The file was not installed.
+  The endpoint must be specced in `api/openapi.yaml` with appropriate auth before implementation.
+
+## Wave C — Payload #19 (C-007 + C-008)
+
+- C-007 webhook receive infrastructure added: `src/webhooks/webhook-receive.controller.ts`,
+  `src/webhooks/webhook-receive.service.ts`. `POST /webhooks/receive` accepts inbound events,
+  verifies HMAC-SHA256 signature (stub returns true when `RRR_WEBHOOK_SECRET` is unset),
+  and deduplicates via `IdempotencyService` using operation `'webhook_receive'` and tenant
+  scope `'system'`. Real ingest-worker queue wiring is deferred to a future payload.
+- C-008 webhook emit service stubbed: `src/webhooks/webhook-emit.service.ts` logs and returns
+  true. Full outbound POST + HMAC + retry logic deferred to the next payload.
+- `WebhookModule` registered in `AppModule`. `IdempotencyService` provided via `useFactory`
+  (no `@Injectable()` on the class) per the existing F-017 factory pattern.
 ## Wave C Start (Payload #17 — C-001, C-002, C-004)
 
 - C-001: `calculateEarnRate` added to `PointAccrualService` — queries active `EarnRateConfigModel` row for the given tenant/merchant/tier/event combination; applies `base_points_per_unit * inferno_multiplier * amount`; honours CEO Decision D3 (Diamond Concierge zero-earn). Existing `awardPoints`/`deductFromAvailable` methods are unchanged.
 - C-002: `validateTierCap` added to `PointRedemptionService` — queries active `TierCapConfigModel` row; validates that `redemptionAmount ≤ (redemption_cap_pct / 100) * transactionValue`; no platform defaults per CEO Decision B5. Existing `redeemPoints` escrow flow is unchanged.
 - C-004: `AuthMiddleware` added at `src/middleware/auth.middleware.ts` — NestJS `NestMiddleware`; extracts Bearer JWT via `jsonwebtoken`; populates `req.tenantId` and `req.userId`; leaves unauthenticated requests for downstream guards to reject. Uses `JWT_SECRET` env var (same key as `AuthService`). Not yet registered in `AppModule.configure()` — see F-039.
+
+## Wave D Start (Payload #22 — D-001, D-005)
+
+- D-001 Structured logging with Pino implemented at `src/lib/logger.ts` — JSON output, LOG_LEVEL env override, redacts `password`/`secret`/`token`, base fields `service` + `env`, ISO timestamps. `pino@^10.3.1` added as a production dependency.
+- D-005 Health check enhanced — `GET /health` now returns `status`, `version`, `timestamp`, and a `components` array listing all nine platform domains. Logs each invocation via the structured logger.
+- `src/main.ts` updated — `console.log` startup messages replaced with `logger.info` calls.
+- Wave D observability layer started.

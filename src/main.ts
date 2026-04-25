@@ -3,6 +3,7 @@ import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 import { setupSwagger } from './openapi';
+import logger from './lib/logger';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -17,8 +18,8 @@ async function bootstrap() {
   const port = process.env.PORT || 3000;
   await app.listen(port);
 
-  console.log(`🚀 RedRoom Rewards™ engine v1.0 running on http://localhost:${port}`);
-  console.log(`📄 OpenAPI docs: http://localhost:${port}/api/docs`);
-  console.log(`✅ Mandatory 18+ GateGuard AV • Promotional Bonus • Immutable ledger`);
+  logger.info(`🚀 RedRoom Rewards™ engine v1.0 running on http://localhost:${port}`);
+  logger.info(`📄 OpenAPI docs: http://localhost:${port}/api/docs`);
+  logger.info('✅ Mandatory 18+ GateGuard AV • Promotional Bonus • Immutable ledger');
 }
 bootstrap();

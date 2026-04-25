@@ -109,3 +109,19 @@
 | ID | Category | Description | Default Used | CEO Action |
 |----|----------|-------------|--------------|------------|
 | F-042 | Wave C Final | `FraudSignalService` (C-009/C-012) and `WebhookEmitService` stub installed. Detection methods are intentional stubs pending C-012 production wiring. All Wave C rows marked DONE with SHA `a1d6d25`. | Yes | Review stub detection logic before production; wire C-005 webhook fan-out when GGS endpoints are confirmed |
+## Wave D Start (Payload #22 — D-001, D-005)
+
+| ID | Category | Description | Default Used | CEO Action |
+|----|----------|-------------|--------------|------------|
+| F-042 | Wave D | D-001 + D-005 started — structured Pino logger and enhanced health check delivered. Wave D observability layer in progress. | Yes | Review |
+| F-039 | Wave C | C-003 PointExpirationService — payload stub not installed; existing production implementation preserved (ledger debit, optimistic locking, batch, idempotency). Comprehensive spec at `src/services/__tests__/point-expiration.service.comprehensive.spec.ts` satisfies charter. | Yes | Review |
+| F-040 | Wave C | C-005 TenantScopeMiddleware — payload stub not installed; existing typed implementation at `src/middleware/tenant-scope.middleware.ts` preserved. AppModule registration still deferred until auth guard sets req.tenantId (see F-034). | Yes | No action needed |
+| F-041 | Wave C | C-006 ReconcileController — payload proposed `@Post('admin/reconcile')` with no auth guard and no OpenAPI spec entry. Not installed: violates §9.2 (all endpoints require auth per openapi.yaml) and §9.4 (no invented behavior). Requires spec entry in `api/openapi.yaml` before implementation. | Yes | Add `/admin/reconcile` to openapi.yaml with admin auth, then implement with guard |
+
+## Wave C Continuation — Payload #20 (C-009, C-010, C-011)
+
+| ID | Category | Description | Default Used | CEO Action |
+|----|----------|-------------|--------------|------------|
+| F-042 | Wave C | C-010 TierEvaluationService — payload not installed: (1) `LoyaltyAccount` has no `lifetime_points` field; (2) `rrr_member_tier` type (`PLATINUM|GOLD|SILVER|MEMBER|GUEST`) conflicts with `RED_*` tier values in payload; (3) `WebhookEmitService` does not exist. Blocked until spec changes land. | Yes | Add `lifetime_points` to LoyaltyAccount, confirm tier enum mapping, establish webhook-emit pattern |
+| F-043 | Wave C | C-009 CrossMerchantExchangeService — payload stub not installed; existing production implementation (snake_case fields, lean query, superseded_at filter, B4 default) already satisfies C-009 charter. | Yes | No action needed |
+| F-044 | Wave C | C-011 SettlementService — installed as a stub. `total_redeemed` is 0 pending B-011 reconciliation job wiring. `SettlementRecord` model added at `src/db/models/settlement-record.model.ts`. | Yes | Wire real aggregation once B-011 reconcile job is complete |
