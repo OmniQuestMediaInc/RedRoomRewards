@@ -100,6 +100,15 @@
 
 | ID | Category | Description | Default Used | CEO Action |
 |----|----------|-------------|--------------|------------|
+| F-039 | Wave C | C-003 PointExpirationService — payload stub not installed; existing production implementation preserved (ledger debit, optimistic locking, batch, idempotency). Comprehensive spec at `src/services/__tests__/point-expiration.service.comprehensive.spec.ts` satisfies charter. | Yes | Review |
+| F-040 | Wave C | C-005 TenantScopeMiddleware — payload stub not installed; existing typed implementation at `src/middleware/tenant-scope.middleware.ts` preserved. AppModule registration still deferred until auth guard sets req.tenantId (see F-034). | Yes | No action needed |
+| F-041 | Wave C | C-006 ReconcileController — payload proposed `@Post('admin/reconcile')` with no auth guard and no OpenAPI spec entry. Not installed: violates §9.2 (all endpoints require auth per openapi.yaml) and §9.4 (no invented behavior). Requires spec entry in `api/openapi.yaml` before implementation. | Yes | Add `/admin/reconcile` to openapi.yaml with admin auth, then implement with guard |
+
+## Wave C — Payload #19 (C-007, C-008)
+
+| ID | Category | Description | Default Used | CEO Action |
+|----|----------|-------------|--------------|------------|
+| F-042 | Wave C | C-007 + C-008 webhook infrastructure — `POST /webhooks/receive` added; `verifySignature` is an HMAC-SHA256 stub that returns `true` when `RRR_WEBHOOK_SECRET` is unset. Real queue wiring deferred to next payload. `WebhookEmitService.emit` logs only. | Yes | Review; wire real ingest queue and full HMAC enforcement when secret is configured |
 | F-039 | Wave C | AuthMiddleware created but not yet registered in `AppModule.configure()`. Wire after confirming which routes need JWT auth — avoids breaking unauthenticated health/docs endpoints. | Yes | Register in AppModule once route scope is confirmed |
 | F-040 | Wave C | C-001 `calculateEarnRate` does not mutate the existing `awardPoints` flow. Callers that want earn-rate-derived point awards must call `calculateEarnRate` first, then pass the result into `awardPoints`/`awardPromotionalPoints`. Integration wiring deferred to next Wave C task. | Yes | Review |
 | F-041 | Wave C | C-002 `validateTierCap` is a standalone validator — not yet called inside `redeemPoints`. Controllers or orchestration services should call it before invoking `redeemPoints` until it is integrated into the redemption flow. | Yes | Review |

@@ -8,6 +8,7 @@ import { WhiteLabelModule } from './white-label/white-label.module';
 import { CreatorGiftingPanelModule } from './creator-gifting-panel/creator-gifting-panel.module';
 import { RedRoomLedgerModule } from './redroom-ledger/redroom-ledger.module';
 import { WalletModule } from './wallets/wallet.module';
+import { WebhookModule } from './webhooks/webhook.module';
 import { HealthController } from './health/health.controller';
 import productionConfig from './config/production.config';
 import appConfig from './config/app.config';
@@ -23,6 +24,7 @@ import appConfig from './config/app.config';
     CreatorGiftingPanelModule,
     RedRoomLedgerModule,
     WalletModule,
+    WebhookModule,
   ],
   controllers: [HealthController],
 })
