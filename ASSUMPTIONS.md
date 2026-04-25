@@ -62,3 +62,14 @@
 - `.env.example` was extended (not replaced) with the Payload #11 `DATABASE_URL` alias; existing security-critical entries (`JWT_SECRET`, `QUEUE_AUTH_SECRET`, `RRR_WEBHOOK_SECRET`, `MONGODB_URI`, `CORS_ORIGINS`, etc.) are preserved per F-021 precedent
 - `/health` is already exposed outside the `api/v1` global prefix (see #283) and continues to return 200
 - OpenAPI docs are already served at `/api/docs` (see #279)
+
+## RRR-WAVE-B-CORE (Payload #12)
+
+- B-001 (`creditPoints` wiring), B-002 (`deductPoints` wiring), and B-006 (MongoDB transaction safety) are now implemented end-to-end
+- New `WalletController` at `src/controllers/wallet.controller.ts` exposes `POST /wallet/credit` and `POST /wallet/deduct` and forwards directly into `LedgerService.creditPoints` / `LedgerService.deductPoints`
+- `WalletModule` (`src/wallets/wallet.module.ts`) is registered in `AppModule`; `LedgerService` is provided via `useFactory` per F-017 to avoid the `Partial<LedgerConfig>` DI token issue
+- `LedgerService.creditPoints` and `LedgerService.deductPoints` accept an optional Mongoose `ClientSession` (the 6th arg) so callers can enlist these writes in an outer transaction. When no session is supplied, the service opens its own via the new private `withTransactionSafety` wrapper
+- `LedgerService.createEntry` accepts an optional `ClientSession` second argument and threads it into `LedgerEntryModel.create([doc], { session })` when provided, so the immutable ledger write participates in the outer transaction
+- `withTransactionSafety` only attempts a transaction when `mongoose.connection.readyState === 1` and falls back to non-transactional execution if the topology rejects transactions (standalone, retryable-writes errors). This keeps unit tests deterministic without a replica set; production must run a replica set for the real transactional path to fire (F-029)
+- Existing balance-validation semantics on `creditPoints` / `deductPoints` (positive-amount check, insufficient-balance rejection, Promotional Bonus bucket via `PROMOTIONAL_AWARD` / `ADMIN_DEBIT` reason codes) are preserved — these were already in place from prior payloads
+- `RedRoomLedgerService.awardPointsWithCompliance` is unchanged; it already uses `LedgerService.creditPoints` and now inherits transaction safety transparently (F-032)

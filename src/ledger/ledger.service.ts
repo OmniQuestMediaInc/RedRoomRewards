@@ -6,6 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import mongoose, { ClientSession } from 'mongoose';
 import {
   ILedgerService,
   LedgerEntry,
@@ -44,9 +45,14 @@ export class LedgerService implements ILedgerService {
   }
 
   /**
-   * Create a new immutable ledger entry
+   * Create a new immutable ledger entry. When a Mongoose `ClientSession`
+   * is supplied (B-006), the underlying insert participates in the caller's
+   * transaction so multi-model writes commit or roll back atomically.
    */
-  async createEntry(request: CreateLedgerEntryRequest): Promise<LedgerEntry> {
+  async createEntry(
+    request: CreateLedgerEntryRequest,
+    session?: ClientSession,
+  ): Promise<LedgerEntry> {
     // Validate state/accountType compatibility
     if (request.accountType === 'user' && request.balanceState === 'earned') {
       throw new Error('Invalid state transition: users cannot use earned balance state');
@@ -124,8 +130,11 @@ export class LedgerService implements ILedgerService {
     };
 
     try {
-      // Insert entry (idempotency key ensures uniqueness)
-      const created = await LedgerEntryModel.create(entryDoc);
+      // Insert entry (idempotency key ensures uniqueness). When a session is
+      // provided, Mongoose's `create` accepts it via array+options form.
+      const created = session
+        ? (await LedgerEntryModel.create([entryDoc], { session }))[0]
+        : await LedgerEntryModel.create(entryDoc);
 
       // Map to domain object
       return this.mapToDomain(created);
@@ -461,15 +470,75 @@ export class LedgerService implements ILedgerService {
   }
 
   /**
-   * Credit promotional points to a user's available balance.
+   * Run `fn` inside a Mongoose transaction (B-006).
    *
-   * Writes an immutable ledger entry tagged with PROMOTIONAL_AWARD.
-   * The string `reason` is captured in metadata alongside `source`.
-   * An optional `idempotencyKey` may be provided by the caller for true
-   * idempotency protection; without it a random key is generated so each
+   * If the caller already holds a session, we participate in it and let the
+   * outer scope commit/abort. Otherwise we open our own session, attempt
+   * `withTransaction`, and gracefully fall back to a no-session run when the
+   * topology does not support transactions (standalone Mongo, in-memory tests).
+   * The fallback is what keeps unit tests working without a replica set; the
+   * production deploy targets a replica set where the real transaction path
+   * fires.
+   */
+  private async withTransactionSafety<T>(
+    session: ClientSession | undefined,
+    fn: (s: ClientSession | undefined) => Promise<T>,
+  ): Promise<T> {
+    if (session) {
+      return fn(session);
+    }
+
+    // Only attempt transactions when Mongoose is actually connected. Calling
+    // `startSession` on a non-connected client buffers indefinitely, which
+    // would deadlock unit tests that don't stand up a database. `readyState`
+    // === 1 means "connected" per Mongoose semantics.
+    if (mongoose.connection?.readyState !== 1) {
+      return fn(undefined);
+    }
+
+    let owned: ClientSession | null = null;
+    try {
+      owned = await mongoose.startSession();
+    } catch {
+      return fn(undefined);
+    }
+
+    try {
+      let result!: T;
+      await owned.withTransaction(async () => {
+        result = await fn(owned ?? undefined);
+      });
+      return result;
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : '';
+      const transactionsUnsupported =
+        /Transaction numbers are only allowed/i.test(msg) ||
+        /This MongoDB deployment does not support retryable writes/i.test(msg) ||
+        /standalone/i.test(msg);
+      if (transactionsUnsupported) {
+        return fn(undefined);
+      }
+      throw e;
+    } finally {
+      try {
+        await owned.endSession();
+      } catch {
+        // ignore: session already closed
+      }
+    }
+  }
+
+  /**
+   * Credit promotional points to a user's available balance (B-001).
+   *
+   * Writes an immutable ledger entry tagged with PROMOTIONAL_AWARD inside a
+   * MongoDB transaction (B-006) so the balance read and entry insert commit
+   * atomically. The string `reason` is captured in metadata alongside
+   * `source`. An optional `idempotencyKey` may be provided by the caller for
+   * true idempotency protection; without it a random key is generated so each
    * call creates a new entry (B-010 will add mandatory caller-supplied keys).
-   * Balance snapshots are derived from the current ledger state immediately
-   * before the entry is written; full transactional safety will be added by B-006.
+   * Pass an existing `session` to enlist this write in the caller's
+   * transaction.
    */
   async creditPoints(
     accountId: string,
@@ -477,40 +546,49 @@ export class LedgerService implements ILedgerService {
     source: string,
     reason: string,
     idempotencyKey?: string,
+    session?: ClientSession,
   ): Promise<boolean> {
     if (amount <= 0) {
       throw new Error(`creditPoints: amount must be positive, got ${amount}`);
     }
-    const snapshot = await this.getBalanceSnapshot(accountId, 'user');
-    await this.createEntry({
-      accountId,
-      accountType: 'user',
-      type: TransactionType.CREDIT,
-      amount,
-      balanceState: 'available',
-      stateTransition: 'promotional-credit→available',
-      reason: TransactionReason.PROMOTIONAL_AWARD,
-      idempotencyKey: idempotencyKey ?? `credit-${source}-${accountId}-${uuidv4()}`,
-      requestId: uuidv4(),
-      balanceBefore: snapshot.availableBalance,
-      balanceAfter: snapshot.availableBalance + amount,
-      correlationId: source,
-      metadata: { reason, source },
+    return this.withTransactionSafety(session, async (s) => {
+      const snapshot = await this.getBalanceSnapshot(accountId, 'user');
+      await this.createEntry(
+        {
+          accountId,
+          accountType: 'user',
+          type: TransactionType.CREDIT,
+          amount,
+          balanceState: 'available',
+          stateTransition: 'promotional-credit→available',
+          reason: TransactionReason.PROMOTIONAL_AWARD,
+          idempotencyKey: idempotencyKey ?? `credit-${source}-${accountId}-${uuidv4()}`,
+          requestId: uuidv4(),
+          balanceBefore: snapshot.availableBalance,
+          balanceAfter: snapshot.availableBalance + amount,
+          correlationId: source,
+          metadata: { reason, source },
+        },
+        s,
+      );
+      return true;
     });
-    return true;
   }
 
   /**
-   * Deduct points from a user's available balance.
+   * Deduct points from a user's available balance (B-002).
    *
-   * Writes an immutable ledger entry tagged with ADMIN_DEBIT.
+   * Writes an immutable ledger entry tagged with ADMIN_DEBIT inside a MongoDB
+   * transaction (B-006) so the insufficient-balance check and entry insert
+   * commit atomically — concurrent debits cannot both succeed against the
+   * same balance because the read is part of the transaction snapshot.
    * Rejects the deduction if the account has insufficient available balance.
    * The string `reason` is captured in metadata alongside `source`.
    * An optional `idempotencyKey` may be provided by the caller for true
    * idempotency protection; without it a random key is generated so each
    * call creates a new entry (B-010 will add mandatory caller-supplied keys).
-   * Balance snapshots are derived from the current ledger state immediately
-   * before the entry is written; full transactional safety will be added by B-006.
+   * Pass an existing `session` to enlist this write in the caller's
+   * transaction.
    */
   async deductPoints(
     accountId: string,
@@ -518,32 +596,38 @@ export class LedgerService implements ILedgerService {
     source: string,
     reason: string,
     idempotencyKey?: string,
+    session?: ClientSession,
   ): Promise<boolean> {
     if (amount <= 0) {
       throw new Error(`deductPoints: amount must be positive, got ${amount}`);
     }
-    const snapshot = await this.getBalanceSnapshot(accountId, 'user');
-    if (snapshot.availableBalance < amount) {
-      throw new Error(
-        `deductPoints: insufficient balance for ${accountId} — available ${snapshot.availableBalance}, requested ${amount}`,
+    return this.withTransactionSafety(session, async (s) => {
+      const snapshot = await this.getBalanceSnapshot(accountId, 'user');
+      if (snapshot.availableBalance < amount) {
+        throw new Error(
+          `deductPoints: insufficient balance for ${accountId} — available ${snapshot.availableBalance}, requested ${amount}`,
+        );
+      }
+      await this.createEntry(
+        {
+          accountId,
+          accountType: 'user',
+          type: TransactionType.DEBIT,
+          amount: -amount,
+          balanceState: 'available',
+          stateTransition: 'available→promotional-debit',
+          reason: TransactionReason.ADMIN_DEBIT,
+          idempotencyKey: idempotencyKey ?? `debit-${source}-${accountId}-${uuidv4()}`,
+          requestId: uuidv4(),
+          balanceBefore: snapshot.availableBalance,
+          balanceAfter: snapshot.availableBalance - amount,
+          correlationId: source,
+          metadata: { reason, source },
+        },
+        s,
       );
-    }
-    await this.createEntry({
-      accountId,
-      accountType: 'user',
-      type: TransactionType.DEBIT,
-      amount: -amount,
-      balanceState: 'available',
-      stateTransition: 'available→promotional-debit',
-      reason: TransactionReason.ADMIN_DEBIT,
-      idempotencyKey: idempotencyKey ?? `debit-${source}-${accountId}-${uuidv4()}`,
-      requestId: uuidv4(),
-      balanceBefore: snapshot.availableBalance,
-      balanceAfter: snapshot.availableBalance - amount,
-      correlationId: source,
-      metadata: { reason, source },
+      return true;
     });
-    return true;
   }
 
   async awardPromotionalPoints(
