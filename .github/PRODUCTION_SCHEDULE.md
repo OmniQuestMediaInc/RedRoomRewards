@@ -86,6 +86,19 @@
 
 ---
 
+## WAVE D — Observability + Final Production Hardening
+
+| ID      | Task                                                                                                                                         | Status | Merge SHA |
+| :------ | :------------------------------------------------------------------------------------------------------------------------------------------- | :----- | :-------- |
+| D-001   | Structured logging — replace ad-hoc `console.*` with `pino` logger; `src/lib/logger.ts`; wired into app bootstrap                           | DONE   | 954bc1c   |
+| D-002   | Rate-limit middleware — `express-rate-limit` ^8; per-tenant configurable; wired into `AppModule`                                             | DONE   | 954bc1c   |
+| D-003   | Tenant-scope CI guard — `scripts/ci/tenant-id-scope-check.js`; allowlist at `scripts/ci/tenant-id-allowlist.json`; wired into `ci.yml`      | DONE   | 954bc1c   |
+| D-005   | Health check enhancement — `/health` returns DB connectivity + version; liveness + readiness probes                                          | DONE   | 954bc1c   |
+| D-006   | FraudSignalService + WebhookEmitService — final Wave C deliverables landed; Wave C closed                                                   | DONE   | 6018f1d   |
+| D-FINAL | Payload #26 — FINAL PRODUCTION DEPLOYMENT: fix garbled `webhook-emit.service.ts`; exclude example file from tsc; `npm run build` clean; 449 tests / 46 suites all pass | DONE   | 55384c9   |
+
+---
+
 ## INVARIANTS (non-negotiable, always enforced)
 
 - LedgerService is append-only — no update/delete primitives ever
