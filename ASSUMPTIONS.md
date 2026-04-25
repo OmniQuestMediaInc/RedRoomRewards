@@ -109,6 +109,58 @@
 - B-016 unknown narrowing applied — replaced all `any` casts in `src/ledger/ledger.service.ts` (query objects, mapToDomain casts, sort object) with typed inline interfaces or explicit enum casts; updated `storeIdempotencyResult` in `src/ledger/types.ts` from `result: any` to `result: unknown`; updated `WalletServiceError.details` and `IdempotencyConflictError` constructor in `src/services/types/error.types.ts` from `any` to `unknown`
 - Wave B now complete — 41 test suites, 429 tests all pass; pre-existing build error in `src/api/receipt-endpoint.example.ts:144` (Type narrowing on union) is unrelated to these changes
 
+## Wave C Continuation — Payload #20 (C-009, C-010, C-011)
+
+- C-009 `CrossMerchantExchangeService`: Payload #20 proposed a stub using the `MerchantPairConfig`
+  model with camelCase field names. A production-quality implementation already exists at
+  `src/services/cross-merchant-exchange.service.ts` (correct snake_case fields, `.lean()`,
+  `superseded_at: null` active-row filter, CEO Decision B4 1:1 default). The existing service and
+  its comprehensive spec at `src/services/cross-merchant-exchange.service.spec.ts` fully satisfy
+  the C-009 charter task. The payload stub was not installed.
+
+- C-010 `TierEvaluationService`: Payload #20 cannot be installed as specified — three blocking
+  model conflicts exist: (1) `LoyaltyAccount` has no `lifetime_points` (or `lifetimePoints`) field;
+  (2) `rrr_member_tier` is typed as `RrrMemberTier` (`PLATINUM | GOLD | SILVER | MEMBER | GUEST`),
+  incompatible with the `RED_*` tier values used in the payload; (3) `WebhookEmitService` does not
+  exist in the repository. Per coding doctrine §9.4, these gaps require a spec change before
+  implementation. See FLAG F-042.
+
+- C-011 `SettlementService`: Payload #20 proposed a stub that creates a `SettlementRecord`.
+  A proper `SettlementRecord` model was added at `src/db/models/settlement-record.model.ts`
+  and the service installed at `src/services/settlement.service.ts`. `total_redeemed` aggregation
+  is stubbed at 0 pending the B-011 reconciliation job wiring. Unit tests added.
+
+## Wave C Continuation — Payload #18 (C-003, C-005, C-006)
+
+- C-003 `PointExpirationService` + `SpendOrderConfig` wiring: Payload #18 proposed a stub replacement
+  (`console.log` only). The existing `src/services/point-expiration.service.ts` is a complete
+  production implementation with ledger integration, optimistic-locking wallet debit, idempotency
+  keys, and batch processing. The stub was not installed to avoid downgrading the implementation.
+  `src/services/__tests__/point-expiration.service.comprehensive.spec.ts` covers the existing service.
+
+- C-005 `TenantScopeMiddleware`: Payload #18 proposed a stub using untyped `any` parameters.
+  `src/middleware/tenant-scope.middleware.ts` already has a properly-typed implementation
+  (`Request & { tenantId?: string; queryOptions?: Record<string, unknown> }`, `Response`,
+  `NextFunction`). The stub was not installed. Registration in `AppModule.configure()` is still
+  deferred until the auth guard that populates `req.tenantId` is in place (see F-034).
+
+- C-006 `ReconcileController` (remove feature flag, use auth middleware): Payload #18 proposed
+  a `@Post('admin/reconcile')` endpoint with no auth guard and no entry in `api/openapi.yaml`.
+  Coding doctrine §9.2 requires all endpoints to have authentication per the OpenAPI spec;
+  §9.4 prohibits creating endpoints not described in the spec. The file was not installed.
+  The endpoint must be specced in `api/openapi.yaml` with appropriate auth before implementation.
+
+## Wave C — Payload #19 (C-007 + C-008)
+
+- C-007 webhook receive infrastructure added: `src/webhooks/webhook-receive.controller.ts`,
+  `src/webhooks/webhook-receive.service.ts`. `POST /webhooks/receive` accepts inbound events,
+  verifies HMAC-SHA256 signature (stub returns true when `RRR_WEBHOOK_SECRET` is unset),
+  and deduplicates via `IdempotencyService` using operation `'webhook_receive'` and tenant
+  scope `'system'`. Real ingest-worker queue wiring is deferred to a future payload.
+- C-008 webhook emit service stubbed: `src/webhooks/webhook-emit.service.ts` logs and returns
+  true. Full outbound POST + HMAC + retry logic deferred to the next payload.
+- `WebhookModule` registered in `AppModule`. `IdempotencyService` provided via `useFactory`
+  (no `@Injectable()` on the class) per the existing F-017 factory pattern.
 ## Wave C Start (Payload #17 — C-001, C-002, C-004)
 
 - C-001: `calculateEarnRate` added to `PointAccrualService` — queries active `EarnRateConfigModel` row for the given tenant/merchant/tier/event combination; applies `base_points_per_unit * inferno_multiplier * amount`; honours CEO Decision D3 (Diamond Concierge zero-earn). Existing `awardPoints`/`deductFromAvailable` methods are unchanged.
