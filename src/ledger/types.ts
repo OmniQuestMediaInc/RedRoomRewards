@@ -314,7 +314,7 @@ export interface ILedgerService {
   /**
    * Get a specific ledger entry by ID
    */
-  getEntry(entryId: string): Promise<LedgerEntry | null>;
+  getEntry(entryId: string, tenantId?: string): Promise<LedgerEntry | null>;
 
   /**
    * Get balance snapshot at a point in time
@@ -323,6 +323,7 @@ export interface ILedgerService {
     accountId: string,
     accountType: 'user' | 'model',
     asOf?: Date,
+    tenantId?: string,
   ): Promise<BalanceSnapshot>;
 
   /**

@@ -6,31 +6,8 @@
       "file": "src/ledger/ledger.service.ts",
       "line": 152,
       "model": "LedgerEntryModel",
-      "method": "findOne"
-    },
-    {
-      "file": "src/ledger/ledger.service.ts",
-      "line": 229,
-      "model": "LedgerEntryModel",
-      "method": "find"
-    },
-    {
-      "file": "src/ledger/ledger.service.ts",
-      "line": 230,
-      "model": "LedgerEntryModel",
-      "method": "countDocuments"
-    },
-    {
-      "file": "src/ledger/ledger.service.ts",
-      "line": 248,
-      "model": "LedgerEntryModel",
-      "method": "findOne"
-    },
-    {
-      "file": "src/ledger/ledger.service.ts",
-      "line": 277,
-      "model": "LedgerEntryModel",
-      "method": "find"
+      "method": "findOne",
+      "_note": "idempotencyKey is globally unique (UUID); tenant scoping not possible without adding tenant_id to CreateLedgerEntryRequest (follow-up ticket)"
     },
     {
       "file": "src/services/admin-ops.service.ts",
@@ -52,27 +29,31 @@
     },
     {
       "file": "src/services/point-accrual.service.ts",
-      "line": 160,
+      "line": 161,
       "model": "WalletModel",
-      "method": "findOne"
+      "method": "findOne",
+      "_note": "WalletModel has no tenant_id field; scoping requires schema migration (follow-up ticket)"
     },
     {
       "file": "src/services/point-accrual.service.ts",
-      "line": 176,
+      "line": 177,
       "model": "WalletModel",
-      "method": "findOneAndUpdate"
+      "method": "findOneAndUpdate",
+      "_note": "WalletModel has no tenant_id field; scoping requires schema migration (follow-up ticket)"
     },
     {
       "file": "src/services/point-accrual.service.ts",
-      "line": 397,
+      "line": 445,
       "model": "WalletModel",
-      "method": "findOne"
+      "method": "findOne",
+      "_note": "WalletModel has no tenant_id field; scoping requires schema migration (follow-up ticket)"
     },
     {
       "file": "src/services/point-accrual.service.ts",
-      "line": 412,
+      "line": 460,
       "model": "WalletModel",
-      "method": "findOneAndUpdate"
+      "method": "findOneAndUpdate",
+      "_note": "WalletModel has no tenant_id field; scoping requires schema migration (follow-up ticket)"
     },
     {
       "file": "src/services/point-expiration.service.ts",
@@ -268,3 +249,4 @@
     }
   ]
 }
+
