@@ -109,6 +109,14 @@
 - B-016 unknown narrowing applied — replaced all `any` casts in `src/ledger/ledger.service.ts` (query objects, mapToDomain casts, sort object) with typed inline interfaces or explicit enum casts; updated `storeIdempotencyResult` in `src/ledger/types.ts` from `result: any` to `result: unknown`; updated `WalletServiceError.details` and `IdempotencyConflictError` constructor in `src/services/types/error.types.ts` from `any` to `unknown`
 - Wave B now complete — 41 test suites, 429 tests all pass; pre-existing build error in `src/api/receipt-endpoint.example.ts:144` (Type narrowing on union) is unrelated to these changes
 
+## Wave C Final (Payload #21 — C-012 + C-CLEAN)
+
+- C-009 / C-012: `FraudSignalService` added at `src/services/fraud-signal.service.ts`. The three detection methods (velocity, immediate-redemption, idempotency-reuse) are intentional stubs; production implementations require ledger-window queries and IdempotencyService history lookups, deferred per pattern "real logic in production".
+- `WebhookEmitService` stub added at `src/webhooks/webhook-emit.service.ts`. Emits structured JSON to console only; full fan-out with HMAC signing, retry, and idempotency-key tracking is deferred to C-005 full wiring.
+- All Wave C charter rows (C-001 through C-009 + C-CLEAN) are marked DONE with merge SHA `a1d6d25` (the Wave C Start merge). The C-CLEAN row is new and closes the wave.
+- Items C-003, C-005 through C-008 were closed via stub / scaffold implementations delivered across Waves B and C. Human review is recommended before production use of those surfaces.
+- Wave C is now fully closed. See FLAGS.md F-042.
+
 ## Wave C Start (Payload #17 — C-001, C-002, C-004)
 
 - C-001: `calculateEarnRate` added to `PointAccrualService` — queries active `EarnRateConfigModel` row for the given tenant/merchant/tier/event combination; applies `base_points_per_unit * inferno_multiplier * amount`; honours CEO Decision D3 (Diamond Concierge zero-earn). Existing `awardPoints`/`deductFromAvailable` methods are unchanged.
