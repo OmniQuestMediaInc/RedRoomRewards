@@ -363,10 +363,11 @@ describe('LedgerService', () => {
         exec: jest.fn().mockResolvedValue({ pointsIdempotencyKey: 'test-key' }),
       });
 
-      const result = await service.checkIdempotency('test-key', 'credit');
+      const result = await service.checkIdempotency('test-key', 'credit', 'tenant-1');
 
       expect(result).toBe(true);
       expect(IdempotencyRecordModel.findOne).toHaveBeenCalledWith({
+        tenant_id: { $eq: 'tenant-1' },
         pointsIdempotencyKey: { $eq: 'test-key' },
         eventScope: { $eq: 'credit' },
       });
@@ -378,7 +379,7 @@ describe('LedgerService', () => {
         exec: jest.fn().mockResolvedValue(null),
       });
 
-      const result = await service.checkIdempotency('new-key', 'debit');
+      const result = await service.checkIdempotency('new-key', 'debit', 'tenant-1');
 
       expect(result).toBe(false);
     });

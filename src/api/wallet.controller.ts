@@ -53,6 +53,7 @@ export interface DeductPointsRequest {
   metadata?: Record<string, unknown>;
   idempotencyKey: string;
   requestId: string;
+  tenantId: string;
 }
 
 /**
@@ -64,6 +65,7 @@ export interface CreditPointsRequest {
   metadata?: Record<string, unknown>;
   idempotencyKey: string;
   requestId: string;
+  tenantId: string;
 }
 
 /**
@@ -173,6 +175,7 @@ export class WalletController {
       reason,
       idempotencyKey: request.idempotencyKey,
       requestId: request.requestId,
+      tenantId: request.tenantId,
       metadata: request.metadata,
     });
 
@@ -269,6 +272,7 @@ export class WalletController {
       reason,
       idempotencyKey: request.idempotencyKey,
       requestId: request.requestId,
+      tenantId: request.tenantId,
       metadata: request.metadata,
     });
 

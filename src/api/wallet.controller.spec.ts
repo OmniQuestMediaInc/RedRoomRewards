@@ -112,6 +112,7 @@ describe('WalletController', () => {
         reason: 'admin_debit',
         idempotencyKey: 'idem-123',
         requestId: 'req-123',
+        tenantId: 'tenant-test',
       };
 
       const response = await controller.deductPoints('user-123', request);
@@ -131,6 +132,7 @@ describe('WalletController', () => {
         reason: 'admin_debit',
         idempotencyKey: 'idem-456',
         requestId: 'req-456',
+        tenantId: 'tenant-test',
       };
 
       await expect(controller.deductPoints('user-123', request)).rejects.toThrow(
@@ -144,6 +146,7 @@ describe('WalletController', () => {
         reason: 'admin_debit',
         idempotencyKey: 'idem-789',
         requestId: 'req-789',
+        tenantId: 'tenant-test',
       };
 
       await expect(controller.deductPoints('user-123', request)).rejects.toThrow(
@@ -164,6 +167,7 @@ describe('WalletController', () => {
         metadata: { itemId: 'item-123', category: 'premium' },
         idempotencyKey: 'idem-meta',
         requestId: 'req-meta',
+        tenantId: 'tenant-test',
       };
 
       const response = await controller.deductPoints('user-789', request);
@@ -227,6 +231,7 @@ describe('WalletController', () => {
         reason: 'admin_debit',
         idempotencyKey: 'idem-dup',
         requestId: 'req-duplicate',
+        tenantId: 'tenant-test',
       };
 
       const response = await controller.deductPoints('user-123', request);
@@ -249,6 +254,7 @@ describe('WalletController', () => {
         reason: 'admin_debit',
         idempotencyKey: 'idem-record',
         requestId: 'req-record',
+        tenantId: 'tenant-test',
       };
 
       await controller.deductPoints('user-123', request);
@@ -290,6 +296,7 @@ describe('WalletController', () => {
         reason: 'user_signup_bonus',
         idempotencyKey: 'idem-credit-123',
         requestId: 'req-credit-123',
+        tenantId: 'tenant-test',
       };
 
       const response = await controller.creditPoints('user-123', request);
@@ -309,6 +316,7 @@ describe('WalletController', () => {
         reason: 'admin_credit',
         idempotencyKey: 'idem-neg',
         requestId: 'req-neg',
+        tenantId: 'tenant-test',
       };
 
       await expect(controller.creditPoints('user-456', request)).rejects.toThrow(
@@ -322,6 +330,7 @@ describe('WalletController', () => {
         reason: 'admin_credit',
         idempotencyKey: 'idem-zero',
         requestId: 'req-zero',
+        tenantId: 'tenant-test',
       };
 
       await expect(controller.creditPoints('user-456', request)).rejects.toThrow(
@@ -341,6 +350,7 @@ describe('WalletController', () => {
         reason: 'referral_bonus',
         idempotencyKey: 'idem-ref',
         requestId: 'req-ref',
+        tenantId: 'tenant-test',
       };
 
       const response = await controller.creditPoints('user-ref', request);
@@ -405,6 +415,7 @@ describe('WalletController', () => {
         reason: 'user_signup_bonus',
         idempotencyKey: 'idem-credit-dup',
         requestId: 'req-duplicate',
+        tenantId: 'tenant-test',
       };
 
       const response = await controller.creditPoints('user-123', request);
@@ -427,6 +438,7 @@ describe('WalletController', () => {
         reason: 'user_signup_bonus',
         idempotencyKey: 'idem-credit-record',
         requestId: 'req-credit-record',
+        tenantId: 'tenant-test',
       };
 
       await controller.creditPoints('user-123', request);

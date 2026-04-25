@@ -390,8 +390,13 @@ describe('LedgerService - Comprehensive Tests', () => {
           exec: jest.fn().mockResolvedValue([{ balanceState: 'available', balanceAfter: 100 }]),
         });
 
-      // Act — positional args: (accountId, accountType, dateRange)
-      const report = await ledgerService.generateReconciliationReport(accountId, 'user', dateRange);
+      // Act — positional args: (accountId, accountType, dateRange, tenantId)
+      const report = await ledgerService.generateReconciliationReport(
+        accountId,
+        'user',
+        dateRange,
+        'tenant-1',
+      );
 
       // Assert — ReconciliationReport fields: totalCredits, totalDebits, reconciled, difference
       expect(report.totalCredits).toBe(100);
@@ -428,10 +433,15 @@ describe('LedgerService - Comprehensive Tests', () => {
         });
 
       // Act
-      const report = await ledgerService.generateReconciliationReport('user-123', 'user', {
-        start: startDate,
-        end: endDate,
-      });
+      const report = await ledgerService.generateReconciliationReport(
+        'user-123',
+        'user',
+        {
+          start: startDate,
+          end: endDate,
+        },
+        'tenant-1',
+      );
 
       // Assert
       expect(report.totalCredits).toBe(100);
