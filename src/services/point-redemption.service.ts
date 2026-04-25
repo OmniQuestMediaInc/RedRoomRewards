@@ -12,6 +12,7 @@
 
 import { IWalletService } from './types';
 import { EscrowHoldRequest, TransactionReason } from '../wallets/types';
+import { TierCapConfigModel } from '../db/models/tier-cap-config.model';
 
 /**
  * Request to redeem points for a feature
@@ -256,6 +257,52 @@ export class PointRedemptionService {
         performanceType,
       },
     });
+  }
+
+  /**
+   * Validate a redemption amount against the active tier cap (C-002).
+   *
+   * Looks up the active `TierCapConfig` row for the tenant/merchant/tier combination
+   * and checks that `redemptionAmount` does not exceed
+   * `(redemption_cap_pct / 100) * transactionValue`.
+   *
+   * CEO Decision B5: No platform defaults — each merchant must configure a cap row
+   * before redemptions are allowed.
+   *
+   * @param tenantId         Tenant identifier
+   * @param merchantId       Merchant identifier
+   * @param tierName         Loyalty tier name
+   * @param transactionValue Full transaction value against which the cap percentage is applied
+   * @param redemptionAmount Points the user wants to redeem
+   * @throws Error when no active cap config exists for the given parameters
+   * @throws Error when redemptionAmount exceeds the tier cap
+   */
+  async validateTierCap(
+    tenantId: string,
+    merchantId: string,
+    tierName: string,
+    transactionValue: number,
+    redemptionAmount: number,
+  ): Promise<void> {
+    const capConfig = await TierCapConfigModel.findOne({
+      tenant_id: { $eq: tenantId },
+      merchant_id: { $eq: merchantId },
+      tier_name: { $eq: tierName },
+      superseded_at: null,
+    }).sort({ effective_at: -1 });
+
+    if (!capConfig) {
+      throw new Error(
+        `No active tier cap config for tenant=${tenantId} merchant=${merchantId} tier=${tierName}`,
+      );
+    }
+
+    const maxAllowed = (capConfig.redemption_cap_pct / 100) * transactionValue;
+    if (redemptionAmount > maxAllowed) {
+      throw new Error(
+        `Redemption amount ${redemptionAmount} exceeds tier cap of ${capConfig.redemption_cap_pct}% (${maxAllowed}) for tier ${tierName}`,
+      );
+    }
   }
 
   /**

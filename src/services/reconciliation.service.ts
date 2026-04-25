@@ -37,23 +37,25 @@ export class ReconciliationService {
   /**
    * Reconcile all ledger entries for a user account (accountType = 'user').
    *
-   * @param userId - The user account ID to reconcile.
+   * @param userId   - The user account ID to reconcile.
+   * @param tenantId - Tenant scope for the reconciliation query.
    * @returns ReconciliationResult — `balanced` is false when a discrepancy
    *   is found. The caller is responsible for raising an alert;
    *   this service never auto-corrects balances.
    */
-  async reconcileUser(userId: string): Promise<ReconciliationResult> {
-    return this.reconcileAccount(userId, 'user');
+  async reconcileUser(userId: string, tenantId: string): Promise<ReconciliationResult> {
+    return this.reconcileAccount(userId, 'user', tenantId);
   }
 
   /**
    * Reconcile all ledger entries for a model account (accountType = 'model').
    *
-   * @param modelId - The model account ID to reconcile.
+   * @param modelId  - The model account ID to reconcile.
+   * @param tenantId - Tenant scope for the reconciliation query.
    * @returns ReconciliationResult
    */
-  async reconcileModel(modelId: string): Promise<ReconciliationResult> {
-    return this.reconcileAccount(modelId, 'model');
+  async reconcileModel(modelId: string, tenantId: string): Promise<ReconciliationResult> {
+    return this.reconcileAccount(modelId, 'model', tenantId);
   }
 
   // ─── private ─────────────────────────────────────────────────────────────
@@ -61,14 +63,20 @@ export class ReconciliationService {
   private async reconcileAccount(
     accountId: string,
     accountType: 'user' | 'model',
+    tenantId: string,
   ): Promise<ReconciliationResult> {
     const now = new Date();
     const epoch = new Date(0); // full history
 
-    const report = await this.ledger.generateReconciliationReport(accountId, accountType, {
-      start: epoch,
-      end: now,
-    });
+    const report = await this.ledger.generateReconciliationReport(
+      accountId,
+      accountType,
+      {
+        start: epoch,
+        end: now,
+      },
+      tenantId,
+    );
 
     if (!report.reconciled) {
       // RECON_MISMATCH — never auto-correct; surface for human review.

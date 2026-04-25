@@ -96,7 +96,7 @@
 | F-037 | FilterQuery / Mongoose 9 | `FilterQuery<T>` is not exported by Mongoose 9.x. B-014 and B-016 queries were typed with explicit inline object types instead. | Yes | No action needed — typed correctly for Mongoose 9 |
 | F-038 | FeatureActionData index signature | Changed `[key: string]: any` to `[key: string]: unknown` in FeatureActionData (services/types/service.types.ts) as part of B-016. Callers that relied on the any escape hatch may need explicit casts if they add non-unknown index properties. | Yes | Confirm no downstream breakage |
 
-## Wave C Continuation — Payload #18 (C-003, C-005, C-006)
+## Wave C Start (Payload #17 — C-001, C-002, C-004)
 
 | ID | Category | Description | Default Used | CEO Action |
 |----|----------|-------------|--------------|------------|
@@ -109,3 +109,6 @@
 | ID | Category | Description | Default Used | CEO Action |
 |----|----------|-------------|--------------|------------|
 | F-042 | Wave C | C-007 + C-008 webhook infrastructure — `POST /webhooks/receive` added; `verifySignature` is an HMAC-SHA256 stub that returns `true` when `RRR_WEBHOOK_SECRET` is unset. Real queue wiring deferred to next payload. `WebhookEmitService.emit` logs only. | Yes | Review; wire real ingest queue and full HMAC enforcement when secret is configured |
+| F-039 | Wave C | AuthMiddleware created but not yet registered in `AppModule.configure()`. Wire after confirming which routes need JWT auth — avoids breaking unauthenticated health/docs endpoints. | Yes | Register in AppModule once route scope is confirmed |
+| F-040 | Wave C | C-001 `calculateEarnRate` does not mutate the existing `awardPoints` flow. Callers that want earn-rate-derived point awards must call `calculateEarnRate` first, then pass the result into `awardPoints`/`awardPromotionalPoints`. Integration wiring deferred to next Wave C task. | Yes | Review |
+| F-041 | Wave C | C-002 `validateTierCap` is a standalone validator — not yet called inside `redeemPoints`. Controllers or orchestration services should call it before invoking `redeemPoints` until it is integrated into the redemption flow. | Yes | Review |
