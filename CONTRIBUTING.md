@@ -1,6 +1,7 @@
 # Contributing to RedRoomRewards
 
-Thank you for your interest in contributing to RedRoomRewards! This document provides guidelines and instructions for contributing to this project.
+Thank you for your interest in contributing to RedRoomRewards! This document
+provides guidelines and instructions for contributing to this project.
 
 ---
 
@@ -21,7 +22,8 @@ Thank you for your interest in contributing to RedRoomRewards! This document pro
 
 ### Our Pledge
 
-We are committed to providing a welcoming and inclusive experience for everyone. We expect all contributors to:
+We are committed to providing a welcoming and inclusive experience for everyone.
+We expect all contributors to:
 
 - Be respectful and considerate
 - Accept constructive criticism gracefully
@@ -37,7 +39,8 @@ We are committed to providing a welcoming and inclusive experience for everyone.
 
 ### Enforcement
 
-Instances of unacceptable behavior may be reported to the project maintainers. All complaints will be reviewed and investigated promptly and fairly.
+Instances of unacceptable behavior may be reported to the project maintainers.
+All complaints will be reviewed and investigated promptly and fairly.
 
 ---
 
@@ -54,6 +57,7 @@ Instances of unacceptable behavior may be reported to the project maintainers. A
 ### Setting Up Development Environment
 
 1. **Fork the Repository**
+
    ```bash
    # Fork via GitHub UI, then clone your fork
    git clone https://github.com/YOUR_USERNAME/RedRoomRewards.git
@@ -61,16 +65,19 @@ Instances of unacceptable behavior may be reported to the project maintainers. A
    ```
 
 2. **Add Upstream Remote**
+
    ```bash
    git remote add upstream https://github.com/OmniQuestMedia/RedRoomRewards.git
    ```
 
 3. **Install Dependencies** (when package.json exists)
+
    ```bash
    npm install
    ```
 
 4. **Configure Environment**
+
    ```bash
    cp .env.example .env
    # Edit .env with your local configuration
@@ -86,8 +93,10 @@ Instances of unacceptable behavior may be reported to the project maintainers. A
 
 Before contributing, please read:
 
-- **[.github/copilot-instructions.md](.github/copilot-instructions.md)** - Core development rules (§9 Coding Doctrine)
-- **[docs/UNIVERSAL_ARCHITECTURE.md](docs/UNIVERSAL_ARCHITECTURE.md)** - Architectural principles
+- **[.github/copilot-instructions.md](.github/copilot-instructions.md)** - Core
+  development rules (§9 Coding Doctrine)
+- **[docs/UNIVERSAL_ARCHITECTURE.md](docs/UNIVERSAL_ARCHITECTURE.md)** -
+  Architectural principles
 - **[SECURITY.md](SECURITY.md)** - Security policy
 - **[api/openapi.yaml](api/openapi.yaml)** - API contract
 
@@ -115,6 +124,7 @@ git checkout -b fix/your-bug-fix
 ```
 
 **Branch Naming Convention**:
+
 - `copilot/<directive-id>` — Copilot agent branches (auto-created)
 - `claude/<directive-id>` — Claude Code agent branches (auto-created)
 - `feature/<short-name>` — Human-authored features
@@ -126,18 +136,21 @@ git checkout -b fix/your-bug-fix
 Follow these principles:
 
 **Minimal Changes**:
+
 - Change only what's necessary for your task
 - Don't refactor unrelated code
 - Preserve existing working code
 - Keep PRs focused on a single concern
 
 **Code Quality**:
+
 - Use TypeScript strict mode
 - No `any` types without justification
 - Follow existing patterns in the codebase
 - Write self-documenting code
 
 **Security**:
+
 - Validate all inputs server-side
 - Use environment variables for secrets
 - Never commit credentials
@@ -146,12 +159,14 @@ Follow these principles:
 ### 4. Test Your Changes
 
 **Required Tests**:
+
 - Unit tests for all new functions
 - Integration tests for API endpoints
 - Edge case tests for financial logic
 - All existing tests must still pass
 
 **Run Tests**:
+
 ```bash
 npm test                    # Run all tests
 npm run test:unit          # Unit tests only
@@ -162,6 +177,7 @@ npm run test:coverage      # With coverage report
 **Financial Logic Testing**:
 
 If your changes affect ledger, wallets, earn, or redeem:
+
 - ✅ Test all code paths
 - ✅ Test edge cases (zero, negative, boundaries)
 - ✅ Test idempotency (duplicate requests)
@@ -178,7 +194,8 @@ npm run format            # Format code
 
 ### 6. Commit Your Changes
 
-Use the **RRR commit prefix enum** (see `.github/copilot-instructions.md` §9 "Coding Doctrine"):
+Use the **RRR commit prefix enum** (see `.github/copilot-instructions.md` §9
+"Coding Doctrine"):
 
 ```bash
 git add .
@@ -190,7 +207,7 @@ git commit -m "API: implement GET /wallets/{userId} endpoint"
 **RRR Prefix Enum** (these are the ONLY valid prefixes):
 
 | Prefix | Scope                                                      |
-|--------|-----------------------------------------------------------|
+| ------ | ---------------------------------------------------------- |
 | FIZ    | Financial Integrity Zone — ledger, wallet, balance, escrow |
 | DB     | Database models, Mongoose schemas, indexes                 |
 | API    | Controllers, routes, OpenAPI contract                      |
@@ -201,9 +218,11 @@ git commit -m "API: implement GET /wallets/{userId} endpoint"
 | TEST   | Test files only                                            |
 | CHORE  | Maintenance, cleanup, non-code tasks                       |
 
-> **Do NOT use** `feat`, `fix`, `docs`, `refactor`, or other Conventional Commits prefixes — they are not valid in RRR.
+> **Do NOT use** `feat`, `fix`, `docs`, `refactor`, or other Conventional
+> Commits prefixes — they are not valid in RRR.
 
 **FIZ-scoped commits** require additional fields in the commit body:
+
 ```bash
 FIZ: prevent race condition in ledger balance updates
 REASON: concurrent earn requests could double-credit
@@ -212,6 +231,7 @@ CORRELATION_ID: rrr-fiz-20260417-001
 ```
 
 **Good Examples**:
+
 ```bash
 API: add POST /earn endpoint with idempotency
 FIZ: prevent race condition in transaction creation
@@ -231,8 +251,9 @@ git merge origin/main
 
 **If conflicts occur:**
 
-1. **`package-lock.json`** — Do NOT manually edit. Accept either side, then
-   run `npm install` to regenerate:
+1. **`package-lock.json`** — Do NOT manually edit. Accept either side, then run
+   `npm install` to regenerate:
+
    ```bash
    git checkout --theirs package-lock.json
    npm install
@@ -241,14 +262,15 @@ git merge origin/main
 
 2. **Source files (`.ts`, `.js`)** — Resolve manually. Open each conflicted
    file, look for `<<<<<<<` markers, pick the correct code, remove markers:
+
    ```bash
    git diff --name-only --diff-filter=U   # list conflicted files
    # edit each file, then:
    git add <resolved-file>
    ```
 
-3. **Markdown / YAML config** — Resolve manually. Check that the result is
-   valid YAML or Markdown after resolution.
+3. **Markdown / YAML config** — Resolve manually. Check that the result is valid
+   YAML or Markdown after resolution.
 
 4. **Finalize the merge:**
    ```bash
@@ -271,6 +293,7 @@ git push origin feature/your-feature-name
 ### TypeScript Guidelines
 
 **Type Safety**:
+
 ```typescript
 // ✅ Good: Explicit types
 function earnPoints(request: EarnRequest): Promise<TransactionResponse> {
@@ -284,6 +307,7 @@ function earnPoints(request: any): Promise<any> {
 ```
 
 **Validation**:
+
 ```typescript
 // ✅ Good: Validate inputs
 if (!request.userId || typeof request.userId !== 'string') {
@@ -295,6 +319,7 @@ const wallet = await getWallet(request.userId); // Not validated
 ```
 
 **Error Handling**:
+
 ```typescript
 // ✅ Good: Proper error handling
 try {
@@ -316,6 +341,7 @@ try {
 ### Architectural Patterns
 
 **Ledger-First**:
+
 ```typescript
 // ✅ Good: Create transaction, then update balance
 const transaction = await ledger.createTransaction({
@@ -323,7 +349,7 @@ const transaction = await ledger.createTransaction({
   amount,
   type: 'credit',
   reason,
-  idempotencyKey
+  idempotencyKey,
 });
 const wallet = await wallets.updateBalance(userId, transaction);
 
@@ -333,6 +359,7 @@ await wallet.save();
 ```
 
 **Idempotency**:
+
 ```typescript
 // ✅ Good: Check for duplicate requests
 const existing = await findByIdempotencyKey(idempotencyKey);
@@ -389,7 +416,7 @@ describe('EarnPoints', () => {
         userId: 'user123',
         amount: 100,
         reason: 'test_award',
-        idempotencyKey: 'key123'
+        idempotencyKey: 'key123',
       };
 
       const result = await earnPoints(request);
@@ -400,19 +427,21 @@ describe('EarnPoints', () => {
     });
 
     it('should handle duplicate requests idempotently', async () => {
-      const request = { /* ... */ };
-      
+      const request = {
+        /* ... */
+      };
+
       const result1 = await earnPoints(request);
       const result2 = await earnPoints(request); // Same idempotency key
-      
+
       expect(result1.transaction.id).toBe(result2.transaction.id);
     });
   });
 
   describe('error handling', () => {
     it('should reject negative amounts', async () => {
-      const request = { userId: 'user123', amount: -100, /* ... */ };
-      
+      const request = { userId: 'user123', amount: -100 /* ... */ };
+
       await expect(earnPoints(request)).rejects.toThrow(ValidationError);
     });
   });
@@ -434,6 +463,7 @@ npm test -- --coverage                 # With coverage
 ### Before Submitting
 
 **Checklist**:
+
 - [ ] Code follows style guidelines (linter passes)
 - [ ] Self-review completed
 - [ ] Comments added for complex logic
@@ -446,6 +476,7 @@ npm test -- --coverage                 # With coverage
 ### Creating the PR
 
 1. **Push to your fork**:
+
    ```bash
    git push origin feature/your-feature-name
    ```
@@ -460,29 +491,35 @@ npm test -- --coverage                 # With coverage
 
 ```markdown
 ## Summary
+
 Brief description of what this PR does and why.
 
 ## Changes
+
 - List of specific changes made
 - Another change
 - One more change
 
 ## Testing
+
 - [ ] Unit tests added/updated
 - [ ] Integration tests added/updated
 - [ ] Manual testing performed
 - [ ] All tests passing
 
 ## Security Considerations
+
 - Server-side validation: Yes/No
 - Idempotency: Yes/No/N/A
 - Authentication required: Yes/No/N/A
 - Sensitive data handling: Details if applicable
 
 ## Breaking Changes
+
 None / [Description of breaking changes and migration path]
 
 ## References
+
 - Issue #123
 - Related to API contract: /api/openapi.yaml
 - Spec: /docs/specs/feature-spec.md
@@ -517,6 +554,7 @@ None / [Description of breaking changes and migration path]
 **Do NOT** open public issues for security vulnerabilities.
 
 **Instead**:
+
 - Email: <security@omniquestmedia.com> (or appropriate contact)
 - Include: Detailed description, steps to reproduce, impact assessment
 - See: [SECURITY.md](SECURITY.md) for full process
@@ -543,33 +581,45 @@ None / [Description of breaking changes and migration path]
 
 ### Where to Ask
 
-- **General Questions**: [GitHub Discussions](https://github.com/OmniQuestMedia/RedRoomRewards/discussions)
-- **Bug Reports**: [GitHub Issues](https://github.com/OmniQuestMedia/RedRoomRewards/issues)
+- **General Questions**:
+  [GitHub Discussions](https://github.com/OmniQuestMedia/RedRoomRewards/discussions)
+- **Bug Reports**:
+  [GitHub Issues](https://github.com/OmniQuestMedia/RedRoomRewards/issues)
 - **Security Issues**: <security@omniquestmedia.com>
 
 ### Documentation
 
-- **Architecture**: [docs/UNIVERSAL_ARCHITECTURE.md](docs/UNIVERSAL_ARCHITECTURE.md)
+- **Architecture**:
+  [docs/UNIVERSAL_ARCHITECTURE.md](docs/UNIVERSAL_ARCHITECTURE.md)
 - **API Contract**: [api/openapi.yaml](api/openapi.yaml)
-- **Development Rules**: [.github/copilot-instructions.md](.github/copilot-instructions.md) (§9 Coding Doctrine)
+- **Development Rules**:
+  [.github/copilot-instructions.md](.github/copilot-instructions.md) (§9 Coding
+  Doctrine)
 
 ---
 
 ## License
 
-By contributing, you agree that your contributions will be licensed under the MIT License. See [LICENSE](LICENSE) for details.
+By contributing, you agree that your contributions will be licensed under the
+MIT License. See [LICENSE](LICENSE) for details.
 
 ---
 
 ## Acknowledgments
 
-Thank you for contributing to RedRoomRewards! Your efforts help build a secure, reliable loyalty platform.
+Thank you for contributing to RedRoomRewards! Your efforts help build a secure,
+reliable loyalty platform.
 
 **Key Resources**:
-- [.github/copilot-instructions.md](.github/copilot-instructions.md) - Mandatory reading (§9 Coding Doctrine)
-- [docs/UNIVERSAL_ARCHITECTURE.md](docs/UNIVERSAL_ARCHITECTURE.md) - Architecture guide
+
+- [.github/copilot-instructions.md](.github/copilot-instructions.md) - Mandatory
+  reading (§9 Coding Doctrine)
+- [docs/UNIVERSAL_ARCHITECTURE.md](docs/UNIVERSAL_ARCHITECTURE.md) -
+  Architecture guide
 - [SECURITY.md](SECURITY.md) - Security policy
 
 ---
 
-**Questions?** Open a [GitHub Discussion](https://github.com/OmniQuestMedia/RedRoomRewards/discussions) or review our documentation.
+**Questions?** Open a
+[GitHub Discussion](https://github.com/OmniQuestMedia/RedRoomRewards/discussions)
+or review our documentation.

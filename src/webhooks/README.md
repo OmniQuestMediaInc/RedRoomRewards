@@ -5,6 +5,7 @@
 ## Purpose
 
 The webhooks module handles:
+
 - Incoming webhook requests from external systems
 - Webhook signature verification
 - Event processing and routing
@@ -20,10 +21,12 @@ The webhooks module handles:
 ## Future Implementation
 
 When implementing this module:
+
 - Create webhook controllers and handlers
 - Implement signature verification
 - Add idempotency key handling
 - Include retry logic with exponential backoff
 - Add webhook event logging
 
-See `/.github/copilot-instructions.md` §9 "Coding Doctrine" for security and idempotency requirements.
+See `/.github/copilot-instructions.md` §9 "Coding Doctrine" for security and
+idempotency requirements.

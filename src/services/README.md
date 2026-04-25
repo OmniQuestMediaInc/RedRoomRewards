@@ -5,6 +5,7 @@
 ## Purpose
 
 The services module contains:
+
 - Business logic and domain services for point management
 - Orchestration of ledger and wallet operations
 - Point accrual, redemption, expiration, and admin operations
@@ -18,6 +19,7 @@ The services module contains:
 Handles all point earning operations with full audit trails.
 
 **Operations:**
+
 - `awardPoints()` - Generic point award with validation
 - `awardSignupBonus()` - New user signup rewards
 - `awardReferralBonus()` - Referral program rewards
@@ -25,6 +27,7 @@ Handles all point earning operations with full audit trails.
 - `adminCreditPoints()` - Administrative credits with reason tracking
 
 **Key Features:**
+
 - Validates earning reasons and amounts
 - Creates immutable ledger entries
 - Supports point expiration metadata
@@ -36,12 +39,14 @@ Handles all point earning operations with full audit trails.
 Orchestrates point redemptions by holding funds in escrow.
 
 **Operations:**
+
 - `redeemPoints()` - Generic redemption with validation
 - `redeemForChipMenu()` - Chip menu action purchases
 - `redeemForSpinWheel()` - Spin wheel play requests
 - `redeemForPerformance()` - Performance request holds
 
 **Key Features:**
+
 - Balance validation before redemption
 - Holds funds in escrow (not settlement)
 - Settlement/refund handled by queue service
@@ -53,11 +58,13 @@ Orchestrates point redemptions by holding funds in escrow.
 Processes automatic point expiration based on configured rules.
 
 **Operations:**
+
 - `processUserExpiration()` - Expire points for single user
 - `processBatchExpiration()` - Batch processing for scheduled jobs
 - `getUsersWithExpiringPoints()` - Get users for warning notifications
 
 **Key Features:**
+
 - Queries ledger for expired credit entries
 - Creates debit entries for expirations
 - Supports grace period configuration
@@ -69,12 +76,14 @@ Processes automatic point expiration based on configured rules.
 Provides privileged administrative operations with full audit trails.
 
 **Operations:**
+
 - `manualAdjustment()` - Credit or debit points with reason
 - `processRefund()` - Issue refunds to users
 - `correctBalance()` - Fix balance discrepancies
 - `getAdminOperationHistory()` - Audit trail of admin operations
 
 **Key Features:**
+
 - Admin authorization validation (role-based)
 - Full audit context (admin ID, username, IP, reason)
 - Configurable adjustment limits
@@ -100,7 +109,7 @@ Provides privileged administrative operations with full audit trails.
 PointAccrualService
   └─ Uses: LedgerService, WalletModel
 
-PointRedemptionService  
+PointRedemptionService
   └─ Uses: WalletService (for escrow holds)
 
 PointExpirationService
@@ -159,11 +168,13 @@ const adminService = new AdminOpsService(ledgerService, walletService, {
 ## Testing
 
 All services have comprehensive unit tests:
+
 - `point-accrual.service.spec.ts` - Earning operations
 - `point-redemption.service.spec.ts` - Redemption flows
 - (Additional test files to be added)
 
 Run tests:
+
 ```bash
 npm test -- services/
 ```
@@ -171,6 +182,7 @@ npm test -- services/
 ## Future Enhancements
 
 When extending this module:
+
 - Add integration with external systems via adapters
 - Implement queue service for settlement authority
 - Add rate limiting and throttling

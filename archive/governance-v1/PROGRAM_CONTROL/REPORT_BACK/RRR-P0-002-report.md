@@ -2,14 +2,14 @@
 
 ## STATUS: SUCCESS
 
-| Field         | Value                                                          |
-|---------------|----------------------------------------------------------------|
-| DIRECTIVE     | RRR-P0-002                                                     |
-| DATE          | 2026-04-17                                                     |
-| AGENT         | GitHub Copilot Task Agent                                      |
-| BRANCH        | copilot/fizrrr-p0-002                                          |
-| HEAD          | (see commit after push)                                        |
-| PR_NUMBER     | TBD — fiz/rrr-p0-002                                           |
+| Field     | Value                     |
+| --------- | ------------------------- |
+| DIRECTIVE | RRR-P0-002                |
+| DATE      | 2026-04-17                |
+| AGENT     | GitHub Copilot Task Agent |
+| BRANCH    | copilot/fizrrr-p0-002     |
+| HEAD      | (see commit after push)   |
+| PR_NUMBER | TBD — fiz/rrr-p0-002      |
 
 ---
 
@@ -69,27 +69,34 @@ npm run lint → exit 0 (17 pre-existing warnings, 0 errors — all unrelated to
 ### Changes Made
 
 1. **`src/services/idempotency.service.ts`** (NEW)
-   - `IIdempotencyService` interface: `checkKey(key, tenantId, operation)` and `recordKey(key, tenantId, operation, result)`
+   - `IIdempotencyService` interface: `checkKey(key, tenantId, operation)` and
+     `recordKey(key, tenantId, operation, result)`
    - `IdempotencyService` class backed by `IdempotencyRecordModel`
-   - Uses `${tenantId}:${operation}` as `eventScope` (composite unique index scope)
+   - Uses `${tenantId}:${operation}` as `eventScope` (composite unique index
+     scope)
    - SHA-256 hash of serialized result stored in `resultHash` field
 
 2. **`src/services/index.ts`**
-   - Added `export * from './idempotency.service'` 
+   - Added `export * from './idempotency.service'`
 
 3. **`src/api/wallet.controller.ts`**
    - `IIdempotencyService` injected into constructor (second argument)
    - `BadRequestError` class added (statusCode 400) for missing key rejection
    - `factory function` `createWalletController` updated to accept both services
-   - `deductPoints`: validates `idempotencyKey` truthy (→ 400), calls `checkKey` before any service call, returns cached result on hit, calls `recordKey` after successful mutation
+   - `deductPoints`: validates `idempotencyKey` truthy (→ 400), calls `checkKey`
+     before any service call, returns cached result on hit, calls `recordKey`
+     after successful mutation
    - `creditPoints`: same pattern with `wallet_credit` operation name
 
 4. **`src/api/wallet.controller.spec.ts`**
    - Mock `IIdempotencyService` injected (cache miss by default)
-   - 4 new tests added: missing key → 400 (credit + deduct), cached result on key hit (credit + deduct), `recordKey` called after success (credit + deduct)
+   - 4 new tests added: missing key → 400 (credit + deduct), cached result on
+     key hit (credit + deduct), `recordKey` called after success (credit +
+     deduct)
    - All original tests preserved and passing
 
 ### Hard Rules Compliance
+
 - ✅ Wallet balance logic from RRR-P0-001 not modified
 - ✅ No method signature changes beyond service injection
 - ✅ No new endpoints added

@@ -9,9 +9,12 @@
 
 ## Overview
 
-This document defines comprehensive testing requirements for the wallet and escrow system. Financial logic requires **100% test coverage** and human review before deployment.
+This document defines comprehensive testing requirements for the wallet and
+escrow system. Financial logic requires **100% test coverage** and human review
+before deployment.
 
-**Reference**: See `.github/copilot-instructions.md` §9 (Coding Doctrine) for mandatory review requirements.
+**Reference**: See `.github/copilot-instructions.md` §9 (Coding Doctrine) for
+mandatory review requirements.
 
 ---
 
@@ -28,6 +31,7 @@ This document defines comprehensive testing requirements for the wallet and escr
 ```
 
 **Coverage Requirements**:
+
 - Unit Tests: 100% for wallet/ledger logic
 - Integration Tests: All critical flows
 - E2E Tests: Happy paths and major scenarios
@@ -50,7 +54,7 @@ describe('WalletService', () => {
       const userId = 'user-123';
       const initialBalance = 500;
       const holdAmount = 100;
-      
+
       // Act
       const result = await walletService.holdInEscrow({
         userId,
@@ -59,73 +63,79 @@ describe('WalletService', () => {
         queueItemId: 'queue-123',
         featureType: 'chip_menu',
         idempotencyKey: uuidv4(),
-        requestId: uuidv4()
+        requestId: uuidv4(),
       });
-      
+
       // Assert
       expect(result.previousBalance).toBe(initialBalance);
       expect(result.newAvailableBalance).toBe(400);
       expect(result.escrowBalance).toBe(100);
     });
-    
+
     it('should reject if insufficient balance', async () => {
       // Arrange
       const userId = 'user-123';
       const availableBalance = 50;
       const holdAmount = 100;
-      
+
       // Act & Assert
-      await expect(walletService.holdInEscrow({
-        userId,
-        amount: holdAmount,
-        // ... other fields
-      })).rejects.toThrow(InsufficientBalanceError);
+      await expect(
+        walletService.holdInEscrow({
+          userId,
+          amount: holdAmount,
+          // ... other fields
+        }),
+      ).rejects.toThrow(InsufficientBalanceError);
     });
-    
+
     it('should handle idempotent requests', async () => {
       // Arrange
       const idempotencyKey = uuidv4();
-      
+
       // Act
       const result1 = await walletService.holdInEscrow({
         // ... fields
-        idempotencyKey
+        idempotencyKey,
       });
-      
+
       const result2 = await walletService.holdInEscrow({
         // ... same fields
-        idempotencyKey
+        idempotencyKey,
       });
-      
+
       // Assert
       expect(result1.transactionId).toBe(result2.transactionId);
       expect(result1.escrowId).toBe(result2.escrowId);
       // Balance only deducted once
     });
-    
+
     it('should handle optimistic lock conflicts', async () => {
       // Simulate concurrent updates
       // Should retry and succeed
     });
-    
+
     it('should create immutable ledger entry', async () => {
       // Verify ledger entry created
       // Verify entry is immutable
     });
-    
+
     it('should validate amount is positive', async () => {
-      await expect(walletService.holdInEscrow({
-        // ... fields
-        amount: 0
-      })).rejects.toThrow(ValidationError);
-      
-      await expect(walletService.holdInEscrow({
-        // ... fields
-        amount: -100
-      })).rejects.toThrow(ValidationError);
+      await expect(
+        walletService.holdInEscrow({
+          // ... fields
+          amount: 0,
+        }),
+      ).rejects.toThrow(ValidationError);
+
+      await expect(
+        walletService.holdInEscrow({
+          // ... fields
+          amount: -100,
+        }),
+      ).rejects.toThrow(ValidationError);
     });
   });
-  
+
   describe('settleEscrow', () => {
     it('should transfer from escrow to model earned', async () => {
       // Arrange
@@ -133,92 +143,101 @@ describe('WalletService', () => {
       const modelId = 'model-456';
       const amount = 100;
       const authorization = generateMockAuthorization();
-      
+
       // Act
-      const result = await walletService.settleEscrow({
-        escrowId,
-        modelId,
-        amount,
-        queueItemId: 'queue-123',
-        reason: TransactionReason.PERFORMANCE_COMPLETED,
-        authorizationToken: authorization.token,
-        idempotencyKey: uuidv4(),
-        requestId: uuidv4()
-      }, authorization);
-      
+      const result = await walletService.settleEscrow(
+        {
+          escrowId,
+          modelId,
+          amount,
+          queueItemId: 'queue-123',
+          reason: TransactionReason.PERFORMANCE_COMPLETED,
+          authorizationToken: authorization.token,
+          idempotencyKey: uuidv4(),
+          requestId: uuidv4(),
+        },
+        authorization,
+      );
+
       // Assert
       expect(result.settledAmount).toBe(100);
       expect(result.modelEarnedBalance).toBeGreaterThan(0);
-      
+
       // Verify escrow status changed to "settled"
       const escrow = await escrowService.getEscrow(escrowId);
       expect(escrow.status).toBe(EscrowStatus.SETTLED);
     });
-    
+
     it('should reject if escrow not found', async () => {
-      await expect(walletService.settleEscrow({
-        escrowId: 'nonexistent',
-        // ... fields
-      })).rejects.toThrow(EscrowNotFoundError);
+      await expect(
+        walletService.settleEscrow({
+          escrowId: 'nonexistent',
+          // ... fields
+        }),
+      ).rejects.toThrow(EscrowNotFoundError);
     });
-    
+
     it('should reject if escrow already settled', async () => {
       // First settlement succeeds
       // Second settlement with same escrowId should fail
     });
-    
+
     it('should reject invalid authorization', async () => {
-      await expect(walletService.settleEscrow({
-        // ... fields
-        authorizationToken: 'invalid-token'
-      })).rejects.toThrow(InvalidAuthorizationError);
+      await expect(
+        walletService.settleEscrow({
+          // ... fields
+          authorizationToken: 'invalid-token',
+        }),
+      ).rejects.toThrow(InvalidAuthorizationError);
     });
-    
+
     it('should reject if authorization expired', async () => {
       // Create expired token
       // Attempt settlement
       // Should fail with InvalidAuthorizationError
     });
-    
+
     it('should verify amount matches escrow', async () => {
       // If settlement amount != escrow amount, should fail
     });
   });
-  
+
   describe('refundEscrow', () => {
     it('should return from escrow to user available', async () => {
       // Similar to settleEscrow tests
     });
-    
+
     it('should reject if escrow already refunded', async () => {
       // Duplicate refund attempt should fail
     });
   });
-  
+
   describe('partialSettleEscrow', () => {
     it('should split between refund and settle', async () => {
       const escrowAmount = 100;
       const refundAmount = 30;
       const settleAmount = 70;
-      
+
       const result = await walletService.partialSettleEscrow({
         // ... fields
         refundAmount,
-        settleAmount
+        settleAmount,
       });
-      
+
       expect(result.refundedAmount).toBe(30);
       expect(result.settledAmount).toBe(70);
     });
-    
+
     it('should reject if amounts do not sum to escrow', async () => {
-      await expect(walletService.partialSettleEscrow({
-        // ... fields
-        refundAmount: 40,
-        settleAmount: 70  // Total = 110, but escrow = 100
-      })).rejects.toThrow(ValidationError);
+      await expect(
+        walletService.partialSettleEscrow({
+          // ... fields
+          refundAmount: 40,
+          settleAmount: 70, // Total = 110, but escrow = 100
+        }),
+      ).rejects.toThrow(ValidationError);
     });
-    
+
     it('should reject negative amounts', async () => {
       // Test negative refundAmount
       // Test negative settleAmount
@@ -250,77 +269,77 @@ describe('LedgerService', () => {
         idempotencyKey: uuidv4(),
         requestId: uuidv4(),
         balanceBefore: 500,
-        balanceAfter: 400
+        balanceAfter: 400,
       });
-      
+
       expect(entry.entryId).toBeDefined();
       expect(entry.amount).toBe(100);
-      
+
       // Attempt to modify should fail
       await expect(
-        ledgerService.updateEntry(entry.entryId, { amount: 200 })
+        ledgerService.updateEntry(entry.entryId, { amount: 200 }),
       ).rejects.toThrow();
     });
-    
+
     it('should enforce idempotency', async () => {
       const idempotencyKey = uuidv4();
-      
+
       const entry1 = await ledgerService.createEntry({
         // ... fields
-        idempotencyKey
+        idempotencyKey,
       });
-      
+
       const entry2 = await ledgerService.createEntry({
         // ... same fields
-        idempotencyKey
+        idempotencyKey,
       });
-      
+
       expect(entry1.entryId).toBe(entry2.entryId);
     });
-    
+
     it('should reject invalid state transitions', async () => {
       // Invalid: earned→escrow
       // Invalid: refunded→available
     });
   });
-  
+
   describe('queryEntries', () => {
     it('should filter by account ID', async () => {
       // Create entries for multiple accounts
       // Query for specific account
       // Verify only that account's entries returned
     });
-    
+
     it('should filter by date range', async () => {
       // Query with startDate and endDate
       // Verify results within range
     });
-    
+
     it('should paginate results', async () => {
       // Query with limit and offset
       // Verify pagination works correctly
     });
   });
-  
+
   describe('getBalanceSnapshot', () => {
     it('should calculate balance from ledger', async () => {
       // Create multiple entries
       // Get snapshot
       // Verify calculated balance matches expected
     });
-    
+
     it('should support point-in-time queries', async () => {
       // Get snapshot at past date
       // Verify balance reflects state at that time
     });
   });
-  
+
   describe('generateReconciliationReport', () => {
     it('should detect balance mismatches', async () => {
       // Simulate ledger vs wallet balance mismatch
       // Report should flag discrepancy
     });
-    
+
     it('should show all transactions in range', async () => {
       // Verify report includes all relevant transactions
     });
@@ -357,56 +376,56 @@ describe('Escrow Flow Integration', () => {
       queueItemId: 'queue-123',
       featureType: 'chip_menu',
       idempotencyKey: uuidv4(),
-      requestId: uuidv4()
+      requestId: uuidv4(),
     });
-    
+
     // 2. Create queue item
     const queueItem = await queueService.enqueue({
       userId: 'user-123',
       modelId: 'model-456',
       escrowId: escrowResponse.escrowId,
       amount: 100,
-      featureType: 'chip_menu'
+      featureType: 'chip_menu',
     });
-    
+
     // 3. Start performance
     await queueService.startPerformance(queueItem.queueItemId);
-    
+
     // 4. Finish performance and settle
     const result = await queueService.finishPerformance(
       queueItem.queueItemId,
-      'model-456'
+      'model-456',
     );
-    
+
     // Verify final state
     expect(result.settlement.settledAmount).toBe(100);
-    
+
     const userBalance = await walletService.getUserBalance('user-123');
     expect(userBalance.escrow).toBe(0);
-    
+
     const modelBalance = await walletService.getModelBalance('model-456');
     expect(modelBalance.earned).toBeGreaterThan(0);
-    
+
     // Verify ledger entries created
     const ledgerEntries = await ledgerService.queryEntries({
-      escrowId: escrowResponse.escrowId
+      escrowId: escrowResponse.escrowId,
     });
     expect(ledgerEntries.entries.length).toBeGreaterThan(0);
   });
-  
+
   it('should complete full escrow → refund flow', async () => {
     // Similar to above, but abandon instead of finish
   });
-  
+
   it('should complete partial settlement flow', async () => {
     // Hold 100, refund 30, settle 70
   });
-  
+
   it('should handle concurrent escrow holds', async () => {
     // Multiple simultaneous holds
     // All should succeed without race conditions
   });
-  
+
   it('should handle user disconnect during performance', async () => {
     // Hold escrow
     // Start performance
@@ -430,12 +449,12 @@ describe('Atomic Transactions', () => {
     // Simulate ledger failure during hold
     // Wallet balance should not change
   });
-  
+
   it('should rollback on wallet update failure', async () => {
     // Simulate wallet update failure
     // No ledger entry should be created
   });
-  
+
   it('should rollback on escrow creation failure', async () => {
     // Simulate escrow creation failure
     // Wallet and ledger should rollback
@@ -459,37 +478,39 @@ describe('Idempotency', () => {
       userId: 'user-123',
       amount: 100,
       // ... other fields
-      idempotencyKey
+      idempotencyKey,
     };
-    
+
     const result1 = await walletService.holdInEscrow(request);
     const result2 = await walletService.holdInEscrow(request);
-    
+
     expect(result1).toEqual(result2);
-    
+
     // Verify balance only deducted once
     const balance = await walletService.getUserBalance('user-123');
     expect(balance.available).toBe(initialBalance - 100);
   });
-  
+
   it('should detect request tampering', async () => {
     const idempotencyKey = uuidv4();
-    
+
     // First request
     await walletService.holdInEscrow({
       userId: 'user-123',
       amount: 100,
       // ... fields
-      idempotencyKey
+      idempotencyKey,
     });
-    
+
     // Second request with same key but different amount
-    await expect(walletService.holdInEscrow({
-      userId: 'user-123',
-      amount: 200,  // Changed!
-      // ... fields
-      idempotencyKey
-    })).rejects.toThrow();
+    await expect(
+      walletService.holdInEscrow({
+        userId: 'user-123',
+        amount: 200, // Changed!
+        // ... fields
+        idempotencyKey,
+      }),
+    ).rejects.toThrow();
   });
 });
 ```
@@ -515,7 +536,6 @@ describe('Feature Integration E2E', () => {
     // 6. Model performs action
     // 7. Queue settles escrow
     // 8. Model receives points
-    
     // Verify all steps completed successfully
   });
 
@@ -534,29 +554,33 @@ describe('Feature Integration E2E', () => {
 **File**: `tests/performance/load.test.ts`
 
 **Metrics to Measure**:
+
 - Escrow hold latency (target: <100ms p95)
 - Settlement latency (target: <150ms p95)
 - Throughput (target: 1000+ operations/second)
 - Concurrent operations (target: no deadlocks)
 
 **Test Scenarios**:
+
 ```typescript
 describe('Load Testing', () => {
   it('should handle 1000 concurrent escrow holds', async () => {
     const promises = [];
     for (let i = 0; i < 1000; i++) {
-      promises.push(walletService.holdInEscrow({
-        userId: `user-${i}`,
-        amount: 100,
-        // ... fields
-      }));
+      promises.push(
+        walletService.holdInEscrow({
+          userId: `user-${i}`,
+          amount: 100,
+          // ... fields
+        }),
+      );
     }
-    
+
     const results = await Promise.all(promises);
     expect(results.length).toBe(1000);
     // Verify no failures
   });
-  
+
   it('should maintain consistency under load', async () => {
     // Run many operations
     // Verify all balances reconcile
@@ -570,6 +594,7 @@ describe('Load Testing', () => {
 ### 4.2 Stress Testing
 
 **Test Scenarios**:
+
 - Database connection pool exhaustion
 - High memory usage scenarios
 - Network latency simulation
@@ -588,29 +613,35 @@ describe('Load Testing', () => {
 ```typescript
 describe('Authorization Security', () => {
   it('should reject settlement without queue token', async () => {
-    await expect(walletService.settleEscrow({
-      // ... fields
-      authorizationToken: ''
-    })).rejects.toThrow(InvalidAuthorizationError);
+    await expect(
+      walletService.settleEscrow({
+        // ... fields
+        authorizationToken: '',
+      }),
+    ).rejects.toThrow(InvalidAuthorizationError);
   });
-  
+
   it('should reject tampered authorization token', async () => {
     const token = generateMockToken();
     const tamperedToken = token.slice(0, -5) + 'XXXXX';
-    
-    await expect(walletService.settleEscrow({
-      // ... fields
-      authorizationToken: tamperedToken
-    })).rejects.toThrow(InvalidAuthorizationError);
+
+    await expect(
+      walletService.settleEscrow({
+        // ... fields
+        authorizationToken: tamperedToken,
+      }),
+    ).rejects.toThrow(InvalidAuthorizationError);
   });
-  
+
   it('should reject expired authorization token', async () => {
     const expiredToken = generateExpiredToken();
-    
-    await expect(walletService.settleEscrow({
-      // ... fields
-      authorizationToken: expiredToken
-    })).rejects.toThrow(InvalidAuthorizationError);
+
+    await expect(
+      walletService.settleEscrow({
+        // ... fields
+        authorizationToken: expiredToken,
+      }),
+    ).rejects.toThrow(InvalidAuthorizationError);
   });
 });
 ```
@@ -620,6 +651,7 @@ describe('Authorization Security', () => {
 ### 5.2 Input Validation Tests
 
 **Test Scenarios**:
+
 - SQL injection attempts
 - NoSQL injection attempts
 - XSS in metadata fields
@@ -642,22 +674,22 @@ describe('Edge Cases', () => {
     // User with 0 balance attempts hold
     // Should fail with InsufficientBalanceError
   });
-  
+
   it('should handle minimum amount (0.01)', async () => {
     // Hold 0.01 points
     // Should succeed
   });
-  
+
   it('should handle large amounts', async () => {
     // Hold 1,000,000 points
     // Should succeed
   });
-  
+
   it('should handle rapid successive operations', async () => {
     // Hold, settle, hold, settle rapidly
     // All should succeed
   });
-  
+
   it('should handle wallet not found', async () => {
     // Attempt operation on non-existent wallet
     // Should fail gracefully
@@ -674,6 +706,7 @@ describe('Edge Cases', () => {
 **Purpose**: Ensure no legacy patterns re-introduced
 
 **Test Scenarios**:
+
 - Detect direct balance modifications
 - Detect settlement without queue authority
 - Detect literal chat strings
@@ -691,12 +724,12 @@ describe('Edge Cases', () => {
 export const createTestUser = () => ({
   userId: `user-${uuidv4()}`,
   availableBalance: 1000,
-  escrowBalance: 0
+  escrowBalance: 0,
 });
 
 export const createTestModel = () => ({
   modelId: `model-${uuidv4()}`,
-  earnedBalance: 0
+  earnedBalance: 0,
 });
 
 export const createTestEscrowRequest = (userId: string) => ({
@@ -706,7 +739,7 @@ export const createTestEscrowRequest = (userId: string) => ({
   queueItemId: `queue-${uuidv4()}`,
   featureType: 'chip_menu',
   idempotencyKey: uuidv4(),
-  requestId: uuidv4()
+  requestId: uuidv4(),
 });
 ```
 
@@ -718,7 +751,7 @@ export const createTestEscrowRequest = (userId: string) => ({
 beforeEach(async () => {
   // Clear test database
   await clearDatabase();
-  
+
   // Seed with test data
   await seedTestData();
 });
@@ -769,7 +802,7 @@ jobs:
       - uses: actions/setup-node@v3
       - run: npm install
       - run: npm run test:unit
-      
+
   integration-tests:
     runs-on: ubuntu-latest
     services:
@@ -780,7 +813,7 @@ jobs:
       - uses: actions/setup-node@v3
       - run: npm install
       - run: npm run test:integration
-      
+
   e2e-tests:
     runs-on: ubuntu-latest
     steps:
@@ -847,4 +880,5 @@ npm test -- --watch
 
 ---
 
-**This testing strategy is authoritative. All wallet/escrow code must have comprehensive tests before deployment.**
+**This testing strategy is authoritative. All wallet/escrow code must have
+comprehensive tests before deployment.**

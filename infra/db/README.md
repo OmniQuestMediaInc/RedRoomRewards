@@ -9,6 +9,7 @@ Database connection management and configuration.
 ## Future Implementation
 
 When implementing:
+
 - Configure connection pooling
 - Set up read replicas for scaling
 - Implement connection retry logic
@@ -18,6 +19,7 @@ When implementing:
 ## Technology Stack
 
 Following MERN conventions:
+
 - MongoDB for document storage
 - Mongoose for ODM
 - Connection pooling for performance

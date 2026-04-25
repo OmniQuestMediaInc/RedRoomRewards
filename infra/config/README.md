@@ -9,6 +9,7 @@ Environment-specific application configuration.
 ## Future Implementation
 
 When implementing:
+
 - Create config files for dev, staging, production
 - Use environment variables for sensitive values
 - Never commit secrets or API keys

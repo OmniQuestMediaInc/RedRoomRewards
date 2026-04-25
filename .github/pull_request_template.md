@@ -51,8 +51,10 @@ N/A
 
 <!-- If this PR has merge conflicts with main, resolve them before requesting review. -->
 
-- [ ] Branch is up to date with `main` (`git fetch origin main && git merge origin/main`)
-- [ ] `package-lock.json` conflicts resolved by running `npm install` after merge
+- [ ] Branch is up to date with `main`
+      (`git fetch origin main && git merge origin/main`)
+- [ ] `package-lock.json` conflicts resolved by running `npm install` after
+      merge
 - [ ] No unrelated changes introduced during conflict resolution
 
 ## Breaking Changes

@@ -9,6 +9,7 @@ Database migration scripts for schema versioning and evolution.
 ## Guidelines
 
 When creating migrations:
+
 - Use timestamp-based naming (e.g., `20251215_create_wallets_table.sql`)
 - Include both `up` and `down` migration scripts
 - Test migrations on development and staging first
@@ -22,16 +23,19 @@ For performance, ensure these indexes exist when implementing:
 ### Core Wallet & Ledger Indexes
 
 **wallets collection:**
+
 - `userId` (unique) - Primary lookup
 - `availableBalance` - Balance queries
 - `escrowBalance` - Escrow tracking
 
 **model_wallets collection:**
+
 - `modelId` (unique) - Primary lookup
 - `earnedBalance` - Balance queries
 - `type, earnedBalance` (compound) - Type-based balance queries
 
 **ledger_entries collection:**
+
 - `entryId` (unique) - Primary lookup
 - `idempotencyKey` (unique) - Prevent duplicate transactions
 - `transactionId, timestamp` (compound) - Transaction history
@@ -44,6 +48,7 @@ For performance, ensure these indexes exist when implementing:
 - `timestamp` - Time-based queries and retention
 
 **escrow_items collection:**
+
 - `escrowId` (unique) - Primary lookup
 - `queueItemId` (unique) - One escrow per queue item
 - `userId, status, createdAt` (compound) - User escrow history
@@ -52,18 +57,25 @@ For performance, ensure these indexes exist when implementing:
 - `featureType, status` (compound) - Feature tracking
 
 ### Ingest & DLQ Indexes (M1)
+
 - **ingest_events.eventId** (unique) - Fast idempotency checks
-- **ingest_events.status, ingest_events.nextAttemptAt** (compound) - Worker polling
+- **ingest_events.status, ingest_events.nextAttemptAt** (compound) - Worker
+  polling
 - **dlq_events.eventId** (unique) - Replay lookups
 - **dlq_events.movedToDLQAt** - Replay date range queries
 - **dlq_events.eventType** - Event type filtering for replay
-- **idempotency_records.pointsIdempotencyKey, idempotency_records.eventScope** (compound unique) - Prevent double processing
+- **idempotency_records.pointsIdempotencyKey, idempotency_records.eventScope**
+  (compound unique) - Prevent double processing
 
 ### Reservation & Hold Indexes (M1)
+
 - **points_reservations.reservationId** (unique) - Primary lookup
-- **points_reservations.userId, points_reservations.createdAt** (compound) - User reservation history
-- **points_reservations.status, points_reservations.expiresAt** (compound) - Expiry cleanup job
-- **points_reservations.expiresAt** (TTL index with expireAfterSeconds: 0) - Auto-cleanup
+- **points_reservations.userId, points_reservations.createdAt** (compound) -
+  User reservation history
+- **points_reservations.status, points_reservations.expiresAt** (compound) -
+  Expiry cleanup job
+- **points_reservations.expiresAt** (TTL index with expireAfterSeconds: 0) -
+  Auto-cleanup
 
 ## Index Verification Script
 
@@ -93,33 +105,42 @@ db.points_reservations.getIndexes();
 ## Scaling Guidance (M1 Production Surfaces)
 
 ### Ingest Worker Scaling
+
 - **Expected Load**: 100-1000 events/second
-- **Index Strategy**: Compound index on (status, nextAttemptAt) enables efficient worker polling
+- **Index Strategy**: Compound index on (status, nextAttemptAt) enables
+  efficient worker polling
 - **Monitoring**: Track queue depth and processing latency
 - **Alert Threshold**: Queue depth > 10,000 events or latency > 60 seconds
-- **Scaling Action**: Increase maxConcurrentJobs or deploy additional worker instances
+- **Scaling Action**: Increase maxConcurrentJobs or deploy additional worker
+  instances
 
 ### DLQ & Replay Scaling
+
 - **Expected Load**: < 1% of ingest volume under normal conditions
 - **Index Strategy**: EventId for point lookups, movedToDLQAt for date ranges
 - **Monitoring**: Track DLQ size and replay success rate
 - **Alert Threshold**: DLQ size > 1000 events (indicates systemic issues)
-- **Scaling Action**: Investigate root cause of failures, batch replay with maxEvents limit
+- **Scaling Action**: Investigate root cause of failures, batch replay with
+  maxEvents limit
 
 ### Reservation System Scaling
+
 - **Expected Load**: 10-100 reservations/second
 - **Index Strategy**: Compound indexes for user lookups and status filtering
 - **Monitoring**: Track active reservation count and expiry job performance
 - **Alert Threshold**: Active reservations > 100,000 or expiry job > 10 seconds
-- **Scaling Action**: Implement batch expiry with limits, consider reservation TTL tuning
+- **Scaling Action**: Implement batch expiry with limits, consider reservation
+  TTL tuning
 
 ### Activity Feed (Future M2+)
+
 - **Expected Load**: TBD based on feature requirements
 - **Index Strategy**: userId + timestamp for timeline queries
 - **Monitoring**: Query performance and feed generation latency
 - **Scaling Action**: Implement pagination, caching, or read replicas
 
 ### Partner Admin Operations (Future M2+)
+
 - **Expected Load**: < 100 operations/day (low volume, high importance)
 - **Index Strategy**: Dispute ID, user ID, and status for admin queries
 - **Monitoring**: Track dispute resolution time and fraud flag rates
