@@ -17,3 +17,5 @@ export * from './redroom-ledger.service';
 export * from './tier-engine.service';
 export * from './member.service';
 export * from './merchant.service';
+export * from './cross-merchant-exchange.service';
+export * from './reconciliation.service';

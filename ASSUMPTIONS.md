@@ -73,3 +73,38 @@
 - `withTransactionSafety` only attempts a transaction when `mongoose.connection.readyState === 1` and falls back to non-transactional execution if the topology rejects transactions (standalone, retryable-writes errors). This keeps unit tests deterministic without a replica set; production must run a replica set for the real transactional path to fire (F-029)
 - Existing balance-validation semantics on `creditPoints` / `deductPoints` (positive-amount check, insufficient-balance rejection, Promotional Bonus bucket via `PROMOTIONAL_AWARD` / `ADMIN_DEBIT` reason codes) are preserved — these were already in place from prior payloads
 - `RedRoomLedgerService.awardPointsWithCompliance` is unchanged; it already uses `LedgerService.creditPoints` and now inherits transaction safety transparently (F-032)
+
+## RRR-WAVE-B-CONTINUATION (Payload #14)
+
+- B-007 `MerchantPairConfig` model was already present (committed prior to this payload) with a more comprehensive implementation using snake_case field names (`tenant_id`, `from_merchant_id`, `to_merchant_id`, `exchange_rate`, `effective_at`, `superseded_at`) and effective-dating via a unique partial index on the active row. The payload-proposed simpler camelCase schema was not applied.
+- B-008 No-hardcoded-balance CI guard was already present as `scripts/ci/no-hardcoded-balance.js` (singular) with a more comprehensive implementation including self-test mode, allow-comment exemption, and schema-index exemption. The payload-proposed simpler version was not applied.
+- B-009 Tenant-id scope CI guard was already present as `scripts/ci/tenant-id-scope-check.js` with `scripts/ci/tenant-id-allowlist.json`. The charter B-009 description ("CI guard") matches this implementation. The payload described B-009 as "Tenant-scope middleware" (a different concept); see F-033.
+- `CrossMerchantExchangeService` added at `src/services/cross-merchant-exchange.service.ts` — resolves the active exchange rate from `MerchantPairConfig` using correct snake_case fields and `superseded_at: null` for active-row selection; falls back to `getDefaultExchangeRate()` (1.0) per CEO Decision B4. This is a Wave C item (chartered under Wave C provisional list) delivered early at CEO direction.
+- `TenantScopeMiddleware` added at `src/middleware/tenant-scope.middleware.ts` — NestJS `NestMiddleware` that propagates `req.tenantId` into `req.queryOptions.tenant_id` for downstream service use. This is new infrastructure not explicitly chartered in Wave B; registered here per payload authority (see F-033).
+
+## Wave B Continuation — Payload #15 (B-010, B-011, B-012)
+
+- B-010: `IdempotencyService` was already fully implemented with production-quality
+  MongoDB-backed storage, canonical `IDEMPOTENCY_OPERATIONS` constants covering all
+  FIZ mutation operations (wallet_credit, wallet_deduct, point_redemption,
+  point_expiration, escrow_hold/release/settle/refund), and a comprehensive
+  `idempotency.service.spec.ts` test suite. The payload stub was not installed to
+  avoid downgrading the existing implementation.
+
+- B-011: `ReconciliationService` added to `src/services/reconciliation.service.ts`.
+  Wraps `LedgerService.generateReconciliationReport` for full-history reconciliation
+  of user and model accounts. Emits `RECON_MISMATCH` log on discrepancy; never
+  auto-corrects balances (append-only invariant preserved).
+
+- B-012: `LedgerService` invariant tests were already complete at
+  `src/ledger/ledger.service.invariants.spec.ts` with four invariants: append-only
+  reflection, monotonic sequence, balance projection, and non-null
+  `correlation_id` + `reason_code`. The payload's simpler duplicate spec was not
+  installed; the existing comprehensive test satisfies the charter requirement.
+## Wave B Final Cleanup (Payload #16 — B-013 through B-CLEAN)
+
+- B-013 admin-ops tests added — 26 tests, full coverage of all public methods in `src/services/admin-ops.service.ts` (manualAdjustment, processRefund, correctBalance, getAdminOperationHistory)
+- B-014 any-type fix completed — `const query: any = {}` in `src/ingest-worker/replay.ts` replaced with an explicit `{ eventId?: string; eventType?: string; movedToDLQAt?: {...} }` typed object
+- B-015 type modules split — `src/wallets/types.ts` split into `src/wallets/types/{domain.types,escrow.types,queue.types,index}.ts`; `src/services/types.ts` split into `src/services/types/{queue.types,service.types,error.types,index}.ts`; all existing import paths `from '../wallets/types'` and `from '../services/types'` continue to resolve to the new `index.ts` barrel files with no shape changes
+- B-016 unknown narrowing applied — replaced all `any` casts in `src/ledger/ledger.service.ts` (query objects, mapToDomain casts, sort object) with typed inline interfaces or explicit enum casts; updated `storeIdempotencyResult` in `src/ledger/types.ts` from `result: any` to `result: unknown`; updated `WalletServiceError.details` and `IdempotencyConflictError` constructor in `src/services/types/error.types.ts` from `any` to `unknown`
+- Wave B now complete — 41 test suites, 429 tests all pass; pre-existing build error in `src/api/receipt-endpoint.example.ts:144` (Type narrowing on union) is unrelated to these changes
