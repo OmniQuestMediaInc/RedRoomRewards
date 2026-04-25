@@ -51,3 +51,14 @@
 | F-021 | .env.example contract | Payload #10 shipped a minimal `.env.example`; we appended the GateGuard AV and `SERVICE_BUREAU_ENABLED` vars rather than replacing existing security-critical entries (`JWT_SECRET`, `QUEUE_AUTH_SECRET`, `RRR_WEBHOOK_SECRET`, `MONGODB_URI`, etc.) | Yes | Confirm additive approach or provide authoritative replacement |
 | F-022 | `@nestjs/config` dependency | Payload #10 used `ConfigModule.forRoot()` and `registerAs` without listing the package; installed `@nestjs/config@^4.0.0` to make the imports resolve | Installed exactly as implied | Confirm the pinned version is acceptable |
 | F-023 | OpenAPI docs | README references `/api/docs` but no Swagger module is wired in this payload; payload did not include Swagger setup. Endpoint is not yet live. | No | Decide whether Swagger should be added in a follow-up |
+
+## RRR-DEPLOYMENT-READY (Payload #11)
+
+> Note: Payload #11 re-used the flag id `F-021` already assigned to the additive `.env.example` decision in Payload #10. The new "all components complete" flag is recorded here as `F-024` to avoid collision.
+
+| ID | Category | Description | Default Used | CEO Action |
+|----|----------|-------------|--------------|------------|
+| F-024 | Final payload | All components complete — `app.config.ts`, `DEPLOYMENT-CHECKLIST.md`, additive `.env.example` update, and checklist docs in place | Yes | Approve staging deploy |
+| F-025 | .env contract drift | Payload #11 `.env.example` body specifies `DATABASE_URL=mongodb+srv://...` while the live file already uses `MONGODB_URI`. Added `DATABASE_URL` as an alias entry rather than renaming, to preserve the security-critical keys (`JWT_SECRET`, `QUEUE_AUTH_SECRET`, `RRR_WEBHOOK_SECRET`, `CORS_ORIGINS`, etc.) that Payload #11's minimal body would have removed. | Yes | Confirm alias approach or provide authoritative replacement |
+| F-026 | `app.config.ts` vs `production.config.ts` | Payload #11 introduces `app.config` with `swaggerEnabled`, which duplicates the key already exported by `production.config.ts`. Both are loaded; whichever is read last wins per `ConfigService` semantics (`app` namespace is queried independently from `production`). | Yes | Decide whether to consolidate into a single namespace |
+| F-027 | Coverage thresholds | `npm run test:coverage` is below the 59% global statement/line threshold (56.67% statements / 57.42% lines). This is pre-existing on the baseline (`f68f6ee`, before this payload, measured 56.76% / 57.49%) and is not introduced by Payload #11. `npm test` passes 259/259 and `npm run build` succeeds. | Yes | Backfill tests for low-coverage files (e.g. `wallet.service.ts`, module barrels) in a follow-up payload |
