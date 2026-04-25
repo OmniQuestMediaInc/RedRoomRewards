@@ -103,3 +103,9 @@
 | F-039 | Wave C | C-003 PointExpirationService — payload stub not installed; existing production implementation preserved (ledger debit, optimistic locking, batch, idempotency). Comprehensive spec at `src/services/__tests__/point-expiration.service.comprehensive.spec.ts` satisfies charter. | Yes | Review |
 | F-040 | Wave C | C-005 TenantScopeMiddleware — payload stub not installed; existing typed implementation at `src/middleware/tenant-scope.middleware.ts` preserved. AppModule registration still deferred until auth guard sets req.tenantId (see F-034). | Yes | No action needed |
 | F-041 | Wave C | C-006 ReconcileController — payload proposed `@Post('admin/reconcile')` with no auth guard and no OpenAPI spec entry. Not installed: violates §9.2 (all endpoints require auth per openapi.yaml) and §9.4 (no invented behavior). Requires spec entry in `api/openapi.yaml` before implementation. | Yes | Add `/admin/reconcile` to openapi.yaml with admin auth, then implement with guard |
+
+## Wave C — Payload #19 (C-007, C-008)
+
+| ID | Category | Description | Default Used | CEO Action |
+|----|----------|-------------|--------------|------------|
+| F-042 | Wave C | C-007 + C-008 webhook infrastructure — `POST /webhooks/receive` added; `verifySignature` is an HMAC-SHA256 stub that returns `true` when `RRR_WEBHOOK_SECRET` is unset. Real queue wiring deferred to next payload. `WebhookEmitService.emit` logs only. | Yes | Review; wire real ingest queue and full HMAC enforcement when secret is configured |
