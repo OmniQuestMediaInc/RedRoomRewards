@@ -82,6 +82,25 @@
 - `CrossMerchantExchangeService` added at `src/services/cross-merchant-exchange.service.ts` — resolves the active exchange rate from `MerchantPairConfig` using correct snake_case fields and `superseded_at: null` for active-row selection; falls back to `getDefaultExchangeRate()` (1.0) per CEO Decision B4. This is a Wave C item (chartered under Wave C provisional list) delivered early at CEO direction.
 - `TenantScopeMiddleware` added at `src/middleware/tenant-scope.middleware.ts` — NestJS `NestMiddleware` that propagates `req.tenantId` into `req.queryOptions.tenant_id` for downstream service use. This is new infrastructure not explicitly chartered in Wave B; registered here per payload authority (see F-033).
 
+## Wave B Continuation — Payload #15 (B-010, B-011, B-012)
+
+- B-010: `IdempotencyService` was already fully implemented with production-quality
+  MongoDB-backed storage, canonical `IDEMPOTENCY_OPERATIONS` constants covering all
+  FIZ mutation operations (wallet_credit, wallet_deduct, point_redemption,
+  point_expiration, escrow_hold/release/settle/refund), and a comprehensive
+  `idempotency.service.spec.ts` test suite. The payload stub was not installed to
+  avoid downgrading the existing implementation.
+
+- B-011: `ReconciliationService` added to `src/services/reconciliation.service.ts`.
+  Wraps `LedgerService.generateReconciliationReport` for full-history reconciliation
+  of user and model accounts. Emits `RECON_MISMATCH` log on discrepancy; never
+  auto-corrects balances (append-only invariant preserved).
+
+- B-012: `LedgerService` invariant tests were already complete at
+  `src/ledger/ledger.service.invariants.spec.ts` with four invariants: append-only
+  reflection, monotonic sequence, balance projection, and non-null
+  `correlation_id` + `reason_code`. The payload's simpler duplicate spec was not
+  installed; the existing comprehensive test satisfies the charter requirement.
 ## Wave B Final Cleanup (Payload #16 — B-013 through B-CLEAN)
 
 - B-013 admin-ops tests added — 26 tests, full coverage of all public methods in `src/services/admin-ops.service.ts` (manualAdjustment, processRefund, correctBalance, getAdminOperationHistory)

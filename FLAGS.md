@@ -81,6 +81,13 @@
 | F-034 | TenantScopeMiddleware DI wiring | `TenantScopeMiddleware` is created but not yet registered in `AppModule.configure()` — NestJS middleware registration requires knowing which routes to scope. Wire into `AppModule` when the auth layer that populates `req.tenantId` is in place (Wave C auth task). | Yes | Register middleware in AppModule once auth guard sets req.tenantId |
 | F-035 | CrossMerchantExchangeService module | `CrossMerchantExchangeService` is exported from `src/services/index.ts` but not yet registered in a NestJS module provider array. Add to the appropriate module (e.g. a future `ExchangeModule` or `MerchantModule`) when the service is consumed by a controller. | Yes | Register in NestJS module when first consumed |
 
+## Wave B Continuation — Payload #15 (B-010, B-011, B-012)
+
+| ID | Category | Description | Default Used | CEO Action |
+|----|----------|-------------|--------------|------------|
+| F-036 | Wave B | B-010 IdempotencyService — existing production implementation preserved (MongoDB-backed, 8 operation constants, full test suite). Payload stub not applied. | Yes | Review |
+| F-037 | Wave B | B-011 ReconciliationService — `reconcileUser`/`reconcileModel` use full-history `generateReconciliationReport`; emits RECON_MISMATCH log but never auto-corrects. Not yet wired to a scheduled job or admin endpoint (chartered in B-011 full scope). | Yes | Wire to `npm run reconcile` script and admin endpoint behind feature flag per charter |
+| F-038 | Wave B | B-012 LedgerService invariant tests — existing comprehensive spec at `src/ledger/ledger.service.invariants.spec.ts` (4 invariants, 11 assertions) satisfies charter. Payload's simpler NestJS-DI-based duplicate not installed. | Yes | Review |
 ## Wave B Final Cleanup (Payload #16 — B-013 through B-CLEAN)
 
 | ID | Category | Description | Default Used | CEO Action |
