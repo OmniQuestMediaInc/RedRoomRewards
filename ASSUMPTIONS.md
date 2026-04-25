@@ -109,6 +109,27 @@
 - B-016 unknown narrowing applied — replaced all `any` casts in `src/ledger/ledger.service.ts` (query objects, mapToDomain casts, sort object) with typed inline interfaces or explicit enum casts; updated `storeIdempotencyResult` in `src/ledger/types.ts` from `result: any` to `result: unknown`; updated `WalletServiceError.details` and `IdempotencyConflictError` constructor in `src/services/types/error.types.ts` from `any` to `unknown`
 - Wave B now complete — 41 test suites, 429 tests all pass; pre-existing build error in `src/api/receipt-endpoint.example.ts:144` (Type narrowing on union) is unrelated to these changes
 
+## Wave C Continuation — Payload #20 (C-009, C-010, C-011)
+
+- C-009 `CrossMerchantExchangeService`: Payload #20 proposed a stub using the `MerchantPairConfig`
+  model with camelCase field names. A production-quality implementation already exists at
+  `src/services/cross-merchant-exchange.service.ts` (correct snake_case fields, `.lean()`,
+  `superseded_at: null` active-row filter, CEO Decision B4 1:1 default). The existing service and
+  its comprehensive spec at `src/services/cross-merchant-exchange.service.spec.ts` fully satisfy
+  the C-009 charter task. The payload stub was not installed.
+
+- C-010 `TierEvaluationService`: Payload #20 cannot be installed as specified — three blocking
+  model conflicts exist: (1) `LoyaltyAccount` has no `lifetime_points` (or `lifetimePoints`) field;
+  (2) `rrr_member_tier` is typed as `RrrMemberTier` (`PLATINUM | GOLD | SILVER | MEMBER | GUEST`),
+  incompatible with the `RED_*` tier values used in the payload; (3) `WebhookEmitService` does not
+  exist in the repository. Per coding doctrine §9.4, these gaps require a spec change before
+  implementation. See FLAG F-042.
+
+- C-011 `SettlementService`: Payload #20 proposed a stub that creates a `SettlementRecord`.
+  A proper `SettlementRecord` model was added at `src/db/models/settlement-record.model.ts`
+  and the service installed at `src/services/settlement.service.ts`. `total_redeemed` aggregation
+  is stubbed at 0 pending the B-011 reconciliation job wiring. Unit tests added.
+
 ## Wave C Continuation — Payload #18 (C-003, C-005, C-006)
 
 - C-003 `PointExpirationService` + `SpendOrderConfig` wiring: Payload #18 proposed a stub replacement
