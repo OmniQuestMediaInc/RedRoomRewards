@@ -175,6 +175,12 @@
 - C-002: `validateTierCap` added to `PointRedemptionService` — queries active `TierCapConfigModel` row; validates that `redemptionAmount ≤ (redemption_cap_pct / 100) * transactionValue`; no platform defaults per CEO Decision B5. Existing `redeemPoints` escrow flow is unchanged.
 - C-004: `AuthMiddleware` added at `src/middleware/auth.middleware.ts` — NestJS `NestMiddleware`; extracts Bearer JWT via `jsonwebtoken`; populates `req.tenantId` and `req.userId`; leaves unauthenticated requests for downstream guards to reject. Uses `JWT_SECRET` env var (same key as `AuthService`). Not yet registered in `AppModule.configure()` — see F-039.
 
+## Wave D Continuation (Payload #23 — D-002, D-003, D-006)
+
+- D-002: OpenAPI drift check stub added at `scripts/ci/openapi-drift-check.js` — validates `api/openapi.yaml` exists and exits 0; full schema-diffing implementation deferred until the controller surface is stable.
+- D-003: Reservation flow E2E test added at `src/__tests__/e2e/reservation.e2e.spec.ts` — exercises hold → settle and hold → refund lifecycle using a mocked `WalletService` (escrow operations live on `WalletService`, not `LedgerService`). Full DB-backed E2E requires replica-set test harness tracked as B-006.
+- D-006: `RateLimitMiddleware` added at `src/middleware/rate-limit.middleware.ts` — 60 req/60 s per IP, standard headers, `express-rate-limit` ^8.4.1. Not yet registered in `AppModule.configure()` — wire after confirming route scope.
+- Wave D observability advancing.
 ## Wave D Start (Payload #22 — D-001, D-005)
 
 - D-001 Structured logging with Pino implemented at `src/lib/logger.ts` — JSON output, LOG_LEVEL env override, redacts `password`/`secret`/`token`, base fields `service` + `env`, ISO timestamps. `pino@^10.3.1` added as a production dependency.
