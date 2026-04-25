@@ -228,10 +228,19 @@ export class LedgerService implements ILedgerService {
     const sortOrder = filter.sortOrder === 'asc' ? 1 : -1;
     const sort: Record<string, 1 | -1> = { [sortField]: sortOrder };
 
-    // Execute query
+    // Execute query — include tenant_id inline so B-009 can verify scoping
     const [entries, totalCount] = await Promise.all([
-      LedgerEntryModel.find(query).sort(sort).skip(offset).limit(limit).lean().exec(),
-      LedgerEntryModel.countDocuments(query),
+      LedgerEntryModel.find(
+        filter.tenantId ? { tenant_id: { $eq: filter.tenantId }, ...query } : query,
+      )
+        .sort(sort)
+        .skip(offset)
+        .limit(limit)
+        .lean()
+        .exec(),
+      LedgerEntryModel.countDocuments(
+        filter.tenantId ? { tenant_id: { $eq: filter.tenantId }, ...query } : query,
+      ),
     ]);
 
     // Map results
@@ -247,8 +256,9 @@ export class LedgerService implements ILedgerService {
   /**
    * Get a specific ledger entry by ID
    */
-  async getEntry(entryId: string): Promise<LedgerEntry | null> {
+  async getEntry(entryId: string, tenantId?: string): Promise<LedgerEntry | null> {
     const entry = await LedgerEntryModel.findOne({
+      tenant_id: tenantId ? { $eq: tenantId } : undefined,
       entryId: { $eq: entryId },
     })
       .lean()
@@ -264,6 +274,7 @@ export class LedgerService implements ILedgerService {
     accountId: string,
     accountType: 'user' | 'model',
     asOf?: Date,
+    tenantId?: string,
   ): Promise<BalanceSnapshot> {
     const query: {
       accountId: { $eq: string };
@@ -278,8 +289,13 @@ export class LedgerService implements ILedgerService {
       query.timestamp = { $lte: asOf };
     }
 
-    // Get all entries up to the specified time
-    const entries = await LedgerEntryModel.find(query).sort({ timestamp: 1 }).lean().exec();
+    // Get all entries up to the specified time — include tenant_id inline so B-009 can verify scoping
+    const entries = await LedgerEntryModel.find(
+      tenantId ? { tenant_id: { $eq: tenantId }, ...query } : query,
+    )
+      .sort({ timestamp: 1 })
+      .lean()
+      .exec();
 
     // Calculate balances by state
     const balances: { [key: string]: number } = {
