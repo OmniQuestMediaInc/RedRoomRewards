@@ -52,3 +52,13 @@
 - `HealthController` exposes `GET /api/v1/health` returning service status, timestamp, and uptime
 - `@nestjs/config@^4.0.0` installed as a runtime dependency
 - Engine is ready for staging deployment
+
+## RRR-DEPLOYMENT-READY (Payload #11)
+
+- Final payload completes all external user components
+- Engine is fully wired and ready for staging deployment
+- `src/config/app.config.ts` added and loaded alongside `productionConfig` in `AppModule`
+- `DEPLOYMENT-CHECKLIST.md` captures pre-deploy verification, staging steps, and production go-live tasks
+- `.env.example` was extended (not replaced) with the Payload #11 `DATABASE_URL` alias; existing security-critical entries (`JWT_SECRET`, `QUEUE_AUTH_SECRET`, `RRR_WEBHOOK_SECRET`, `MONGODB_URI`, `CORS_ORIGINS`, etc.) are preserved per F-021 precedent
+- `/health` is already exposed outside the `api/v1` global prefix (see #283) and continues to return 200
+- OpenAPI docs are already served at `/api/docs` (see #279)

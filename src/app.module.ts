@@ -9,10 +9,11 @@ import { CreatorGiftingPanelModule } from './creator-gifting-panel/creator-gifti
 import { RedRoomLedgerModule } from './redroom-ledger/redroom-ledger.module';
 import { HealthController } from './health/health.controller';
 import productionConfig from './config/production.config';
+import appConfig from './config/app.config';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true, load: [productionConfig] }),
+    ConfigModule.forRoot({ isGlobal: true, load: [productionConfig, appConfig] }),
     MemberModule,
     MerchantModule,
     BurnModule,
