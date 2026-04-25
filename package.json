@@ -37,6 +37,7 @@
     "@types/jsonwebtoken": "^9.0.10",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.4.1",
+    "pino": "^10.3.1",
     "reflect-metadata": "^0.2.2",
     "uuid": "^14.0.0"
   },
