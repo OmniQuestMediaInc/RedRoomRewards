@@ -88,3 +88,10 @@
 | F-036 | Wave B | B-010 IdempotencyService — existing production implementation preserved (MongoDB-backed, 8 operation constants, full test suite). Payload stub not applied. | Yes | Review |
 | F-037 | Wave B | B-011 ReconciliationService — `reconcileUser`/`reconcileModel` use full-history `generateReconciliationReport`; emits RECON_MISMATCH log but never auto-corrects. Not yet wired to a scheduled job or admin endpoint (chartered in B-011 full scope). | Yes | Wire to `npm run reconcile` script and admin endpoint behind feature flag per charter |
 | F-038 | Wave B | B-012 LedgerService invariant tests — existing comprehensive spec at `src/ledger/ledger.service.invariants.spec.ts` (4 invariants, 11 assertions) satisfies charter. Payload's simpler NestJS-DI-based duplicate not installed. | Yes | Review |
+## Wave B Final Cleanup (Payload #16 — B-013 through B-CLEAN)
+
+| ID | Category | Description | Default Used | CEO Action |
+|----|----------|-------------|--------------|------------|
+| F-036 | Wave B Final | B-013 to B-016 + B-CLEAN completed. 429 tests pass across 41 suites. Pre-existing build error in receipt-endpoint.example.ts:144 (union type narrowing) not introduced by this payload. | Yes | Review |
+| F-037 | FilterQuery / Mongoose 9 | `FilterQuery<T>` is not exported by Mongoose 9.x. B-014 and B-016 queries were typed with explicit inline object types instead. | Yes | No action needed — typed correctly for Mongoose 9 |
+| F-038 | FeatureActionData index signature | Changed `[key: string]: any` to `[key: string]: unknown` in FeatureActionData (services/types/service.types.ts) as part of B-016. Callers that relied on the any escape hatch may need explicit casts if they add non-unknown index properties. | Yes | Confirm no downstream breakage |

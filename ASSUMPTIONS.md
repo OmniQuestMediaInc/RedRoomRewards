@@ -101,3 +101,10 @@
   reflection, monotonic sequence, balance projection, and non-null
   `correlation_id` + `reason_code`. The payload's simpler duplicate spec was not
   installed; the existing comprehensive test satisfies the charter requirement.
+## Wave B Final Cleanup (Payload #16 — B-013 through B-CLEAN)
+
+- B-013 admin-ops tests added — 26 tests, full coverage of all public methods in `src/services/admin-ops.service.ts` (manualAdjustment, processRefund, correctBalance, getAdminOperationHistory)
+- B-014 any-type fix completed — `const query: any = {}` in `src/ingest-worker/replay.ts` replaced with an explicit `{ eventId?: string; eventType?: string; movedToDLQAt?: {...} }` typed object
+- B-015 type modules split — `src/wallets/types.ts` split into `src/wallets/types/{domain.types,escrow.types,queue.types,index}.ts`; `src/services/types.ts` split into `src/services/types/{queue.types,service.types,error.types,index}.ts`; all existing import paths `from '../wallets/types'` and `from '../services/types'` continue to resolve to the new `index.ts` barrel files with no shape changes
+- B-016 unknown narrowing applied — replaced all `any` casts in `src/ledger/ledger.service.ts` (query objects, mapToDomain casts, sort object) with typed inline interfaces or explicit enum casts; updated `storeIdempotencyResult` in `src/ledger/types.ts` from `result: any` to `result: unknown`; updated `WalletServiceError.details` and `IdempotencyConflictError` constructor in `src/services/types/error.types.ts` from `any` to `unknown`
+- Wave B now complete — 41 test suites, 429 tests all pass; pre-existing build error in `src/api/receipt-endpoint.example.ts:144` (Type narrowing on union) is unrelated to these changes
