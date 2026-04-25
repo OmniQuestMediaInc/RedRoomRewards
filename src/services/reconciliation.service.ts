@@ -11,6 +11,7 @@
  * Human remediation is required for any mismatch surfaced here.
  */
 
+import { Injectable } from '@nestjs/common';
 import { LedgerService } from '../ledger/ledger.service';
 import { ReconciliationReport } from '../ledger/types';
 
@@ -29,6 +30,7 @@ export interface ReconciliationResult {
  * Uses Unix epoch as the range start so the full transaction history is
  * always evaluated, and `new Date()` as the range end.
  */
+@Injectable()
 export class ReconciliationService {
   constructor(private readonly ledger: LedgerService) {}
 
@@ -70,12 +72,17 @@ export class ReconciliationService {
 
     if (!report.reconciled) {
       // RECON_MISMATCH — never auto-correct; surface for human review.
+      // Log as structured JSON so alerting pipelines can parse fields directly.
       console.error(
-        `[RECON_MISMATCH] accountId=${accountId} accountType=${accountType} ` +
-          `difference=${report.difference} ` +
-          `calculatedBalance=${report.calculatedBalance} ` +
-          `actualBalance=${report.actualBalance} ` +
-          `reportedAt=${report.reportedAt.toISOString()}`,
+        JSON.stringify({
+          event: 'RECON_MISMATCH',
+          accountId,
+          accountType,
+          difference: report.difference,
+          calculatedBalance: report.calculatedBalance,
+          actualBalance: report.actualBalance,
+          reportedAt: report.reportedAt.toISOString(),
+        }),
       );
     }
 
