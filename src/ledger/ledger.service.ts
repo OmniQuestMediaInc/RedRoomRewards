@@ -258,7 +258,7 @@ export class LedgerService implements ILedgerService {
    */
   async getEntry(entryId: string, tenantId?: string): Promise<LedgerEntry | null> {
     const entry = await LedgerEntryModel.findOne({
-      tenant_id: tenantId ? { $eq: tenantId } : undefined,
+      ...(tenantId ? { tenant_id: { $eq: tenantId } } : {}),
       entryId: { $eq: entryId },
     })
       .lean()
