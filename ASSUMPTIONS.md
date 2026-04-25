@@ -166,3 +166,10 @@
 - C-001: `calculateEarnRate` added to `PointAccrualService` — queries active `EarnRateConfigModel` row for the given tenant/merchant/tier/event combination; applies `base_points_per_unit * inferno_multiplier * amount`; honours CEO Decision D3 (Diamond Concierge zero-earn). Existing `awardPoints`/`deductFromAvailable` methods are unchanged.
 - C-002: `validateTierCap` added to `PointRedemptionService` — queries active `TierCapConfigModel` row; validates that `redemptionAmount ≤ (redemption_cap_pct / 100) * transactionValue`; no platform defaults per CEO Decision B5. Existing `redeemPoints` escrow flow is unchanged.
 - C-004: `AuthMiddleware` added at `src/middleware/auth.middleware.ts` — NestJS `NestMiddleware`; extracts Bearer JWT via `jsonwebtoken`; populates `req.tenantId` and `req.userId`; leaves unauthenticated requests for downstream guards to reject. Uses `JWT_SECRET` env var (same key as `AuthService`). Not yet registered in `AppModule.configure()` — see F-039.
+
+## Wave D Start (Payload #22 — D-001, D-005)
+
+- D-001 Structured logging with Pino implemented at `src/lib/logger.ts` — JSON output, LOG_LEVEL env override, redacts `password`/`secret`/`token`, base fields `service` + `env`, ISO timestamps. `pino@^10.3.1` added as a production dependency.
+- D-005 Health check enhanced — `GET /health` now returns `status`, `version`, `timestamp`, and a `components` array listing all nine platform domains. Logs each invocation via the structured logger.
+- `src/main.ts` updated — `console.log` startup messages replaced with `logger.info` calls.
+- Wave D observability layer started.
