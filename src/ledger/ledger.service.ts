@@ -83,6 +83,22 @@ export class LedgerService implements ILedgerService {
     const transactionId = request.transactionId || uuidv4();
     const timestamp = new Date();
 
+    // Invariant (B-012): every LedgerEntry carries a non-null
+    // correlation_id and reason_code. `reason` is already required by the
+    // type system. For correlationId, default to the transactionId so
+    // paired entries inside a single transaction share a stable
+    // correlation key; an explicit caller-supplied value wins.
+    const correlationId =
+      request.correlationId && request.correlationId.trim().length > 0
+        ? request.correlationId
+        : transactionId;
+    if (!correlationId || correlationId.trim().length === 0) {
+      throw new Error('createEntry: correlationId is required (invariant B-012)');
+    }
+    if (!request.reason) {
+      throw new Error('createEntry: reason is required (invariant B-012)');
+    }
+
     // Create ledger entry document
     const entryDoc: Partial<ILedgerEntry> = {
       entryId,
@@ -104,7 +120,7 @@ export class LedgerService implements ILedgerService {
       escrowId: request.escrowId,
       queueItemId: request.queueItemId,
       featureType: request.featureType,
-      correlationId: request.correlationId,
+      correlationId,
     };
 
     try {

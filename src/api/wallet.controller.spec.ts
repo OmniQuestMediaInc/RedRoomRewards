@@ -11,11 +11,13 @@ import {
 } from './wallet.controller';
 import { IWalletService } from '../services/types';
 import { IIdempotencyService } from '../services/idempotency.service';
+import { PointAccrualService } from '../services/point-accrual.service';
 
 describe('WalletController', () => {
   let controller: WalletController;
   let mockWalletService: jest.Mocked<IWalletService>;
   let mockIdempotencyService: jest.Mocked<IIdempotencyService>;
+  let mockPointAccrualService: jest.Mocked<PointAccrualService>;
 
   beforeEach(() => {
     // Create mock wallet service
@@ -34,7 +36,19 @@ describe('WalletController', () => {
       recordKey: jest.fn().mockResolvedValue(undefined),
     } as jest.Mocked<IIdempotencyService>;
 
-    controller = new WalletController(mockWalletService, mockIdempotencyService);
+    // Mock PointAccrualService — emulates real service responses so
+    // controller-level wiring tests stay focused on request/response
+    // shape, not on service internals (those have dedicated specs).
+    mockPointAccrualService = {
+      awardPoints: jest.fn(),
+      deductFromAvailable: jest.fn(),
+    } as unknown as jest.Mocked<PointAccrualService>;
+
+    controller = new WalletController(
+      mockWalletService,
+      mockIdempotencyService,
+      mockPointAccrualService,
+    );
   });
 
   describe('getWallet', () => {
@@ -76,6 +90,16 @@ describe('WalletController', () => {
   });
 
   describe('deductPoints', () => {
+    beforeEach(() => {
+      // Default — service decrements 100 from previous-balance 900.
+      mockPointAccrualService.deductFromAvailable.mockImplementation(async (req) => ({
+        transactionId: `txn-${req.idempotencyKey}`,
+        amountAwarded: req.amount,
+        newBalance: 900 - req.amount,
+        timestamp: new Date('2026-01-01T00:00:00.000Z'),
+      }));
+    });
+
     it('should deduct points from a user wallet', async () => {
       mockWalletService.getUserBalance.mockResolvedValue({
         available: 900,
@@ -239,6 +263,21 @@ describe('WalletController', () => {
   });
 
   describe('creditPoints', () => {
+    beforeEach(() => {
+      // Default — service awards `amount` and reports newBalance =
+      // previous + amount; controller computes previous from
+      // walletService.getUserBalance, so we mirror that.
+      mockPointAccrualService.awardPoints.mockImplementation(async (req) => {
+        const balance = await mockWalletService.getUserBalance(req.userId);
+        return {
+          transactionId: `txn-${req.idempotencyKey}`,
+          amountAwarded: req.amount,
+          newBalance: balance.available + req.amount,
+          timestamp: new Date('2026-01-01T00:00:00.000Z'),
+        };
+      });
+    });
+
     it('should credit points to a user wallet', async () => {
       mockWalletService.getUserBalance.mockResolvedValue({
         available: 1100,
@@ -406,7 +445,12 @@ describe('createWalletController', () => {
   it('should return a WalletController instance', () => {
     const mockWalletService = {} as IWalletService;
     const mockIdempotencyService = {} as IIdempotencyService;
-    const controller = createWalletController(mockWalletService, mockIdempotencyService);
+    const mockPointAccrualService = {} as PointAccrualService;
+    const controller = createWalletController(
+      mockWalletService,
+      mockIdempotencyService,
+      mockPointAccrualService,
+    );
     expect(controller).toBeInstanceOf(WalletController);
   });
 });
