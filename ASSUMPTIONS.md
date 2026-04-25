@@ -109,22 +109,8 @@
 - B-016 unknown narrowing applied — replaced all `any` casts in `src/ledger/ledger.service.ts` (query objects, mapToDomain casts, sort object) with typed inline interfaces or explicit enum casts; updated `storeIdempotencyResult` in `src/ledger/types.ts` from `result: any` to `result: unknown`; updated `WalletServiceError.details` and `IdempotencyConflictError` constructor in `src/services/types/error.types.ts` from `any` to `unknown`
 - Wave B now complete — 41 test suites, 429 tests all pass; pre-existing build error in `src/api/receipt-endpoint.example.ts:144` (Type narrowing on union) is unrelated to these changes
 
-## Wave C Continuation — Payload #18 (C-003, C-005, C-006)
+## Wave C Start (Payload #17 — C-001, C-002, C-004)
 
-- C-003 `PointExpirationService` + `SpendOrderConfig` wiring: Payload #18 proposed a stub replacement
-  (`console.log` only). The existing `src/services/point-expiration.service.ts` is a complete
-  production implementation with ledger integration, optimistic-locking wallet debit, idempotency
-  keys, and batch processing. The stub was not installed to avoid downgrading the implementation.
-  `src/services/__tests__/point-expiration.service.comprehensive.spec.ts` covers the existing service.
-
-- C-005 `TenantScopeMiddleware`: Payload #18 proposed a stub using untyped `any` parameters.
-  `src/middleware/tenant-scope.middleware.ts` already has a properly-typed implementation
-  (`Request & { tenantId?: string; queryOptions?: Record<string, unknown> }`, `Response`,
-  `NextFunction`). The stub was not installed. Registration in `AppModule.configure()` is still
-  deferred until the auth guard that populates `req.tenantId` is in place (see F-034).
-
-- C-006 `ReconcileController` (remove feature flag, use auth middleware): Payload #18 proposed
-  a `@Post('admin/reconcile')` endpoint with no auth guard and no entry in `api/openapi.yaml`.
-  Coding doctrine §9.2 requires all endpoints to have authentication per the OpenAPI spec;
-  §9.4 prohibits creating endpoints not described in the spec. The file was not installed.
-  The endpoint must be specced in `api/openapi.yaml` with appropriate auth before implementation.
+- C-001: `calculateEarnRate` added to `PointAccrualService` — queries active `EarnRateConfigModel` row for the given tenant/merchant/tier/event combination; applies `base_points_per_unit * inferno_multiplier * amount`; honours CEO Decision D3 (Diamond Concierge zero-earn). Existing `awardPoints`/`deductFromAvailable` methods are unchanged.
+- C-002: `validateTierCap` added to `PointRedemptionService` — queries active `TierCapConfigModel` row; validates that `redemptionAmount ≤ (redemption_cap_pct / 100) * transactionValue`; no platform defaults per CEO Decision B5. Existing `redeemPoints` escrow flow is unchanged.
+- C-004: `AuthMiddleware` added at `src/middleware/auth.middleware.ts` — NestJS `NestMiddleware`; extracts Bearer JWT via `jsonwebtoken`; populates `req.tenantId` and `req.userId`; leaves unauthenticated requests for downstream guards to reject. Uses `JWT_SECRET` env var (same key as `AuthService`). Not yet registered in `AppModule.configure()` — see F-039.
