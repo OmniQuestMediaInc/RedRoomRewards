@@ -72,3 +72,13 @@
 | F-030 | WalletController auth | `WalletController` exposes `POST /wallet/credit` and `POST /wallet/deduct` with no auth guard — matches the pattern of `BurnController`, `MerchantController`, etc. on this branch (no global guard wired yet). | Yes | Decide whether to add an admin/internal-API guard before exposing publicly |
 | F-031 | WalletModule placement | `WalletModule` placed at `src/wallets/wallet.module.ts` next to the existing escrow `wallet.service.ts`. Uses the `useFactory` pattern for `LedgerService` per F-017. | Yes | Confirm placement |
 | F-032 | RedRoomLedgerService unchanged | The payload's proposed update to `awardPointsWithCompliance` is functionally identical to the existing implementation (same AV → WGS → `creditPoints` flow); we left it as-is rather than re-shipping the same code minus the `source: 'RedRoomRewards'` metadata key it would have dropped. | Yes | Confirm no-op decision |
+
+## RRR-WAVE-B-CONTINUATION (Payload #13)
+
+> Note: Payload #13 prescribes flag id `F-024`, which is already assigned (Payload #11 — final-payload completion). To avoid collision the Wave B Continuation flags are recorded as `F-033`–`F-035`.
+
+| ID | Category | Description | Default Used | CEO Action |
+|----|----------|-------------|--------------|------------|
+| F-033 | Wave B | B-003 integration spec, B-004 Tenant model, B-005 Merchant model, B-006 public `withTransaction` wrapper completed | Yes | Review models and spec |
+| F-034 | Tenant + Merchant models pre-existed | Payload #13 prescribed minimal Tenant/Merchant Mongoose schemas (only `slug`, `name`, `status`). The repo already ships richer schemas with `tenant_id`/`merchant_id` business keys, `phase` (CEO Decision B3), `merchant_tier` (CEO Decision B2 with B5 caps), `default_currency`, and compound indexes on `tenant_id+status` / `tenant_id+merchant_tier` / `phase+status`. Replacing them with the stub would have regressed B-004 / B-005 — kept the richer schemas instead. | Yes | Confirm decision to keep richer schemas |
+| F-035 | B-003 spec import paths | Payload #13's integration spec imports `../wallet.controller` and `../../services/ledger.service`. The Nest `WalletController` exposing `/wallet/credit` and `/wallet/deduct` actually lives at `src/controllers/wallet.controller.ts`, and `LedgerService` lives at `src/ledger/ledger.service.ts` (per F-017). Imports were rewritten to those locations and the assertions adapted to the controller's `{ ok }` return shape; test intent (Test.createTestingModule + mocked `LedgerService` for `creditPoints` / `deductPoints`) is preserved. | Yes | Confirm path-rewrite is acceptable |

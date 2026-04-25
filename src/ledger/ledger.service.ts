@@ -480,6 +480,18 @@ export class LedgerService implements ILedgerService {
    * production deploy targets a replica set where the real transaction path
    * fires.
    */
+  /**
+   * Public transaction wrapper (B-006).
+   *
+   * Runs `fn` inside a Mongoose session, opening one if the caller has none
+   * and committing/aborting around `fn`. Falls back to a no-session run on
+   * topologies that don't support transactions (delegates to
+   * `withTransactionSafety`).
+   */
+  async withTransaction<T>(fn: (session: ClientSession | undefined) => Promise<T>): Promise<T> {
+    return this.withTransactionSafety(undefined, fn);
+  }
+
   private async withTransactionSafety<T>(
     session: ClientSession | undefined,
     fn: (s: ClientSession | undefined) => Promise<T>,
